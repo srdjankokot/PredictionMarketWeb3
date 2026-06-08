@@ -1,0 +1,2679 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Syne:wght@400;600;700&display=swap');
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Syne', sans-serif;
+    background: #0a0a0f;
+    color: #e8e6f0;
+    min-height: 100vh;
+    padding: 2rem 1.5rem 4rem;
+  }
+
+  .header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    margin-bottom: 2.5rem;
+    padding-bottom: 1.5rem;
+    border-bottom: 0.5px solid rgba(255,255,255,0.1);
+  }
+
+  .header-left {}
+
+  .badge {
+    display: inline-block;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: #7b6fff;
+    border: 0.5px solid rgba(123,111,255,0.4);
+    padding: 3px 10px;
+    border-radius: 4px;
+    margin-bottom: 10px;
+  }
+
+  h1 {
+    font-size: 26px;
+    font-weight: 700;
+    color: #fff;
+    line-height: 1.2;
+    max-width: 500px;
+  }
+
+  h1 span {
+    color: #7b6fff;
+  }
+
+  .meta {
+    display: flex;
+    gap: 1.5rem;
+    margin-top: 0.75rem;
+    font-size: 12px;
+    color: rgba(255,255,255,0.35);
+    font-family: 'JetBrains Mono', monospace;
+  }
+
+  .copy-all-btn {
+    background: rgba(123,111,255,0.12);
+    border: 0.5px solid rgba(123,111,255,0.4);
+    color: #7b6fff;
+    padding: 8px 18px;
+    border-radius: 6px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    cursor: pointer;
+    transition: all 0.2s;
+    white-space: nowrap;
+    margin-top: 6px;
+  }
+  .copy-all-btn:hover { background: rgba(123,111,255,0.22); }
+
+  .toc {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-bottom: 2rem;
+  }
+
+  .toc-item {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: rgba(255,255,255,0.4);
+    border: 0.5px solid rgba(255,255,255,0.1);
+    padding: 4px 10px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.15s;
+    text-decoration: none;
+  }
+  .toc-item:hover { color: #fff; border-color: rgba(255,255,255,0.3); }
+
+  .section {
+    margin-bottom: 1.25rem;
+    border: 0.5px solid rgba(255,255,255,0.08);
+    border-radius: 10px;
+    overflow: hidden;
+  }
+
+  .section-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.9rem 1.25rem;
+    cursor: pointer;
+    background: rgba(255,255,255,0.03);
+    transition: background 0.15s;
+    user-select: none;
+  }
+  .section-header:hover { background: rgba(255,255,255,0.05); }
+
+  .section-title {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .section-num {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: rgba(255,255,255,0.25);
+    min-width: 20px;
+  }
+
+  .section-label {
+    font-size: 14px;
+    font-weight: 600;
+    color: #fff;
+    letter-spacing: 0.02em;
+  }
+
+  .section-tag {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    padding: 2px 8px;
+    border-radius: 3px;
+    margin-left: 8px;
+  }
+
+  .tag-stack { background: rgba(123,111,255,0.15); color: #9d94ff; }
+  .tag-contract { background: rgba(93,202,165,0.15); color: #5dcaa5; }
+  .tag-db { background: rgba(239,159,39,0.15); color: #efbd5a; }
+  .tag-feature { background: rgba(93,183,235,0.15); color: #5db7eb; }
+  .tag-ui { background: rgba(212,83,126,0.15); color: #e8789e; }
+  .tag-arch { background: rgba(255,255,255,0.1); color: rgba(255,255,255,0.5); }
+  .tag-roles { background: rgba(239,159,39,0.15); color: #efbd5a; }
+  .tag-cat { background: rgba(93,183,235,0.15); color: #5db7eb; }
+
+  .cat-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 1rem;
+  }
+
+  .cat-pill {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: #0f0f1a;
+    border: 0.5px solid rgba(255,255,255,0.08);
+    border-radius: 6px;
+    padding: 7px 12px;
+    font-size: 12.5px;
+    color: #c8c4e8;
+  }
+
+  .cat-icon {
+    font-size: 15px;
+  }
+
+  .cat-default {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9px;
+    color: rgba(255,255,255,0.25);
+    border: 0.5px solid rgba(255,255,255,0.1);
+    padding: 1px 5px;
+    border-radius: 3px;
+    margin-left: 4px;
+  }
+
+  .chevron {
+    font-size: 16px;
+    color: rgba(255,255,255,0.25);
+    transition: transform 0.2s;
+  }
+  .chevron.open { transform: rotate(180deg); }
+
+  .section-body {
+    display: none;
+    padding: 0 1.25rem 1.25rem;
+    border-top: 0.5px solid rgba(255,255,255,0.06);
+  }
+  .section-body.open { display: block; }
+
+  .prompt-block {
+    background: #0f0f1a;
+    border-radius: 6px;
+    padding: 1rem 1.25rem;
+    margin-top: 1rem;
+    position: relative;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12.5px;
+    line-height: 1.75;
+    color: #c8c4e8;
+    white-space: pre-wrap;
+    word-break: break-word;
+  }
+
+  .copy-btn {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: rgba(255,255,255,0.06);
+    border: 0.5px solid rgba(255,255,255,0.12);
+    color: rgba(255,255,255,0.4);
+    padding: 4px 10px;
+    border-radius: 4px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .copy-btn:hover { background: rgba(255,255,255,0.1); color: #fff; }
+  .copy-btn.copied { color: #5dcaa5; border-color: rgba(93,202,165,0.4); }
+
+  .kv-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    margin-top: 1rem;
+  }
+
+  .kv-card {
+    background: #0f0f1a;
+    border: 0.5px solid rgba(255,255,255,0.07);
+    border-radius: 6px;
+    padding: 0.75rem 1rem;
+  }
+
+  .kv-key {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    color: rgba(255,255,255,0.3);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin-bottom: 4px;
+  }
+
+  .kv-val {
+    font-size: 13px;
+    color: #e8e6f0;
+    font-weight: 600;
+  }
+
+  .feature-list {
+    margin-top: 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .feature-item {
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+    padding: 8px 10px;
+    background: #0f0f1a;
+    border-radius: 6px;
+  }
+
+  .feature-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    margin-top: 5px;
+    flex-shrink: 0;
+  }
+
+  .dot-yes { background: #5dcaa5; }
+  .dot-no { background: rgba(255,255,255,0.2); }
+
+  .feature-text {
+    font-size: 13px;
+    color: #c8c4e8;
+    line-height: 1.5;
+  }
+
+  .feature-note {
+    font-size: 11px;
+    color: rgba(255,255,255,0.3);
+    font-family: 'JetBrains Mono', monospace;
+    margin-top: 2px;
+  }
+
+  .step-list {
+    margin-top: 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    counter-reset: step;
+  }
+
+  .step-item {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    padding: 8px 10px;
+    background: #0f0f1a;
+    border-radius: 6px;
+    counter-increment: step;
+  }
+
+  .step-n {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: #7b6fff;
+    min-width: 18px;
+  }
+
+  .step-text {
+    font-size: 13px;
+    color: #c8c4e8;
+  }
+
+  .step-sub {
+    font-size: 11px;
+    color: rgba(255,255,255,0.3);
+    font-family: 'JetBrains Mono', monospace;
+    margin-left: auto;
+    padding-left: 8px;
+  }
+
+  .divider { height: 0.5px; background: rgba(255,255,255,0.06); margin: 1rem 0; }
+
+  .scope-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-top: 1rem;
+  }
+
+  .scope-box {
+    background: #0f0f1a;
+    border-radius: 6px;
+    padding: 0.85rem 1rem;
+  }
+
+  .scope-title {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    margin-bottom: 8px;
+  }
+
+  .scope-in .scope-title { color: #5dcaa5; }
+  .scope-out .scope-title { color: rgba(255,255,255,0.25); }
+
+  .scope-tag {
+    display: inline-block;
+    font-size: 12px;
+    padding: 3px 8px;
+    border-radius: 4px;
+    margin: 3px 3px 3px 0;
+  }
+
+  .scope-in .scope-tag { background: rgba(93,202,165,0.1); color: #5dcaa5; }
+  .scope-out .scope-tag { background: rgba(255,255,255,0.05); color: rgba(255,255,255,0.3); text-decoration: line-through; }
+
+  .roles-table { width: 100%; border-collapse: collapse; margin-top: 1rem; }
+  .roles-table th {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: rgba(255,255,255,0.3);
+    padding: 8px 12px;
+    text-align: left;
+    border-bottom: 0.5px solid rgba(255,255,255,0.08);
+  }
+  .roles-table td {
+    padding: 9px 12px;
+    font-size: 12.5px;
+    color: #c8c4e8;
+    border-bottom: 0.5px solid rgba(255,255,255,0.04);
+    vertical-align: top;
+  }
+  .roles-table tr:last-child td { border-bottom: none; }
+  .roles-table tr:hover td { background: rgba(255,255,255,0.02); }
+  .role-badge {
+    display: inline-block;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    padding: 2px 8px;
+    border-radius: 3px;
+    font-weight: 500;
+  }
+  .role-admin { background: rgba(123,111,255,0.2); color: #9d94ff; }
+  .role-trader { background: rgba(93,202,165,0.2); color: #5dcaa5; }
+  .role-guest { background: rgba(255,255,255,0.08); color: rgba(255,255,255,0.45); }
+  .perm-yes { color: #5dcaa5; font-size: 13px; }
+  .perm-no { color: rgba(255,255,255,0.2); font-size: 13px; }
+
+  .footer {
+    margin-top: 2.5rem;
+    padding-top: 1.5rem;
+    border-top: 0.5px solid rgba(255,255,255,0.06);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .footer-note {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: rgba(255,255,255,0.2);
+  }
+
+  .use-btn {
+    background: #7b6fff;
+    border: none;
+    color: #fff;
+    padding: 9px 20px;
+    border-radius: 6px;
+    font-family: 'Syne', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .use-btn:hover { background: #9d94ff; transform: translateY(-1px); }
+
+  .hl-purple { color: #9d94ff; }
+  .hl-teal { color: #5dcaa5; }
+  .hl-amber { color: #efbd5a; }
+
+  @media (max-width: 500px) {
+    .kv-grid { grid-template-columns: 1fr; }
+    .scope-grid { grid-template-columns: 1fr; }
+    h1 { font-size: 20px; }
+  }
+
+  .group-header {
+    margin: 2rem 0 0.75rem;
+    padding: 0 0.25rem;
+  }
+  .group-title {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: rgba(255,255,255,0.3);
+    user-select: none;
+  }
+  .toc-group {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: rgba(255,255,255,0.2);
+    padding: 4px 2px 2px;
+    width: 100%;
+    display: block;
+    margin-top: 6px;
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-left">
+    <div class="badge">System Prompt · MVP</div>
+    <h1>Build a <span>Prediction Market</span> Platform</h1>
+    <div class="meta">
+      <span>Next.js · Solidity · Crypto</span>
+      <span>·</span>
+      <span>v1.0</span>
+    </div>
+  </div>
+  <button class="copy-all-btn" onclick="copyAll()">Copy full prompt ↗</button>
+</div>
+
+<div class="toc">
+  <span class="toc-group">① OVERVIEW</span>
+  <span class="toc-item" onclick="toggleSection('s1')">01 Context & Goal</span>
+  <span class="toc-item" onclick="toggleSection('s2')">02 Tech Stack</span>
+  <span class="toc-group">② SMART CONTRACTS</span>
+  <span class="toc-item" onclick="toggleSection('s3')">03 Smart Contracts</span>
+  <span class="toc-item" onclick="toggleSection('s14')">04 Slippage Protection</span>
+  <span class="toc-item" onclick="toggleSection('s15')">05 Contract Error Handling</span>
+  <span class="toc-group">③ DATA</span>
+  <span class="toc-item" onclick="toggleSection('s6')">06 Database Schema</span>
+  <span class="toc-item" onclick="toggleSection('s8')">07 Data Storage Strategy</span>
+  <span class="toc-item" onclick="toggleSection('s5')">08 Market Categories</span>
+  <span class="toc-group">④ FEATURES</span>
+  <span class="toc-item" onclick="toggleSection('s4')">09 Pages & Features</span>
+  <span class="toc-item" onclick="toggleSection('s20')">10 Create Market Form</span>
+  <span class="toc-item" onclick="toggleSection('s10')">11 Roles & Permissions</span>
+  <span class="toc-group">⑤ REALTIME</span>
+  <span class="toc-item" onclick="toggleSection('s9')">12 Realtime Updates</span>
+  <span class="toc-item" onclick="toggleSection('s18')">13 Cron Job — Market Expiry</span>
+  <span class="toc-group">⑥ FRONTEND</span>
+  <span class="toc-item" onclick="toggleSection('s7')">14 UI / UX Guidelines</span>
+  <span class="toc-item" onclick="toggleSection('s16')">15 Frontend State Management</span>
+  <span class="toc-item" onclick="toggleSection('s13')">16 USDC Approval Flow</span>
+  <span class="toc-group">⑦ CONFIG</span>
+  <span class="toc-item" onclick="toggleSection('s17')">17 Environment Variables</span>
+  <span class="toc-item" onclick="toggleSection('s19')">18 White Label Architecture</span>
+  <span class="toc-group">⑧ EXECUTION</span>
+  <span class="toc-item" onclick="toggleSection('s11')">19 Build Order</span>
+  <span class="toc-item" onclick="toggleSection('s12')">20 MVP Scope</span>
+  <span class="toc-group">⑨ DEVELOPER SPECS</span>
+  <span class="toc-item" onclick="toggleSection('s21')">21 Blockchain Dev</span>
+  <span class="toc-item" onclick="toggleSection('s22')">22 Backend Dev</span>
+  <span class="toc-item" onclick="toggleSection('s23')">23 Frontend Dev</span>
+</div>
+
+<div class="group-header"><span class="group-title">① OVERVIEW</span></div>
+
+<div class="section" id="s1">
+<div class="section-header" onclick="toggleSection('s1')">
+<div class="section-title">
+<span class="section-num">01</span>
+<span class="section-label">Context &amp; Goal</span>
+</div>
+<span class="chevron open" id="chev-s1">▾</span>
+</div>
+<div class="section-body open" id="body-s1">
+<div class="prompt-block"><button class="copy-btn" onclick="copyBlock(this)">copy</button><span class="hl-teal">// GOAL</span>
+Build an MVP prediction market web platform inspired by Polymarket.
+Users bet on future event outcomes using cryptocurrency.
+The result must be a functional, production-ready app with clean architecture designed to be extended.
+
+<span class="hl-teal">// CONSTRAINTS</span>
+- MVP scope only — no over-engineering
+- All code in TypeScript with strict types
+- Use environment variables for all sensitive data (.env.local)
+- Every on-chain call must include error handling and gas estimation
+- Include a README.md with local setup and deploy instructions
+</div>
+</div>
+</div>
+
+<div class="section" id="s2">
+<div class="section-header" onclick="toggleSection('s2')">
+<div class="section-title">
+<span class="section-num">02</span>
+<span class="section-label">Tech Stack</span>
+<span class="section-tag tag-stack">stack</span>
+</div>
+<span class="chevron" id="chev-s2">▾</span>
+</div>
+<div class="section-body" id="body-s2">
+<div class="kv-grid">
+<div class="kv-card">
+<div class="kv-key">Framework</div>
+<div class="kv-val">Next.js 14+ (App Router)</div>
+</div>
+<div class="kv-card">
+<div class="kv-key">Language</div>
+<div class="kv-val">TypeScript (strict)</div>
+</div>
+<div class="kv-card">
+<div class="kv-key">Styling</div>
+<div class="kv-val">Tailwind CSS</div>
+</div>
+<div class="kv-card">
+<div class="kv-key">State</div>
+<div class="kv-val">Zustand or React Context</div>
+</div>
+<div class="kv-card">
+<div class="kv-key">Web3</div>
+<div class="kv-val">wagmi + viem</div>
+</div>
+<div class="kv-card">
+<div class="kv-key">Wallet Connect</div>
+<div class="kv-val">RainbowKit or ConnectKit</div>
+</div>
+<div class="kv-card">
+<div class="kv-key">Contracts</div>
+<div class="kv-val">Solidity ^0.8.20 / Hardhat or Foundry</div>
+</div>
+<div class="kv-card">
+<div class="kv-key">Network</div>
+<div class="kv-val">Polygon Mumbai or Base Sepolia (testnet)</div>
+</div>
+<div class="kv-card">
+<div class="kv-key">Database</div>
+<div class="kv-val">PostgreSQL + Prisma (or Supabase)</div>
+</div>
+<div class="kv-card">
+<div class="kv-key">API</div>
+<div class="kv-val">Next.js API Routes (REST) or tRPC</div>
+</div>
+</div>
+</div>
+</div>
+
+<div class="group-header"><span class="group-title">② SMART CONTRACTS</span></div>
+
+<div class="section" id="s3">
+<div class="section-header" onclick="toggleSection('s3')">
+<div class="section-title">
+<span class="section-num">03</span>
+<span class="section-label">Smart Contracts</span>
+<span class="section-tag tag-contract">solidity</span>
+</div>
+<span class="chevron" id="chev-s3">▾</span>
+</div>
+<div class="section-body" id="body-s3">
+<div class="prompt-block"><button class="copy-btn" onclick="copyBlock(this)">copy</button><span class="hl-purple">// PredictionMarket.sol</span>
+<span class="hl-amber">// Main contract — orchestrates markets, pools, payouts</span>
+import "./AMMPricer.sol";
+
+struct Market {
+  uint    id;
+  string  question;
+  uint    endTime;
+  bool    resolved;
+  bool    outcome;       <span class="hl-amber">// true = YES, false = NO</span>
+  uint    yesPool;       <span class="hl-amber">// total USDC on YES side</span>
+  uint    noPool;        <span class="hl-amber">// total USDC on NO side</span>
+  uint    totalShares;   <span class="hl-amber">// total shares ever issued</span>
+}
+
+mapping(uint =&gt; mapping(address =&gt; uint)) public yesShares;
+mapping(uint =&gt; mapping(address =&gt; uint)) public noShares;
+
+<span class="hl-teal">createMarket</span>(question, endTime, seedAmount)
+  → transfers seedAmount USDC from admin to both pools equally
+  → sets initial yesPool = noPool = seedAmount / 2
+
+<span class="hl-teal">buyShares</span>(marketId, isYes, usdcAmount)
+  → calls AMMPricer.getShares() to calculate shares
+  → transfers USDC from user to contract
+  → updates yesPool or noPool
+  → mints shares to user mapping
+  → emits SharesBought(marketId, user, isYes, usdcAmount, shares)
+
+<span class="hl-teal">resolveMarket</span>(marketId, outcome) → owner only, sets resolved + outcome
+<span class="hl-teal">claimWinnings</span>(marketId)
+  → reads user's winning shares
+  → payout = (userShares / totalWinningShares) * totalPool
+  → transfers USDC to user, zeroes out their shares
+</div>
+<div class="prompt-block" style="margin-top: 8px;"><button class="copy-btn" onclick="copyBlock(this)">copy</button><span class="hl-purple">// AMMPricer.sol — Solidity library</span>
+<span class="hl-amber">// Constant Product AMM pricing logic, separated for clarity and testability</span>
+<span class="hl-amber">// Used by PredictionMarket.sol via: using AMMPricer for AMMPricer.Pool;</span>
+
+library AMMPricer {
+
+  struct Pool {
+    uint yesPool;   <span class="hl-amber">// USDC on YES side</span>
+    uint noPool;    <span class="hl-amber">// USDC on NO side</span>
+  }
+
+  <span class="hl-teal">// YES price (0–1 scaled to 1e18)</span>
+<span class="hl-amber">// yesPrice = noPool / (yesPool + noPool)</span>
+<span class="hl-amber">// Logic: more money on YES → YES is "cheap" → NO is scarce → NO costs more</span>
+  function getYesPrice(Pool memory p) → uint (scaled 1e18)
+
+  <span class="hl-teal">// NO price</span>
+<span class="hl-amber">// noPrice = yesPool / (yesPool + noPool)</span>
+  function getNoPrice(Pool memory p) → uint (scaled 1e18)
+
+  <span class="hl-teal">// How many shares does usdcAmount buy?</span>
+<span class="hl-amber">// shares = usdcAmount / price</span>
+<span class="hl-amber">// Example: buying YES at 0.30 with 30 USDC → 100 YES shares</span>
+  function getShares(Pool memory p, uint usdcAmount, bool isYes) → uint shares
+
+  <span class="hl-teal">// Simulate price impact — what will price be AFTER this buy?</span>
+<span class="hl-amber">// Used by frontend to show slippage warning</span>
+  function getPriceAfterBuy(Pool memory p, uint usdcAmount, bool isYes) → uint newPrice
+
+  <span class="hl-teal">// Validate pool invariant (sanity check)</span>
+<span class="hl-amber">// yesPrice + noPrice must always equal 1.0 (1e18)</span>
+  function assertInvariant(Pool memory p) → bool
+}
+</div>
+<div class="prompt-block" style="margin-top: 8px;"><button class="copy-btn" onclick="copyBlock(this)">copy</button><span class="hl-purple">// Pricing example (readable)</span>
+<span class="hl-amber">// Initial state (seeded equally)</span>
+yesPool = 500 USDC,  noPool = 500 USDC
+yesPrice = 500/1000 = <span class="hl-teal">0.50 (50%)</span>
+noPrice  = 500/1000 = <span class="hl-teal">0.50 (50%)</span>
+<span class="hl-amber">// User buys YES with 100 USDC</span>
+shares = 100 / 0.50 = <span class="hl-teal">200 YES shares</span>
+yesPool → 600 USDC,  noPool stays 500 USDC
+
+<span class="hl-amber">// New prices after buy</span>
+yesPrice = 500/1100 = <span class="hl-teal">0.45 (45%)</span>  ← YES got cheaper (more supply)
+noPrice  = 600/1100 = <span class="hl-teal">0.55 (55%)</span>  ← NO got more expensive (scarcer)
+
+<span class="hl-amber">// Market resolves YES wins. Total pool = 1100 USDC</span>
+<span class="hl-amber">// User had 200 YES shares out of e.g. 1400 total YES shares</span>
+payout = (200 / 1400) * 1100 = <span class="hl-teal">~157 USDC</span>  (profit: +57 USDC)
+
+<span class="hl-purple">// Frontend replicates this formula in TypeScript</span>
+<span class="hl-amber">// for instant UI preview BEFORE user signs tx:</span>
+function getShares(yesPool, noPool, amount, isYes) {
+  const price = isYes
+    ? noPool / (yesPool + noPool)
+    : yesPool / (yesPool + noPool);
+  return amount / price;
+}
+function getPriceAfterBuy(yesPool, noPool, amount, isYes) {
+  const newYes = isYes ? yesPool + amount : yesPool;
+  const newNo  = isYes ? noPool : noPool + amount;
+  return isYes
+    ? newNo / (newYes + newNo)
+    : newYes / (newYes + newNo);
+}
+</div>
+<div class="prompt-block" style="margin-top: 8px;"><button class="copy-btn" onclick="copyBlock(this)">copy</button><span class="hl-purple">// MockUSDC.sol</span>
+ERC20 with public mint() — anyone can mint for testnet testing
+
+<span class="hl-purple">// Contract architecture</span>
+AMMPricer.sol        ← pure library, no state, fully testable in isolation
+PredictionMarket.sol ← imports AMMPricer, holds all state
+MockUSDC.sol         ← testnet only
+
+<span class="hl-purple">// Deploy order</span>
+1. Deploy MockUSDC
+2. Deploy AMMPricer (library — linked at compile time, no separate deploy needed)
+3. Deploy PredictionMarket(usdcAddress)
+4. Seed initial markets via createMarket()
+</div>
+</div>
+</div>
+
+<div class="section" id="s14">
+<div class="section-header" onclick="toggleSection('s14')">
+<div class="section-title">
+<span class="section-num">04</span>
+<span class="section-label">Slippage Protection</span>
+<span class="section-tag tag-contract">solidity</span>
+</div>
+<span class="chevron" id="chev-s14">▾</span>
+</div>
+<div class="section-body" id="body-s14">
+<div class="prompt-block"><button class="copy-btn" onclick="copyBlock(this)">copy</button><span class="hl-amber">// Problem: if two users submit buyShares() in the same block,</span>
+<span class="hl-amber">// the second tx gets fewer shares than the UI showed (price moved).</span>
+<span class="hl-teal">// Solution: add minShares parameter to buyShares()</span>
+function buyShares(
+  uint marketId,
+  bool isYes,
+  uint usdcAmount,
+  uint minShares    <span class="hl-amber">// ← slippage guard</span>
+) external {
+  uint shares = AMMPricer.getShares(pool, usdcAmount, isYes);
+  require(shares &gt;= minShares, "Slippage: too few shares");
+  <span class="hl-amber">// ... rest of logic</span>
+}
+
+<span class="hl-teal">// Frontend: calculate minShares with 1% slippage tolerance</span>
+const expectedShares = getShares(yesPool, noPool, amount, isYes);
+const minShares = expectedShares * 0.99;  <span class="hl-amber">// 1% slippage</span>
+await contract.buyShares(marketId, isYes, amount, minShares);
+
+<span class="hl-teal">// UI: show slippage warning if price impact &gt; 5%</span>
+const priceAfter = getPriceAfterBuy(yesPool, noPool, amount, isYes);
+const priceImpact = Math.abs(priceAfter - priceBefore) / priceBefore;
+if (priceImpact &gt; 0.05) showWarning("High price impact: " + (priceImpact*100).toFixed(1) + "%");
+</div>
+</div>
+</div>
+
+<div class="section" id="s15">
+<div class="section-header" onclick="toggleSection('s15')">
+<div class="section-title">
+<span class="section-num">05</span>
+<span class="section-label">Contract Error Handling</span>
+<span class="section-tag tag-contract">solidity</span>
+</div>
+<span class="chevron" id="chev-s15">▾</span>
+</div>
+<div class="section-body" id="body-s15">
+<div class="prompt-block"><button class="copy-btn" onclick="copyBlock(this)">copy</button><span class="hl-purple">// PredictionMarket.sol — all require() guards</span>
+<span class="hl-teal">// createMarket()</span>
+require(msg.sender == owner, "Not authorized");
+require(endTime &gt; block.timestamp, "End time must be in the future");
+require(seedAmount &gt; 0, "Seed amount required");
+
+<span class="hl-teal">// buyShares()</span>
+require(market.endTime &gt; block.timestamp, "Market has expired");
+require(!market.resolved, "Market already resolved");
+require(usdcAmount &gt; 0, "Amount must be greater than zero");
+require(shares &gt;= minShares, "Slippage: too few shares received");
+
+<span class="hl-teal">// resolveMarket()</span>
+require(msg.sender == owner, "Not authorized");
+require(market.endTime &lt;= block.timestamp, "Market has not expired yet");
+require(!market.resolved, "Market already resolved");
+
+<span class="hl-teal">// claimWinnings()</span>
+require(market.resolved, "Market not resolved yet");
+require(userWinningShares &gt; 0, "No winning shares to claim");
+
+<span class="hl-purple">// Frontend — catch and translate contract errors</span>
+try {
+  await contract.buyShares(...);
+} catch (err) {
+  if (err.message.includes("Market has expired"))   showToast("This market has closed");
+  if (err.message.includes("Slippage"))             showToast("Price moved too much, try again");
+  if (err.message.includes("Market already resolved")) showToast("Market is already resolved");
+  else showToast("Transaction failed: " + err.shortMessage);
+}
+</div>
+</div>
+</div>
+
+<div class="group-header"><span class="group-title">③ DATA</span></div>
+
+<div class="section" id="s6">
+<div class="section-header" onclick="toggleSection('s6')">
+<div class="section-title">
+<span class="section-num">06</span>
+<span class="section-label">Database Schema</span>
+<span class="section-tag tag-db">prisma</span>
+</div>
+<span class="chevron" id="chev-s6">▾</span>
+</div>
+<div class="section-body" id="body-s6">
+<div class="prompt-block"><button class="copy-btn" onclick="copyBlock(this)">copy</button><span class="hl-purple">model</span> User {
+  address   String   <span class="hl-teal">@id</span> <span class="hl-amber">// wallet address</span>
+  role      String   <span class="hl-teal">@default("TRADER")</span> <span class="hl-amber">// "TRADER" | "ADMIN"</span>
+  createdAt DateTime <span class="hl-teal">@default(now())</span>
+  trades    Trade[]
+}
+
+<span class="hl-purple">model</span> Market {
+  id          String   <span class="hl-teal">@id</span>
+  contractId  Int      <span class="hl-amber">// on-chain market ID</span>
+  question    String
+  description String
+  categoryId  String
+  category    Category <span class="hl-teal">@relation(fields: [categoryId], references: [id])</span>
+  endDate     DateTime
+  resolved    Boolean  <span class="hl-teal">@default(false)</span>
+  outcome     String?  <span class="hl-amber">// "YES" | "NO" | null</span>
+  status      String   <span class="hl-amber">// "ACTIVE" | "RESOLVED" | "EXPIRED"</span>
+  imageUrl    String?  <span class="hl-amber">// optional market icon, stored in cloud storage</span>
+  yesLabel    String   <span class="hl-teal">@default("YES")</span> <span class="hl-amber">// custom outcome label, max 20 chars</span>
+  noLabel     String   <span class="hl-teal">@default("NO")</span> <span class="hl-amber">// custom outcome label, max 20 chars</span>
+  createdAt   DateTime <span class="hl-teal">@default(now())</span>
+  trades      Trade[]
+}
+
+<span class="hl-purple">model</span> Trade {
+  id        String   <span class="hl-teal">@id @default(cuid())</span>
+  marketId  String
+  market    Market   <span class="hl-teal">@relation(fields: [marketId], references: [id])</span>
+  trader    String   <span class="hl-amber">// wallet address</span>
+  outcome   String   <span class="hl-amber">// "YES" | "NO"</span>
+  amount    Float    <span class="hl-amber">// in USDC</span>
+  shares    Float
+  txHash    String
+  createdAt DateTime <span class="hl-teal">@default(now())</span>
+}
+
+<span class="hl-purple">model</span> Category {
+  id        String   <span class="hl-teal">@id @default(cuid())</span>
+  name      String   <span class="hl-teal">@unique</span>
+  slug      String   <span class="hl-teal">@unique</span>
+  icon      String
+  isDefault Boolean  <span class="hl-teal">@default(false)</span>
+  createdAt DateTime <span class="hl-teal">@default(now())</span>
+  markets   Market[]
+}
+</div>
+<div class="prompt-block" style="margin-top: 8px;"><button class="copy-btn" onclick="copyBlock(this)">copy</button><span class="hl-teal">// API Routes</span>
+GET  /api/markets              → list markets (filters: status, category, sort)
+GET  /api/markets/[id]         → single market + recent trades
+POST /api/trades               → store trade after tx confirmed
+GET  /api/portfolio/[addr]     → positions for a wallet address
+GET  /api/admin/categories     → list all categories
+POST /api/admin/categories     → create category
+DEL  /api/admin/categories/[id]→ delete custom category
+</div>
+</div>
+</div>
+
+<div class="section" id="s8">
+<div class="section-header" onclick="toggleSection('s8')">
+<div class="section-title">
+<span class="section-num">07</span>
+<span class="section-label">Data Storage Strategy</span>
+<span class="section-tag tag-contract">blockchain</span>
+</div>
+<span class="chevron" id="chev-s8">▾</span>
+</div>
+<div class="section-body" id="body-s8">
+<div class="prompt-block"><button class="copy-btn" onclick="copyBlock(this)">copy</button><span class="hl-teal">// Source of truth: blockchain</span>
+ALL market data lives on-chain permanently — active and resolved.
+The smart contract is the single source of truth. Markets never get
+deleted. Resolved markets remain queryable on-chain forever.
+
+<span class="hl-purple">On-chain (PredictionMarket.sol)</span>
+- All markets (active + resolved)
+- All trades / share balances
+- Pool sizes (yesPool, noPool)
+- Resolution outcome
+- User share holdings → claimWinnings()
+
+<span class="hl-teal">// Off-chain DB (PostgreSQL) — cache layer only</span>
+- Market metadata: title, description, category, image
+- Trade history: synced from on-chain events via event listener
+- Indexed for fast queries / filtering / sorting
+- DB is NOT the source of truth — it mirrors chain state
+- If DB is wiped, it can be rebuilt by replaying contract events
+
+<span class="hl-amber">// Sync strategy</span>
+- Backend listens to contract events (MarketCreated, SharesBought,
+  MarketResolved) via viem event watcher
+- On each event → upsert into DB
+- Market status field: "ACTIVE" | "RESOLVED" | "EXPIRED"
+- /api/markets?status=resolved → returns resolved markets from DB
+- /api/markets?status=active  → returns active markets from DB
+- Market detail page always fetches live data from chain for
+  critical values (pools, outcome) + DB for metadata
+</div>
+</div>
+</div>
+
+<div class="section" id="s5">
+<div class="section-header" onclick="toggleSection('s5')">
+<div class="section-title">
+<span class="section-num">08</span>
+<span class="section-label">Market Categories</span>
+<span class="section-tag tag-cat">taxonomy</span>
+</div>
+<span class="chevron" id="chev-s5">▾</span>
+</div>
+<div class="section-body" id="body-s5">
+<div class="cat-grid">
+<div class="cat-pill"><span class="cat-icon">🪙</span> Crypto <span class="cat-default">default</span></div>
+<div class="cat-pill"><span class="cat-icon">🗳️</span> Politics <span class="cat-default">default</span></div>
+<div class="cat-pill"><span class="cat-icon">⚽</span> Sports <span class="cat-default">default</span></div>
+<div class="cat-pill"><span class="cat-icon">🔬</span> Science <span class="cat-default">default</span></div>
+<div class="cat-pill"><span class="cat-icon">🎬</span> Entertainment <span class="cat-default">default</span></div>
+<div class="cat-pill"><span class="cat-icon">💹</span> Finance <span class="cat-default">default</span></div>
+<div class="cat-pill"><span class="cat-icon">🌍</span> World Events <span class="cat-default">default</span></div>
+<div class="cat-pill"><span class="cat-icon">📦</span> Other <span class="cat-default">default</span></div>
+<div class="cat-pill" style="border-style: dashed; color: rgba(255,255,255,0.3);">+ Admin can add custom</div>
+</div>
+<div class="prompt-block" style="margin-top: 1rem;"><button class="copy-btn" onclick="copyBlock(this)">copy</button><span class="hl-teal">// Category system</span>
+Default categories are seeded at startup (cannot be deleted).
+Admin can create additional custom categories via /admin/categories.
+Each market belongs to exactly one category.
+
+<span class="hl-purple">model Category</span> {
+  id        String   <span class="hl-teal">@id @default(cuid())</span>
+  name      String   <span class="hl-teal">@unique</span> <span class="hl-amber">// e.g. "Crypto"</span>
+  slug      String   <span class="hl-teal">@unique</span> <span class="hl-amber">// e.g. "crypto"</span>
+  icon      String             <span class="hl-amber">// emoji or icon name</span>
+  isDefault Boolean  <span class="hl-teal">@default(false)</span>
+  createdAt DateTime <span class="hl-teal">@default(now())</span>
+  markets   Market[]
+}
+
+<span class="hl-teal">// Default categories (seeded)</span>
+Crypto · Politics · Sports · Science · Entertainment · Finance · World Events · Other
+
+<span class="hl-teal">// Admin capabilities</span>
+- GET  /api/admin/categories       → list all categories
+- POST /api/admin/categories       → create new category { name, slug, icon }
+- DEL  /api/admin/categories/[id]  → delete custom category (not default ones)
+
+<span class="hl-teal">// UI behavior</span>
+- Listing page: horizontal tab/pill filter bar per category
+- "All" tab shown by default
+- Market create form: category dropdown (required field)
+- Category pill shown on each market card
+</div>
+</div>
+</div>
+
+<div class="group-header"><span class="group-title">④ FEATURES</span></div>
+
+<div class="section" id="s4">
+<div class="section-header" onclick="toggleSection('s4')">
+<div class="section-title">
+<span class="section-num">09</span>
+<span class="section-label">Pages &amp; Features</span>
+<span class="section-tag tag-feature">MVP</span>
+</div>
+<span class="chevron" id="chev-s4">▾</span>
+</div>
+<div class="section-body" id="body-s4">
+<div class="feature-list">
+<div class="feature-item">
+<div class="feature-dot dot-yes"></div>
+<div>
+<div class="feature-text">Wallet authentication (MetaMask, Coinbase Wallet via wagmi)</div>
+<div class="feature-note">/ — show address + balance in header</div>
+</div>
+</div>
+<div class="feature-item">
+<div class="feature-dot dot-yes"></div>
+<div>
+<div class="feature-text">Market listing page — grid of active markets with YES/NO odds, volume, end date, category</div>
+<div class="feature-note">/  — filter by category, sort by volume/date/new</div>
+</div>
+</div>
+<div class="feature-item">
+<div class="feature-dot dot-yes"></div>
+<div>
+<div class="feature-text">Market detail page — price history chart (Recharts), YES/NO trading panel, activity feed</div>
+<div class="feature-note">/market/[id]</div>
+</div>
+</div>
+<div class="feature-item">
+<div class="feature-dot dot-yes"></div>
+<div>
+<div class="feature-text">Trading panel — toggle YES/NO, amount input, estimated shares + potential payout, Buy button</div>
+<div class="feature-note">Calls buyShares() on-chain with pending/confirmed/error toasts</div>
+</div>
+</div>
+<div class="feature-item">
+<div class="feature-dot dot-yes"></div>
+<div>
+<div class="feature-text">Portfolio page — user positions, unrealized P&amp;L, claimWinnings button for resolved markets</div>
+<div class="feature-note">/portfolio</div>
+</div>
+</div>
+<div class="feature-item">
+<div class="feature-dot dot-yes"></div>
+<div>
+<div class="feature-text">Admin create market page — question, description, end date, category, initial liquidity</div>
+<div class="feature-note">/create — wallet address gated, calls createMarket() on-chain</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+
+<div class="section" id="s20">
+<div class="section-header" onclick="toggleSection('s20')">
+<div class="section-title">
+<span class="section-num">10</span>
+<span class="section-label">Create Market Form</span>
+<span class="section-tag tag-feature">admin</span>
+</div>
+<span class="chevron" id="chev-s20">▾</span>
+</div>
+<div class="section-body" id="body-s20">
+<div class="prompt-block"><button class="copy-btn" onclick="copyBlock(this)">copy</button><span class="hl-purple">// /create — Admin only page</span>
+<span class="hl-amber">// All fields validated client-side before tx is sent</span>
+<span class="hl-teal">// Form fields</span>
+
+question       String   <span class="hl-amber">// required, max 140 chars</span>
+<span class="hl-amber">// e.g. "Will ETH exceed $5000 before Dec 31, 2025?"</span>
+<span class="hl-amber">// helper text: "Write as a clear yes/no question"</span>
+
+description    String   <span class="hl-amber">// required, max 1000 chars, free text</span>
+<span class="hl-amber">// context, background, any relevant links</span>
+<span class="hl-amber">// also used as resolution criteria — admin explains</span>
+<span class="hl-amber">// how the winner will be determined</span>
+
+category       String   <span class="hl-amber">// required, dropdown from Category table</span>
+
+endDate        Date     <span class="hl-amber">// required, date picker</span>
+endTime        Time     <span class="hl-amber">// required, time picker (HH:MM)</span>
+<span class="hl-amber">// combined into single DateTime before sending to contract</span>
+<span class="hl-amber">// must be at least 1 hour in the future</span>
+<span class="hl-amber">// stored as UTC, displayed in user's local timezone</span>
+
+seedAmount     Number   <span class="hl-amber">// required, USDC amount, min: 10, max: 10000</span>
+<span class="hl-amber">// split equally: seedAmount/2 → yesPool, seedAmount/2 → noPool</span>
+<span class="hl-amber">// admin wallet must have sufficient USDC balance</span>
+<span class="hl-amber">// show admin's current USDC balance next to this field</span>
+
+imageUrl       String   <span class="hl-amber">// optional, market icon/thumbnail</span>
+<span class="hl-amber">// admin uploads image → stored in cloud storage (S3 or Cloudinary)</span>
+<span class="hl-amber">// show upload button + drag-and-drop zone</span>
+<span class="hl-amber">// accepted: jpg, png, webp — max 2MB</span>
+<span class="hl-amber">// auto-cropped to square (1:1), shown as icon on market card</span>
+<span class="hl-amber">// fallback: category emoji if no image uploaded</span>
+
+yesLabel       String   <span class="hl-amber">// optional, default: "YES"</span>
+<span class="hl-amber">// custom label for the YES outcome</span>
+<span class="hl-amber">// max 20 chars, e.g. "Lakers", "Hoće", "Above $5k"</span>
+
+noLabel        String   <span class="hl-amber">// optional, default: "NO"</span>
+<span class="hl-amber">// custom label for the NO outcome</span>
+<span class="hl-amber">// max 20 chars, e.g. "Celtics", "Neće", "Below $5k"</span>
+<span class="hl-amber">// yesLabel and noLabel must both be set or both empty</span>
+<span class="hl-teal">// Client-side validation rules</span>
+- question:    required, 10–140 chars
+- description: required, 20–1000 chars
+- category:    required, must select from list
+- endDateTime: required, must be &gt; now() + 1 hour
+- seedAmount:  required, number, min 10, max 10000, must be &lt;= admin USDC balance
+- imageUrl:    optional, jpg/png/webp, max 2MB — upload on select, store URL
+- yesLabel:    optional, max 20 chars — if set, noLabel must also be set
+- noLabel:     optional, max 20 chars — if set, yesLabel must also be set
+
+<span class="hl-teal">// Submit flow</span>
+1. Validate all fields → show inline errors if invalid
+2. Check admin USDC allowance → if insufficient, show "Approve USDC" step first
+3. Approve USDC if needed (seedAmount) → wait for confirmation
+4. Call createMarket(question, endTimestamp, seedAmount) on-chain
+5. On tx confirm:
+   - Save metadata to DB (description, category, slug)
+   - Emit market:created via Socket.io → listing page updates
+   - Redirect admin to /market/[newId]
+
+<span class="hl-teal">// UI details</span>
+- Character counter on question and description fields
+- Live preview of market card as admin types (right side of form)
+- endDateTime shown in both local time and UTC below the pickers
+- seedAmount field shows: initial YES price = 50%, NO price = 50%
+  (always equal because seed splits evenly)
+- Image upload: drag-and-drop zone with preview thumbnail after upload
+  fallback shown if no image: category emoji as placeholder
+- yesLabel / noLabel: shown as paired inputs side by side
+  live preview updates YES/NO buttons in market card preview
+  placeholder text "YES" / "NO" when empty (shows default)
+- Disable submit button while tx is pending
+- Show step indicator: "1. Approve → 2. Create" if approval needed
+</div>
+</div>
+</div>
+
+<div class="section" id="s10">
+<div class="section-header" onclick="toggleSection('s10')">
+<div class="section-title">
+<span class="section-num">11</span>
+<span class="section-label">Roles &amp; Permissions</span>
+<span class="section-tag tag-roles">auth</span>
+</div>
+<span class="chevron" id="chev-s10">▾</span>
+</div>
+<div class="section-body" id="body-s10">
+<table class="roles-table">
+<thead>
+<tr>
+<th>Role</th>
+<th>How assigned</th>
+<th>View markets</th>
+<th>Trade</th>
+<th>Portfolio</th>
+<th>Create market</th>
+<th>Admin panel</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><span class="role-badge role-guest">Guest</span></td>
+<td>No wallet connected</td>
+<td class="perm-yes">✓</td>
+<td class="perm-no">✗</td>
+<td class="perm-no">✗</td>
+<td class="perm-no">✗</td>
+<td class="perm-no">✗</td>
+</tr>
+<tr>
+<td><span class="role-badge role-trader">Trader</span></td>
+<td>Wallet connected (auto)</td>
+<td class="perm-yes">✓</td>
+<td class="perm-yes">✓</td>
+<td class="perm-yes">✓</td>
+<td class="perm-no">✗</td>
+<td class="perm-no">✗</td>
+</tr>
+<tr>
+<td><span class="role-badge role-admin">Admin</span></td>
+<td>Hardcoded wallet address</td>
+<td class="perm-yes">✓</td>
+<td class="perm-yes">✓</td>
+<td class="perm-yes">✓</td>
+<td class="perm-yes">✓</td>
+<td class="perm-yes">✓</td>
+</tr>
+</tbody>
+</table>
+<div class="prompt-block" style="margin-top: 1rem;"><button class="copy-btn" onclick="copyBlock(this)">copy</button><span class="hl-teal">// Role assignment logic</span>
+<span class="hl-purple">Guest</span>   → no wallet connected; can browse all markets (read-only)
+<span class="hl-teal">Trader</span>  → any wallet that connects is automatically assigned Trader role
+            stored in DB: User { address, role: "TRADER", createdAt }
+<span class="hl-purple">Admin</span>   → wallet address matches NEXT_PUBLIC_ADMIN_ADDRESS env var
+            checked client-side for UI gating + server-side for API protection
+
+<span class="hl-teal">// Implementation</span>
+- useRole() hook returns current role based on connected wallet
+- &lt;RoleGate role="TRADER"&gt; wrapper component blocks unauthorized UI
+- API routes check role server-side before mutating data
+- Trader role stored in DB on first wallet connection (upsert)
+- Admin address configured via env var — no DB entry needed
+</div>
+<div class="prompt-block" style="margin-top: 8px;"><button class="copy-btn" onclick="copyBlock(this)">copy</button><span class="hl-purple">// Admin Resolution Dashboard (/admin/resolve)</span>
+Admin-only page that shows all markets requiring attention.
+
+<span class="hl-teal">// Pending resolution list</span>
+- Query: WHERE status = "EXPIRED" AND resolved = false
+- Each item shows: question, end date, total volume, YES% / NO%
+- Sorted by endDate ascending (oldest first)
+- Badge in admin nav shows count of pending resolutions
+  → updated in realtime via admin:resolve:pending Socket.io event
+
+<span class="hl-teal">// Resolution UI per market</span>
+- Large YES / NO buttons to select outcome
+- Confirmation modal: "Are you sure? This cannot be undone."
+- On confirm → calls resolveMarket(marketId, outcome) on-chain
+- On tx confirm → market:resolved emitted → all users see result instantly
+
+<span class="hl-amber">// API</span>
+GET  /api/admin/resolve/pending  → list of expired + unresolved markets
+POST /api/admin/resolve/[id]     → trigger resolution (admin only, server-side verified)
+</div>
+</div>
+</div>
+
+<div class="group-header"><span class="group-title">⑤ REALTIME</span></div>
+
+<div class="section" id="s9">
+<div class="section-header" onclick="toggleSection('s9')">
+<div class="section-title">
+<span class="section-num">12</span>
+<span class="section-label">Realtime Updates</span>
+<span class="section-tag tag-stack">socket.io</span>
+</div>
+<span class="chevron" id="chev-s9">▾</span>
+</div>
+<div class="section-body" id="body-s9">
+<div class="prompt-block"><button class="copy-btn" onclick="copyBlock(this)">copy</button><span class="hl-teal">// Architecture</span>
+Socket.io server runs alongside Next.js (custom server.ts).
+Contract event listener → emits Socket.io events → all connected
+clients receive updates and re-render without page refresh.
+
+<span class="hl-purple">Events emitted by server</span>
+market:trade     → { marketId, outcome, amount, shares, yesPrice, noPrice, trader }
+market:resolved  → { marketId, outcome }
+market:created   → { marketId, question, category, endDate }
+market:expired   → { marketId }
+admin:resolve:pending → { marketId, question, endDate }  <span class="hl-amber">// admin room only</span>
+<span class="hl-teal">// Client usage (React hook)</span>
+useMarketSocket(marketId) {
+  on('market:trade')    → update price chart + activity feed + pools
+  on('market:resolved') → show resolution banner + enable claim button
+  on('market:expired')  → lock trading panel, show "Awaiting resolution" badge
+}
+
+useMarketListSocket() {
+  on('market:trade')   → update odds % on listing cards
+  on('market:created') → prepend new market card to grid
+  on('market:expired') → update card status badge to "Expired"
+}
+
+useAdminSocket() {  <span class="hl-amber">// admin only</span>
+  on('admin:resolve:pending') → increment pending resolution counter in admin nav
+}
+
+<span class="hl-amber">// Flow — trade</span>
+1. User submits trade tx → tx confirmed on-chain
+2. Event listener detects SharesBought event
+3. Updates DB (trade record, pool sizes)
+4. Emits market:trade via Socket.io to room market:{id}
+5. All clients in that room update UI instantly
+
+<span class="hl-amber">// Flow — market expiry</span>
+1. Cron job runs every minute, checks markets WHERE endDate &lt;= now AND status = "ACTIVE"
+2. For each expired market: update DB status → "EXPIRED"
+3. Emit market:expired to room market:{id} → clients lock trading panel
+4. Emit market:expired to room market:list → listing cards update badge
+5. Emit admin:resolve:pending to room admin → admin sees notification
+
+<span class="hl-teal">// Rooms</span>
+- Each market detail page joins room: market:{marketId}
+- Listing page joins room: market:list
+- Admin panel joins room: admin (verified by wallet address)
+- Socket auth: verify wallet signature for Trader/Admin rooms
+</div>
+</div>
+</div>
+
+<div class="section" id="s18">
+<div class="section-header" onclick="toggleSection('s18')">
+<div class="section-title">
+<span class="section-num">13</span>
+<span class="section-label">Cron Job — Market Expiry</span>
+<span class="section-tag tag-stack">node-cron</span>
+</div>
+<span class="chevron" id="chev-s18">▾</span>
+</div>
+<div class="section-body" id="body-s18">
+<div class="prompt-block"><button class="copy-btn" onclick="copyBlock(this)">copy</button><span class="hl-amber">// Implemented in server.ts alongside Socket.io and Next.js</span>
+<span class="hl-amber">// Uses node-cron package: npm install node-cron</span>
+
+import cron from 'node-cron';
+import { prisma } from './lib/prisma';
+import { io } from './lib/socket';
+
+<span class="hl-teal">// Run every minute: '* * * * *'</span>
+cron.schedule('* * * * *', async () =&gt; {
+  const expired = await prisma.market.findMany({
+    where: {
+      status: 'ACTIVE',
+      endDate: { lte: new Date() }
+    }
+  });
+
+  for (const market of expired) {
+    <span class="hl-amber">// 1. Update DB</span>
+    await prisma.market.update({
+      where: { id: market.id },
+      data: { status: 'EXPIRED' }
+    });
+
+    <span class="hl-amber">// 2. Notify all users on that market page</span>
+    io.to(`market:${market.id}`).emit('market:expired', { marketId: market.id });
+
+    <span class="hl-amber">// 3. Notify listing page</span>
+    io.to('market:list').emit('market:expired', { marketId: market.id });
+
+    <span class="hl-amber">// 4. Notify admin</span>
+    io.to('admin').emit('admin:resolve:pending', {
+      marketId: market.id,
+      question: market.question,
+      endDate: market.endDate
+    });
+  }
+});
+
+<span class="hl-teal">// server.ts boot order</span>
+1. Create HTTP server
+2. Attach Socket.io to HTTP server
+3. Start cron job
+4. Start Next.js request handler
+5. Listen on port 3000
+</div>
+</div>
+</div>
+
+<div class="group-header"><span class="group-title">⑥ FRONTEND</span></div>
+
+<div class="section" id="s7">
+<div class="section-header" onclick="toggleSection('s7')">
+<div class="section-title">
+<span class="section-num">14</span>
+<span class="section-label">UI / UX Guidelines</span>
+<span class="section-tag tag-ui">design</span>
+</div>
+<span class="chevron" id="chev-s7">▾</span>
+</div>
+<div class="section-body" id="body-s7">
+<div class="prompt-block"><button class="copy-btn" onclick="copyBlock(this)">copy</button><span class="hl-teal">// Theme</span>
+- Dark mode as primary
+- YES accent: green (#22c55e)
+- NO accent: red (#ef4444)
+- Clean, data-dense layout (Polymarket / Manifold style)
+- Responsive — mobile-friendly
+
+<span class="hl-teal">// UX Requirements</span>
+- Skeleton loading states for all async data
+- Toast notifications for tx lifecycle: pending → confirmed → error
+- Optimistic UI updates where possible
+- Empty states for no markets / no positions
+- Price chart: line chart via Recharts with time-range selector (1D/1W/1M)
+</div>
+</div>
+</div>
+
+<div class="section" id="s16">
+<div class="section-header" onclick="toggleSection('s16')">
+<div class="section-title">
+<span class="section-num">15</span>
+<span class="section-label">Frontend State Management</span>
+<span class="section-tag tag-stack">zustand</span>
+</div>
+<span class="chevron" id="chev-s16">▾</span>
+</div>
+<div class="section-body" id="body-s16">
+<div class="prompt-block"><button class="copy-btn" onclick="copyBlock(this)">copy</button><span class="hl-teal">// Global Zustand stores — shared across all components</span>
+<span class="hl-purple">useWalletStore</span> {
+  address: string | null
+  role: "GUEST" | "TRADER" | "ADMIN"
+  usdcBalance: bigint
+  usdcAllowance: bigint     <span class="hl-amber">// cached so UI knows if approve is needed</span>
+  isConnecting: boolean
+  connect() / disconnect()
+  refreshBalance()
+}
+
+<span class="hl-purple">useMarketStore</span> {
+  markets: Market[]         <span class="hl-amber">// listing page cache</span>
+  activeCategory: string    <span class="hl-amber">// selected filter</span>
+  activeSort: string        <span class="hl-amber">// "volume" | "new" | "endDate"</span>
+  isLoading: boolean
+  fetchMarkets()
+  updateMarketFromSocket(event: MarketTradeEvent)
+  setExpired(marketId: string)
+}
+
+<span class="hl-purple">useAdminStore</span> {
+  pendingResolutions: Market[]   <span class="hl-amber">// markets awaiting resolve</span>
+  pendingCount: number           <span class="hl-amber">// shown as badge in admin nav</span>
+  fetchPending()
+  addPending(market: Market)     <span class="hl-amber">// called from admin socket event</span>
+}
+
+<span class="hl-teal">// Local state (per component, NOT in Zustand)</span>
+<span class="hl-amber">// TradingPanel.tsx</span>
+- selectedOutcome: "YES" | "NO"
+- inputAmount: string
+- estimatedShares: number
+- priceImpact: number
+- txStatus: "idle" | "approving" | "buying" | "confirmed" | "error"
+
+<span class="hl-amber">// MarketDetail.tsx</span>
+- market: Market             <span class="hl-amber">// fetched on mount</span>
+- livePool: { yes, no }     <span class="hl-amber">// fetched from chain, updated via socket</span>
+- trades: Trade[]            <span class="hl-amber">// activity feed</span>
+- chartRange: "1D"|"1W"|"1M"
+</div>
+</div>
+</div>
+
+<div class="section" id="s13">
+<div class="section-header" onclick="toggleSection('s13')">
+<div class="section-title">
+<span class="section-num">16</span>
+<span class="section-label">USDC Approval Flow</span>
+<span class="section-tag tag-contract">web3</span>
+</div>
+<span class="chevron" id="chev-s13">▾</span>
+</div>
+<div class="section-body" id="body-s13">
+<div class="prompt-block"><button class="copy-btn" onclick="copyBlock(this)">copy</button><span class="hl-amber">// ERC20 requires two transactions before any trade can happen:</span>
+<span class="hl-amber">// 1. approve() — user allows contract to spend their USDC</span>
+<span class="hl-amber">// 2. buyShares() — contract pulls USDC and mints shares</span>
+<span class="hl-teal">// Step 1 — Check existing allowance first</span>
+const allowance = await usdc.allowance(userAddress, CONTRACT_ADDRESS);
+
+if (allowance &lt; usdcAmount) {
+  <span class="hl-amber">// Need to approve first</span>
+  const approveTx = await usdc.approve(CONTRACT_ADDRESS, usdcAmount);
+  await approveTx.wait();  <span class="hl-amber">// wait for approval to confirm</span>
+}
+
+<span class="hl-teal">// Step 2 — Now buyShares can pull the USDC</span>
+const tx = await predictionMarket.buyShares(marketId, isYes, usdcAmount);
+await tx.wait();
+
+<span class="hl-purple">// UI states to implement in TradingPanel.tsx</span>
+"Approve USDC"   → approve tx pending
+"Approving..."   → approve tx confirming
+"Buy YES"        → ready to trade (allowance sufficient)
+"Buying..."      → buyShares tx pending
+"Confirmed ✓"   → done
+
+<span class="hl-amber">// Use MaxUint256 for approval amount so user only approves once ever:</span>
+usdc.approve(CONTRACT_ADDRESS, ethers.MaxUint256)
+
+<span class="hl-amber">// Approve for createMarket() seed — admin must also approve before calling:</span>
+usdc.approve(CONTRACT_ADDRESS, seedAmount)  <span class="hl-amber">// called in /create page</span>
+</div>
+</div>
+</div>
+
+<div class="group-header"><span class="group-title">⑦ CONFIG</span></div>
+
+<div class="section" id="s17">
+<div class="section-header" onclick="toggleSection('s17')">
+<div class="section-title">
+<span class="section-num">17</span>
+<span class="section-label">Environment Variables</span>
+<span class="section-tag tag-arch">config</span>
+</div>
+<span class="chevron" id="chev-s17">▾</span>
+</div>
+<div class="section-body" id="body-s17">
+<div class="prompt-block"><button class="copy-btn" onclick="copyBlock(this)">copy</button><span class="hl-teal">// .env.local — never commit to git</span>
+<span class="hl-purple"># Database</span>
+DATABASE_URL="postgresql://user:pass@localhost:5432/predmarket"
+
+<span class="hl-purple"># Blockchain — server-side (secret)</span>
+DEPLOYER_PRIVATE_KEY="0x..."          <span class="hl-amber"># admin wallet private key for deploy scripts</span>
+RPC_URL="https://polygon-mumbai.g.alchemy.com/v2/YOUR_KEY"
+
+<span class="hl-purple"># Blockchain — client-side (NEXT_PUBLIC_ prefix = exposed to browser)</span>
+NEXT_PUBLIC_CONTRACT_ADDRESS="0x..."  <span class="hl-amber"># PredictionMarket contract</span>
+NEXT_PUBLIC_USDC_ADDRESS="0x..."      <span class="hl-amber"># MockUSDC contract</span>
+NEXT_PUBLIC_CHAIN_ID="80001"          <span class="hl-amber"># Polygon Mumbai</span>
+NEXT_PUBLIC_RPC_URL="https://polygon-mumbai.g.alchemy.com/v2/YOUR_KEY"
+
+<span class="hl-purple"># Admin</span>
+NEXT_PUBLIC_ADMIN_ADDRESS="0x..."     <span class="hl-amber"># wallet address that gets Admin role</span>
+<span class="hl-purple"># Socket.io</span>
+NEXT_PUBLIC_SOCKET_URL="http://localhost:3000"  <span class="hl-amber"># prod: your domain</span>
+<span class="hl-teal">// lib/constants.ts — import these in code, never use raw env vars</span>
+export const CONTRACT_ADDRESS = process.env.NEXT_PUBLIC_CONTRACT_ADDRESS!;
+export const USDC_ADDRESS     = process.env.NEXT_PUBLIC_USDC_ADDRESS!;
+export const ADMIN_ADDRESS    = process.env.NEXT_PUBLIC_ADMIN_ADDRESS!;
+export const CHAIN_ID         = Number(process.env.NEXT_PUBLIC_CHAIN_ID);
+
+<span class="hl-teal">// .env.example — commit this to git (values replaced with placeholders)</span>
+DATABASE_URL="postgresql://..."
+DEPLOYER_PRIVATE_KEY="0x..."
+RPC_URL="https://..."
+NEXT_PUBLIC_CONTRACT_ADDRESS="0x..."
+NEXT_PUBLIC_USDC_ADDRESS="0x..."
+NEXT_PUBLIC_CHAIN_ID="80001"
+NEXT_PUBLIC_RPC_URL="https://..."
+NEXT_PUBLIC_ADMIN_ADDRESS="0x..."
+NEXT_PUBLIC_SOCKET_URL="http://localhost:3000"
+</div>
+</div>
+</div>
+
+<div class="section" id="s19">
+<div class="section-header" onclick="toggleSection('s19')">
+<div class="section-title">
+<span class="section-num">18</span>
+<span class="section-label">White Label Architecture</span>
+<span class="section-tag tag-arch">future / v2</span>
+</div>
+<span class="chevron" id="chev-s19">▾</span>
+</div>
+<div class="section-body" id="body-s19">
+<div class="prompt-block"><button class="copy-btn" onclick="copyBlock(this)">copy</button><span class="hl-amber">// MVP is built for a single tenant.</span>
+<span class="hl-amber">// However, every decision below must be made with white label in mind</span>
+<span class="hl-amber">// so that adding a new client = config + deploy, NOT a code rewrite.</span>
+<span class="hl-purple">// Contract architecture — two tiers</span>
+<span class="hl-teal">Shared (deployed once, never changes)</span>
+AMMPricer.sol   → pricing library, no state, used by all clients
+                   deployed at a known address, referenced by all PredictionMarket instances
+
+<span class="hl-teal">Per-client (deployed for each new tenant)</span>
+PredictionMarket.sol(ammPricerAddress, usdcAddress, ownerAddress)
+  → each client gets their own contract instance
+  → their own markets, their own pools, their own admin wallet
+  → contract address stored in that client's .env
+
+<span class="hl-purple">// Per-client deployment stack</span>
+- Separate server (VPS / container)
+- Separate PostgreSQL database
+- Separate .env with their CONTRACT_ADDRESS, ADMIN_ADDRESS, branding config
+- Same codebase — pulled from git, configured via env vars
+- Separate subdomain: client1.com or app.client1.com
+
+<span class="hl-purple">// Branding — never hardcode, always config-driven</span>
+<span class="hl-amber">// tenant.config.ts — loaded at runtime from env or a config file</span>
+export const tenantConfig = {
+  name:        process.env.TENANT_NAME        ?? "PredictX",
+  logoUrl:     process.env.TENANT_LOGO_URL    ?? "/logo.svg",
+  primaryColor:process.env.TENANT_PRIMARY     ?? "#7b6fff",
+  accentYes:   process.env.TENANT_YES_COLOR   ?? "#22c55e",
+  accentNo:    process.env.TENANT_NO_COLOR    ?? "#ef4444",
+  faviconUrl:  process.env.TENANT_FAVICON_URL ?? "/favicon.ico",
+  supportUrl:  process.env.TENANT_SUPPORT_URL ?? "",
+}
+
+<span class="hl-amber">// In globals.css — inject CSS variables from tenantConfig at app init</span>
+document.documentElement.style.setProperty('--color-primary', tenantConfig.primaryColor);
+document.documentElement.style.setProperty('--color-yes',     tenantConfig.accentYes);
+document.documentElement.style.setProperty('--color-no',      tenantConfig.accentNo);
+
+<span class="hl-amber">// All components use CSS vars, never hardcoded hex values</span>
+<span class="hl-amber">// ✓  color: var(--color-yes)</span>
+<span class="hl-amber">// ✗  color: #22c55e</span>
+<span class="hl-purple">// Additional .env vars needed for white label</span>
+TENANT_NAME="ClientName"
+TENANT_LOGO_URL="https://..."
+TENANT_PRIMARY="#..."
+TENANT_YES_COLOR="#..."
+TENANT_NO_COLOR="#..."
+TENANT_FAVICON_URL="https://..."
+TENANT_SUPPORT_URL="https://..."
+
+<span class="hl-purple">// What stays the same across all clients (shared codebase)</span>
+- All React components and pages
+- All API route logic
+- Socket.io event system
+- Cron job
+- Prisma schema
+- AMMPricer.sol address (shared contract)
+- PredictionMarket.sol source (each client deploys their own instance)
+
+<span class="hl-purple">// What differs per client (config + env only, zero code changes)</span>
+- CONTRACT_ADDRESS        → their PredictionMarket instance
+- ADMIN_ADDRESS           → their admin wallet
+- DATABASE_URL            → their own database
+- TENANT_* vars           → branding
+- RPC_URL                 → can use same or different RPC provider
+- Domain / subdomain      → configured at infrastructure level
+</div>
+</div>
+</div>
+
+<div class="group-header"><span class="group-title">⑧ EXECUTION</span></div>
+
+<div class="section" id="s11">
+<div class="section-header" onclick="toggleSection('s11')">
+<div class="section-title">
+<span class="section-num">19</span>
+<span class="section-label">Build Order</span>
+<span class="section-tag tag-arch">step-by-step</span>
+</div>
+<span class="chevron" id="chev-s11">▾</span>
+</div>
+<div class="section-body" id="body-s11">
+<div class="step-list">
+<div class="step-item"><span class="step-n">01</span><span class="step-text">Project setup — Next.js custom server.ts, Tailwind, wagmi + RainbowKit config</span></div>
+<div class="step-item"><span class="step-n">02</span><span class="step-text">Smart contracts — MockUSDC.sol + PredictionMarket.sol, unit tests, deploy to testnet</span></div>
+<div class="step-item"><span class="step-n">03</span><span class="step-text">Database — Prisma schema (User + Market + Trade + Category), migrations, seed script</span></div>
+<div class="step-item"><span class="step-n">04</span><span class="step-text">Role system — useRole() hook, RoleGate component, auto-assign Trader on wallet connect</span></div>
+<div class="step-item"><span class="step-n">05</span><span class="step-text">API routes — markets CRUD + trades + portfolio + admin categories + admin resolve</span></div>
+<div class="step-item"><span class="step-n">06</span><span class="step-text">Event listener — viem watcher for on-chain events → DB sync</span></div>
+<div class="step-item"><span class="step-n">07</span><span class="step-text">Cron job — runs every minute, detects expired markets, emits market:expired + admin:resolve:pending</span></div>
+<div class="step-item"><span class="step-n">08</span><span class="step-text">Socket.io server — all events: market:trade / resolved / created / expired + admin:resolve:pending</span></div>
+<div class="step-item"><span class="step-n">09</span><span class="step-text">Frontend pages — Listing → Market detail → Portfolio → Admin create + categories + resolve dashboard</span></div>
+<div class="step-item"><span class="step-n">10</span><span class="step-text">Realtime hooks — useMarketSocket() + useMarketListSocket() + useAdminSocket() wired to UI</span></div>
+<div class="step-item"><span class="step-n">11</span><span class="step-text">Web3 integration — buyShares() + claimWinnings() + resolveMarket() wired to UI</span></div>
+<div class="step-item"><span class="step-n">12</span><span class="step-text">Polish — loading skeletons, error handling, toasts, empty states, README</span></div>
+</div>
+</div>
+</div>
+
+<div class="section" id="s12">
+<div class="section-header" onclick="toggleSection('s12')">
+<div class="section-title">
+<span class="section-num">20</span>
+<span class="section-label">MVP Scope</span>
+<span class="section-tag tag-arch">in / out</span>
+</div>
+<span class="chevron" id="chev-s12">▾</span>
+</div>
+<div class="section-body" id="body-s12">
+<div class="scope-grid">
+<div class="scope-box scope-in">
+<div class="scope-title">✓ In scope</div>
+<span class="scope-tag">YES/NO binary markets</span>
+<span class="scope-tag">AMM pricing (LMSR)</span>
+<span class="scope-tag">Wallet auth</span>
+<span class="scope-tag">Buy shares</span>
+<span class="scope-tag">Claim winnings</span>
+<span class="scope-tag">Owner resolution</span>
+<span class="scope-tag">Price chart</span>
+<span class="scope-tag">Portfolio page</span>
+<span class="scope-tag">Admin create</span>
+<span class="scope-tag">Categories</span>
+<span class="scope-tag">Realtime (Socket.io)</span>
+<span class="scope-tag">Testnet deploy</span>
+</div>
+<div class="scope-box scope-out">
+<div class="scope-title">✗ Out of scope (v2)</div>
+<span class="scope-tag">Orderbook</span>
+<span class="scope-tag">KYC / identity</span>
+<span class="scope-tag">UMA / Chainlink oracle</span>
+<span class="scope-tag">Multi-outcome markets</span>
+<span class="scope-tag">LP rewards</span>
+<span class="scope-tag">Comments / social</span>
+<span class="scope-tag">Mobile app</span>
+<span class="scope-tag">Governance</span>
+</div>
+</div>
+</div>
+</div>
+
+</div>
+
+<div class="group-header"><span class="group-title">⑨ DEVELOPER SPECS</span></div>
+
+<!-- 21 Blockchain Dev Spec -->
+<div class="section" id="s21">
+  <div class="section-header" onclick="toggleSection('s21')">
+    <div class="section-title">
+      <span class="section-num">21</span>
+      <span class="section-label">Blockchain Developer Spec</span>
+      <span class="section-tag tag-contract">solidity</span>
+    </div>
+    <span class="chevron" id="chev-s21">▾</span>
+  </div>
+  <div class="section-body" id="body-s21">
+    <div class="prompt-block"><button class="copy-btn" onclick="copyBlock(this)">copy</button><span class="hl-purple">// Deliverables</span>
+AMMPricer.sol         ← pure library, no constructor, no state
+PredictionMarket.sol  ← main contract, imports AMMPricer
+MockUSDC.sol          ← ERC20 + mint(), testnet only
+deploy/              ← Hardhat or Foundry deploy + verify scripts
+test/                ← unit tests for all functions
+
+<span class="hl-purple">// Contract events — emit these exactly, backend listens to them</span>
+<span class="hl-teal">event MarketCreated(</span>
+  uint indexed marketId,
+  string question,
+  uint endTime,
+  uint seedAmount
+<span class="hl-teal">);</span>
+
+<span class="hl-teal">event SharesBought(</span>
+  uint indexed marketId,
+  address indexed buyer,
+  bool isYes,           <span class="hl-amber">// true = YES side, false = NO side</span>
+  uint usdcAmount,      <span class="hl-amber">// USDC spent</span>
+  uint sharesReceived,  <span class="hl-amber">// shares minted</span>
+  uint newYesPool,      <span class="hl-amber">// pool state after buy</span>
+  uint newNoPool
+<span class="hl-teal">);</span>
+
+<span class="hl-teal">event MarketResolved(</span>
+  uint indexed marketId,
+  bool outcome          <span class="hl-amber">// true = YES won, false = NO won</span>
+<span class="hl-teal">);</span>
+
+<span class="hl-teal">event WinningsClaimed(</span>
+  uint indexed marketId,
+  address indexed claimer,
+  uint usdcAmount
+<span class="hl-teal">);</span>
+
+<span class="hl-purple">// ABI — expose these view functions for frontend reads</span>
+getMarket(uint marketId)     → Market struct
+getShares(address, uint marketId) → (uint yesShares, uint noShares)
+getYesPrice(uint marketId)   → uint (1e18 scaled)
+getNoPrice(uint marketId)    → uint (1e18 scaled)
+getTotalPool(uint marketId)  → uint (yesPool + noPool)
+
+<span class="hl-purple">// Hardhat config</span>
+networks: {
+  mumbai: { url: process.env.RPC_URL, accounts: [process.env.DEPLOYER_PRIVATE_KEY] }
+}
+<span class="hl-amber">// After deploy: print contract addresses, copy to .env</span>
+<span class="hl-amber">// Run: npx hardhat verify --network mumbai CONTRACT_ADDRESS CONSTRUCTOR_ARGS</span>
+
+<span class="hl-purple">// Unit tests required for</span>
+- AMMPricer: getYesPrice, getNoPrice, getShares, getPriceAfterBuy, assertInvariant
+- PredictionMarket: createMarket, buyShares (YES + NO), resolveMarket, claimWinnings
+- Edge cases: expired market buy attempt, double claim, zero amount, slippage rejection</span>
+    </div>
+  </div>
+</div>
+
+<!-- 22 Backend Dev Spec -->
+<div class="section" id="s22">
+  <div class="section-header" onclick="toggleSection('s22')">
+    <div class="section-title">
+      <span class="section-num">22</span>
+      <span class="section-label">Backend Developer Spec</span>
+      <span class="section-tag tag-db">node</span>
+    </div>
+    <span class="chevron" id="chev-s22">▾</span>
+  </div>
+  <div class="section-body" id="body-s22">
+    <div class="prompt-block"><button class="copy-btn" onclick="copyBlock(this)">copy</button><span class="hl-purple">// Deliverables</span>
+server.ts             ← custom Next.js server with Socket.io + cron
+lib/prisma.ts         ← Prisma client singleton
+lib/socket.ts         ← Socket.io server instance (exported for use in cron + API)
+lib/eventListener.ts  ← viem watcher for on-chain events
+lib/cron.ts           ← node-cron market expiry job
+prisma/schema.prisma  ← DB schema
+prisma/seed.ts        ← seed default categories + sample markets
+
+<span class="hl-purple">// API response shapes — return exactly these structures</span>
+
+<span class="hl-teal">GET /api/markets</span>
+Query params: status?, category?, sort? (volume|new|endDate), page?, limit?
+Response: {
+  markets: [{
+    id, contractId, question, description,
+    category: { id, name, slug, icon },
+    endDate, status, resolved, outcome,
+    imageUrl, yesLabel, noLabel,
+    yesPool, noPool,              <span class="hl-amber">// synced from chain events</span>
+    yesPrice, noPrice,            <span class="hl-amber">// computed: noPool/(y+n), yesPool/(y+n)</span>
+    volume,                       <span class="hl-amber">// sum of all trade amounts</span>
+    createdAt
+  }],
+  total, page, limit
+}
+
+<span class="hl-teal">GET /api/markets/[id]</span>
+Response: {
+  market: { ...same as above },
+  trades: [{
+    id, trader, outcome, amount, shares, txHash, createdAt
+  }]  <span class="hl-amber">// last 50, desc</span>
+}
+
+<span class="hl-teal">POST /api/trades</span>
+Body: { marketId, trader, outcome, amount, shares, txHash }
+Response: { trade: { id, ...fields } }
+<span class="hl-amber">// Called by event listener after SharesBought confirmed, not by frontend directly</span>
+
+<span class="hl-teal">GET /api/portfolio/[address]</span>
+Response: {
+  positions: [{
+    market: { id, question, status, outcome, yesLabel, noLabel, imageUrl },
+    yesShares, noShares,
+    currentYesPrice, currentNoPrice,
+    unrealizedPnl,        <span class="hl-amber">// estimated if market resolved now</span>
+    claimable,            <span class="hl-amber">// true if resolved + user on winning side</span>
+    claimableAmount       <span class="hl-amber">// estimated USDC payout</span>
+  }]
+}
+
+<span class="hl-teal">GET /api/admin/resolve/pending</span>
+<span class="hl-amber">// Middleware: verify req wallet address === ADMIN_ADDRESS</span>
+Response: {
+  markets: [{ id, question, endDate, yesPool, noPool, volume, yesPrice, noPrice }]
+}
+
+<span class="hl-purple">// Event listener — lib/eventListener.ts</span>
+<span class="hl-amber">// Uses viem watchContractEvent()</span>
+Listen for: MarketCreated, SharesBought, MarketResolved, WinningsClaimed
+
+On <span class="hl-teal">SharesBought</span>:
+  1. Upsert trade in DB
+  2. Update market yesPool/noPool in DB
+  3. Compute new yesPrice/noPrice
+  4. io.to(`market:${marketId}`).emit('market:trade', {
+       marketId, outcome: isYes ? yesLabel : noLabel,
+       amount, shares, yesPrice, noPrice, trader
+     })
+  5. io.to('market:list').emit('market:trade', { marketId, yesPrice, noPrice })
+
+On <span class="hl-teal">MarketResolved</span>:
+  1. Update market resolved=true, outcome in DB
+  2. io.to(`market:${marketId}`).emit('market:resolved', { marketId, outcome })
+
+On <span class="hl-teal">MarketCreated</span>:
+  1. Market metadata already saved by /create API — just emit socket event
+  2. io.to('market:list').emit('market:created', { marketId, question, category, endDate })
+
+<span class="hl-purple">// Socket.io auth middleware</span>
+io.use((socket, next) => {
+  const { address, signature, message } = socket.handshake.auth;
+  <span class="hl-amber">// verify signature using viem verifyMessage()</span>
+  <span class="hl-amber">// if valid: attach role to socket, allow connection</span>
+  <span class="hl-amber">// if invalid: next(new Error('Unauthorized'))</span>
+  <span class="hl-amber">// Guests connect without auth (no signature required)</span>
+})
+
+<span class="hl-purple">// Image upload — POST /api/upload</span>
+Accept: multipart/form-data, field name: "image"
+Max size: 2MB, allowed types: jpg/png/webp
+Process: resize + crop to 400x400px (use sharp package)
+Upload to: S3 or Cloudinary (configured via env)
+Return: { imageUrl: "https://..." }
+<span class="hl-amber">// Called by /create page before createMarket() tx</span></span>
+    </div>
+  </div>
+</div>
+
+<!-- 23 Frontend Dev Spec -->
+<div class="section" id="s23">
+  <div class="section-header" onclick="toggleSection('s23')">
+    <div class="section-title">
+      <span class="section-num">23</span>
+      <span class="section-label">Frontend Developer Spec</span>
+      <span class="section-tag tag-feature">react</span>
+    </div>
+    <span class="chevron" id="chev-s23">▾</span>
+  </div>
+  <div class="section-body" id="body-s23">
+    <div class="prompt-block"><button class="copy-btn" onclick="copyBlock(this)">copy</button><span class="hl-purple">// Folder structure</span>
+app/
+  page.tsx                    <span class="hl-amber">// market listing</span>
+  market/[id]/page.tsx        <span class="hl-amber">// market detail</span>
+  portfolio/page.tsx
+  create/page.tsx             <span class="hl-amber">// admin only</span>
+  admin/resolve/page.tsx      <span class="hl-amber">// admin only</span>
+  admin/categories/page.tsx   <span class="hl-amber">// admin only</span>
+  api/...                     <span class="hl-amber">// backend routes</span>
+
+components/
+  layout/
+    Header.tsx                <span class="hl-amber">// wallet connect button, role-based nav, pending badge</span>
+    RoleGate.tsx              <span class="hl-amber">// wraps content, renders null if role insufficient</span>
+  market/
+    MarketCard.tsx            <span class="hl-amber">// props: market, showCategory?</span>
+    MarketGrid.tsx            <span class="hl-amber">// listing with filter bar + sort</span>
+    CategoryFilter.tsx        <span class="hl-amber">// horizontal pill tabs</span>
+    PriceChart.tsx            <span class="hl-amber">// Recharts LineChart, props: marketId, range</span>
+    TradingPanel.tsx          <span class="hl-amber">// YES/NO toggle, amount input, buy button</span>
+    ActivityFeed.tsx          <span class="hl-amber">// last 50 trades, live via socket</span>
+    ResolutionBanner.tsx      <span class="hl-amber">// shown when market:resolved received</span>
+  admin/
+    PendingResolutionList.tsx
+    ResolveModal.tsx          <span class="hl-amber">// YES/NO confirm dialog</span>
+    CreateMarketForm.tsx
+    ImageUpload.tsx           <span class="hl-amber">// drag-drop, preview, calls /api/upload</span>
+  shared/
+    Toast.tsx
+    Skeleton.tsx
+    EmptyState.tsx
+
+hooks/
+  useRole.ts                  <span class="hl-amber">// returns "GUEST"|"TRADER"|"ADMIN"</span>
+  useMarketSocket.ts          <span class="hl-amber">// joins room market:{id}, handles events</span>
+  useMarketListSocket.ts      <span class="hl-amber">// joins room market:list</span>
+  useAdminSocket.ts           <span class="hl-amber">// joins room admin (admin only)</span>
+  useTrade.ts                 <span class="hl-amber">// orchestrates approve + buyShares flow</span>
+  usePortfolio.ts             <span class="hl-amber">// fetches /api/portfolio/[address]</span>
+
+lib/
+  wagmi.ts                    <span class="hl-amber">// wagmi config + chains</span>
+  socket.ts                   <span class="hl-amber">// socket.io-client singleton</span>
+  constants.ts                <span class="hl-amber">// addresses, chain ID from env</span>
+  abi/
+    PredictionMarket.json
+    MockUSDC.json
+  tenant.config.ts            <span class="hl-amber">// branding from TENANT_* env vars</span>
+
+store/
+  walletStore.ts
+  marketStore.ts
+  adminStore.ts</span>
+    </div>
+    <div class="prompt-block" style="margin-top: 8px;"><button class="copy-btn" onclick="copyBlock(this)">copy</button><span class="hl-purple">// Key wagmi hooks usage</span>
+
+<span class="hl-teal">// Read pool state from chain (always fresh)</span>
+const { data } = useReadContract({
+  address: CONTRACT_ADDRESS,
+  abi: PredictionMarketABI,
+  functionName: 'getMarket',
+  args: [marketId],
+})
+
+<span class="hl-teal">// Write — buyShares</span>
+const { writeContractAsync } = useWriteContract()
+await writeContractAsync({
+  address: CONTRACT_ADDRESS,
+  abi: PredictionMarketABI,
+  functionName: 'buyShares',
+  args: [marketId, isYes, usdcAmount, minShares],
+})
+
+<span class="hl-teal">// USDC allowance check</span>
+const { data: allowance } = useReadContract({
+  address: USDC_ADDRESS,
+  abi: ERC20ABI,
+  functionName: 'allowance',
+  args: [userAddress, CONTRACT_ADDRESS],
+})
+
+<span class="hl-teal">// useTrade.ts — complete flow hook</span>
+function useTrade(marketId) {
+  return async (isYes, amount) => {
+    setStatus('approving')
+    if (allowance &lt; amount) {
+      await approve(MaxUint256)    <span class="hl-amber">// wait for confirmation</span>
+    }
+    setStatus('buying')
+    const minShares = getShares(...) * 0.99
+    await buyShares(marketId, isYes, amount, minShares)
+    setStatus('confirmed')
+  }
+}
+
+<span class="hl-purple">// Socket.io client init — lib/socket.ts</span>
+import { io } from 'socket.io-client'
+
+export const socket = io(process.env.NEXT_PUBLIC_SOCKET_URL!, {
+  autoConnect: false,   <span class="hl-amber">// connect manually after wallet auth</span>
+  auth: {
+    address: walletAddress,
+    signature,          <span class="hl-amber">// sign fixed message on connect</span>
+    message: 'Connect to PredictX'
+  }
+})
+
+<span class="hl-purple">// useMarketSocket.ts</span>
+function useMarketSocket(marketId) {
+  useEffect(() => {
+    socket.emit('join', `market:${marketId}`)
+    socket.on('market:trade',    handleTrade)
+    socket.on('market:resolved', handleResolved)
+    socket.on('market:expired',  handleExpired)
+    return () => {
+      socket.emit('leave', `market:${marketId}`)
+      socket.off('market:trade')
+      socket.off('market:resolved')
+      socket.off('market:expired')
+    }
+  }, [marketId])
+}
+
+<span class="hl-purple">// RoleGate.tsx</span>
+function RoleGate({ role, children }) {
+  const { role: userRole } = useWalletStore()
+  const hierarchy = { GUEST: 0, TRADER: 1, ADMIN: 2 }
+  if (hierarchy[userRole] &lt; hierarchy[role]) return null
+  return children
+}
+<span class="hl-amber">// Usage: &lt;RoleGate role="TRADER"&gt;&lt;TradingPanel /&gt;&lt;/RoleGate&gt;</span>
+<span class="hl-amber">//        &lt;RoleGate role="ADMIN"&gt;&lt;AdminNav /&gt;&lt;/RoleGate&gt;</span></span>
+    </div>
+  </div>
+</div>
+
+<div class="footer">
+  <span class="footer-note">prediction-market-mvp · Next.js + Solidity</span>
+  <button class="use-btn" onclick="copyAll()">Copy full prompt ↗</button>
+</div>
+
+<script>
+  function toggleSection(id) {
+    const body = document.getElementById('body-' + id);
+    const chev = document.getElementById('chev-' + id);
+    const section = document.getElementById(id);
+    if (!body) return;
+
+    const isOpening = !body.classList.contains('open');
+    body.classList.toggle('open');
+    chev.classList.toggle('open');
+
+    if (isOpening && section) {
+      setTimeout(() => {
+        section.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }, 50);
+    }
+  }
+
+  function copyBlock(btn) {
+    const block = btn.parentElement;
+    const text = block.innerText.replace(/^copy\n?/, '').trim();
+    navigator.clipboard.writeText(text).then(() => {
+      btn.textContent = 'copied!';
+      btn.classList.add('copied');
+      setTimeout(() => { btn.textContent = 'copy'; btn.classList.remove('copied'); }, 1800);
+    });
+  }
+
+  const fullPrompt = `# Build a Prediction Market Platform (MVP)
+
+## Goal
+Build an MVP prediction market web platform inspired by Polymarket. Users bet on future event outcomes using cryptocurrency. The result must be a functional, production-ready app with clean architecture designed to be extended.
+
+## Constraints
+- MVP scope only — no over-engineering
+- All code in TypeScript with strict types
+- Use environment variables for all sensitive data (.env.local)
+- Every on-chain call must include error handling and gas estimation
+- Include a README.md with local setup and deploy instructions
+
+---
+
+## Tech Stack
+
+### Frontend
+- Framework: Next.js 14+ (App Router)
+- Language: TypeScript (strict)
+- Styling: Tailwind CSS
+- State management: Zustand or React Context
+- Web3: wagmi + viem
+- Wallet connect: RainbowKit or ConnectKit
+
+### Smart Contracts
+- Language: Solidity ^0.8.20
+- Dev/testing: Hardhat or Foundry
+- Network: Polygon Mumbai testnet or Base Sepolia
+- Oracle: owner-controlled resolve function (MVP)
+
+### Database (off-chain metadata)
+- DB: PostgreSQL (or Supabase)
+- ORM: Prisma
+- API: Next.js API Routes (REST) or tRPC
+
+---
+
+## Smart Contracts
+
+Three contracts total: AMMPricer (library), PredictionMarket (main), MockUSDC (testnet).
+
+### AMMPricer.sol — Solidity library
+Pure pricing library with no state. Imported by PredictionMarket. Fully testable in isolation.
+
+Uses Constant Product AMM formula:
+- yesPrice = noPool / (yesPool + noPool)
+- noPrice  = yesPool / (yesPool + noPool)
+- shares   = usdcAmount / price
+- Invariant: yesPrice + noPrice always equals 1.0
+
+Functions:
+- getYesPrice(pool) → uint scaled to 1e18
+- getNoPrice(pool) → uint scaled to 1e18
+- getShares(pool, usdcAmount, isYes) → uint shares
+- getPriceAfterBuy(pool, usdcAmount, isYes) → uint newPrice  // for slippage preview
+- assertInvariant(pool) → bool
+
+### PredictionMarket.sol
+struct Market { id, question, endTime, resolved, outcome, yesPool, noPool, totalShares }
+mapping(marketId => mapping(address => uint)) yesShares / noShares
+
+- createMarket(question, endTime, seedAmount) — seeds both pools equally (seedAmount/2 each)
+- buyShares(marketId, isYes, usdcAmount) — calls AMMPricer.getShares(), updates pools, mints shares
+- resolveMarket(marketId, outcome) — owner only
+- claimWinnings(marketId) — payout = (userShares / totalWinningShares) * totalPool
+
+### MockUSDC.sol
+ERC20 with public mint() for testnet testing.
+
+### Pricing example
+Initial: yesPool = 500, noPool = 500 → YES 50%, NO 50%
+User buys YES with 100 USDC → shares = 100/0.50 = 200 YES shares
+After: yesPool = 600, noPool = 500 → YES 45%, NO 55%
+Market resolves YES. User had 200/1400 total YES shares → payout = (200/1400) * 1100 = ~157 USDC
+
+### Frontend TypeScript replica (for instant UI preview)
+function getShares(yesPool, noPool, amount, isYes) {
+  const price = isYes ? noPool/(yesPool+noPool) : yesPool/(yesPool+noPool);
+  return amount / price;
+}
+function getPriceAfterBuy(yesPool, noPool, amount, isYes) {
+  const newYes = isYes ? yesPool + amount : yesPool;
+  const newNo  = isYes ? noPool : noPool + amount;
+  return isYes ? newNo/(newYes+newNo) : newYes/(newYes+newNo);
+}
+
+### Deploy order
+1. Deploy MockUSDC
+2. AMMPricer is a library — linked at compile time, no separate deploy needed
+3. Deploy PredictionMarket(usdcAddress)
+4. Seed initial markets via createMarket()
+
+---
+
+## Pages & Features
+
+### Authentication
+- Web3 wallet connect (MetaMask, Coinbase Wallet via wagmi)
+- Display wallet address + balance in header
+
+### Market listing (/)
+- Grid of active markets: question, YES/NO %, volume, end date, category
+- Filter by category, sort by volume / date / new
+
+### Market detail (/market/[id])
+- Price history chart (Recharts, time-range: 1D/1W/1M)
+- YES/NO trading panel: toggle outcome, amount input, estimated shares + payout, Buy button
+- Activity feed (recent trades)
+- Market info: creator, end date, resolution source, liquidity
+
+### Portfolio (/portfolio)
+- All user positions (YES/NO shares per market)
+- Unrealized P&L
+- Claim winnings button for resolved markets
+
+### Admin create (/create)
+- Form: question, description, end date, category, initial liquidity
+- Wallet-address gated (admin only)
+- Calls createMarket() on-chain
+
+---
+
+## Database Schema (Prisma)
+
+model User {
+  address   String   @id  // wallet address
+  role      String   @default("TRADER")  // "TRADER" | "ADMIN"
+  createdAt DateTime @default(now())
+  trades    Trade[]
+}
+
+model Market {
+  id          String   @id
+  contractId  Int      // on-chain market ID
+  question    String
+  description String
+  categoryId  String
+  category    Category @relation(fields: [categoryId], references: [id])
+  endDate     DateTime
+  resolved    Boolean  @default(false)
+  outcome     String?  // "YES" | "NO" | null
+  status      String   // "ACTIVE" | "RESOLVED" | "EXPIRED"
+  imageUrl    String?  // optional, stored in cloud storage
+  yesLabel    String   @default("YES")  // max 20 chars
+  noLabel     String   @default("NO")   // max 20 chars
+  createdAt   DateTime @default(now())
+  trades      Trade[]
+}
+
+model Trade {
+  id        String   @id @default(cuid())
+  marketId  String
+  market    Market   @relation(fields: [marketId], references: [id])
+  trader    String   // wallet address
+  outcome   String   // "YES" | "NO"
+  amount    Float    // in USDC
+  shares    Float
+  txHash    String
+  createdAt DateTime @default(now())
+}
+
+## API Routes
+GET  /api/markets           - list markets (with filters)
+GET  /api/markets/[id]      - single market + recent trades
+POST /api/trades            - store trade after tx confirmed
+GET  /api/portfolio/[addr]  - positions for a wallet address
+
+---
+
+## UI/UX Guidelines
+
+- Dark mode as primary theme
+- YES accent: green (#22c55e), NO accent: red (#ef4444)
+- Clean, data-dense layout (Polymarket / Manifold style)
+- Responsive — mobile-friendly
+- Skeleton loading states for all async data
+- Toast notifications: pending → confirmed → error
+- Optimistic UI updates where possible
+- Empty states for no markets / no positions
+
+---
+
+## Market Categories
+
+Default categories are seeded at startup and cannot be deleted. Admin can create additional custom categories via /admin/categories. Each market belongs to exactly one category.
+
+### Default categories
+Crypto · Politics · Sports · Science · Entertainment · Finance · World Events · Other
+
+### Category model (Prisma)
+model Category {
+  id        String   @id @default(cuid())
+  name      String   @unique   // e.g. "Crypto"
+  slug      String   @unique   // e.g. "crypto"
+  icon      String             // emoji or icon name
+  isDefault Boolean  @default(false)
+  createdAt DateTime @default(now())
+  markets   Market[]
+}
+
+### Admin API
+- GET  /api/admin/categories       → list all categories
+- POST /api/admin/categories       → create new category { name, slug, icon }
+- DEL  /api/admin/categories/[id]  → delete custom only (default categories are protected)
+
+### UI behavior
+- Listing page: horizontal pill/tab filter bar — "All" shown by default
+- Each market card displays its category pill
+- Market create form: category is a required dropdown field
+
+---
+
+Blockchain is the single source of truth. ALL market data lives on-chain permanently — both active and resolved markets. Markets are never deleted. Resolved markets remain queryable on-chain forever.
+
+### On-chain (PredictionMarket.sol)
+- All markets (active + resolved)
+- All trades and share balances
+- Pool sizes (yesPool, noPool)
+- Resolution outcome
+- User share holdings for claimWinnings()
+
+### Off-chain DB (PostgreSQL) — cache layer only
+- Market metadata: title, description, category, image
+- Trade history: synced from on-chain events via event listener
+- Indexed for fast queries, filtering, and sorting
+- DB is NOT the source of truth — it mirrors chain state
+- If DB is wiped, it can be fully rebuilt by replaying contract events
+
+### Sync strategy
+- Backend listens to contract events (MarketCreated, SharesBought, MarketResolved) via viem event watcher
+- On each event → upsert into DB
+- Market status field: "ACTIVE" | "RESOLVED" | "EXPIRED"
+- /api/markets?status=resolved → resolved markets from DB
+- /api/markets?status=active → active markets from DB
+- Market detail page fetches live data from chain for critical values (pools, outcome) + DB for metadata
+
+---
+
+## Realtime Updates (Socket.io)
+
+Socket.io server runs alongside Next.js via a custom server.ts. The contract event listener emits Socket.io events to all connected clients, who re-render without page refresh.
+
+### Events emitted by server
+- market:trade    → { marketId, outcome, amount, shares, yesPrice, noPrice, trader }
+- market:resolved → { marketId, outcome }
+- market:created  → { marketId, question, category, endDate }
+- market:expired  → { marketId }
+- admin:resolve:pending → { marketId, question, endDate }  // admin room only
+
+### Client hooks
+- useMarketSocket(marketId): on market:trade → update chart + activity feed + pools; on market:resolved → show resolution banner + enable claim button; on market:expired → lock trading panel, show "Awaiting resolution" badge
+- useMarketListSocket(): on market:trade → update odds % on listing cards; on market:created → prepend new card to grid; on market:expired → update card status badge
+- useAdminSocket(): on admin:resolve:pending → increment pending counter in admin nav
+
+### Flow — trade
+1. User submits trade tx → confirmed on-chain
+2. Event listener detects SharesBought event
+3. Updates DB (trade record + pool sizes)
+4. Emits market:trade to Socket.io room market:{id}
+5. All clients in that room update UI instantly
+
+### Flow — market expiry
+1. Cron job runs every minute, checks markets WHERE endDate <= now AND status = "ACTIVE"
+2. For each expired market: update DB status → "EXPIRED"
+3. Emit market:expired to room market:{id} → clients lock trading panel
+4. Emit market:expired to room market:list → listing cards update badge
+5. Emit admin:resolve:pending to room admin → admin sees notification
+
+### Rooms
+- Market detail page joins room: market:{marketId}
+- Listing page joins room: market:list
+- Admin panel joins room: admin (verified by wallet address)
+- Socket auth: verify wallet signature for Trader/Admin rooms
+
+---
+
+## Admin Resolution Dashboard (/admin/resolve)
+
+Admin-only page showing all markets that require resolution.
+
+### Pending resolution list
+- Query: WHERE status = "EXPIRED" AND resolved = false, sorted by endDate ascending
+- Badge in admin nav shows count of pending resolutions, updated in realtime via admin:resolve:pending
+- Each item shows: question, end date, total volume, YES% / NO%
+
+### Resolution UI per market
+- Large YES / NO buttons to select outcome
+- Confirmation modal: "Are you sure? This cannot be undone."
+- On confirm → calls resolveMarket(marketId, outcome) on-chain
+- On tx confirm → market:resolved emitted → all users see result instantly
+
+### API
+- GET  /api/admin/resolve/pending  → list of expired + unresolved markets
+- POST /api/admin/resolve/[id]     → trigger resolution (admin only, server-side verified)
+
+---
+
+Three roles exist in the system:
+
+| Role   | Assigned when              | View markets | Trade | Portfolio | Create market | Admin panel |
+|--------|----------------------------|:---:|:---:|:---:|:---:|:---:|
+| Guest  | No wallet connected        | ✓ | ✗ | ✗ | ✗ | ✗ |
+| Trader | Any wallet connects (auto) | ✓ | ✓ | ✓ | ✗ | ✗ |
+| Admin  | Hardcoded wallet address   | ✓ | ✓ | ✓ | ✓ | ✓ |
+
+### Implementation
+- Guest: no wallet connected; read-only access to all markets
+- Trader: automatically assigned when any wallet connects for the first time; stored in DB via upsert: User { address, role: "TRADER", createdAt }
+- Admin: wallet address matches NEXT_PUBLIC_ADMIN_ADDRESS env var; checked client-side for UI gating and server-side for API route protection
+- useRole() hook returns the current role based on connected wallet
+- <RoleGate role="TRADER"> wrapper component blocks unauthorized UI elements
+- API routes verify role server-side before any data mutation
+
+---
+
+## Build Order
+
+1. Project setup — Next.js custom server.ts, Tailwind, wagmi + RainbowKit config
+2. Smart contracts — MockUSDC.sol + PredictionMarket.sol, unit tests, deploy to testnet
+3. Database — Prisma schema (User + Market + Trade + Category), migrations, seed script
+4. Role system — useRole() hook, RoleGate component, auto-assign Trader on wallet connect
+5. API routes — markets CRUD + trades + portfolio + admin categories + admin resolve
+6. Event listener — viem watcher for on-chain events → DB sync
+7. Cron job — runs every minute, detects expired markets, emits market:expired + admin:resolve:pending
+8. Socket.io server — all events: market:trade / resolved / created / expired + admin:resolve:pending
+9. Frontend pages — Listing → Market detail → Portfolio → Admin create + categories + resolve dashboard
+10. Realtime hooks — useMarketSocket() + useMarketListSocket() + useAdminSocket() wired to UI
+11. Web3 integration — buyShares() + claimWinnings() + resolveMarket() wired to UI
+12. Polish — loading skeletons, error handling, toasts, empty states, README
+
+---
+
+## MVP Scope
+
+### In scope
+- YES/NO binary markets only
+- AMM pricing (LMSR or constant-product)
+- Wallet authentication
+- Buy shares on-chain
+- Claim winnings
+- Owner-controlled resolution
+- Price history chart
+- Portfolio page
+- Admin market creation
+- Testnet deployment
+
+### Out of scope (v2)
+- Orderbook
+- KYC / identity verification
+- Decentralized oracle (UMA, Chainlink)
+- Multi-outcome markets
+- Liquidity provider rewards
+- Comments / social features
+- Mobile app
+- Governance token
+
+---
+
+## USDC Approval Flow
+
+ERC20 requires two transactions before any trade: approve() then buyShares().
+
+1. Check existing allowance: usdc.allowance(userAddress, CONTRACT_ADDRESS)
+2. If allowance < usdcAmount: call usdc.approve(CONTRACT_ADDRESS, MaxUint256) and wait for confirmation
+3. Then call contract.buyShares(marketId, isYes, usdcAmount, minShares)
+
+UI states in TradingPanel.tsx: "Approve USDC" → "Approving..." → "Buy YES/NO" → "Buying..." → "Confirmed ✓"
+
+Use MaxUint256 for approval amount so user only needs to approve once ever.
+Admin must also approve before calling createMarket() with seed amount.
+
+---
+
+## Slippage Protection
+
+Problem: if two users submit buyShares() in the same block, the second gets fewer shares than the UI showed.
+
+Solution: add minShares parameter to buyShares():
+- function buyShares(marketId, isYes, usdcAmount, minShares)
+- require(shares >= minShares, "Slippage: too few shares received")
+
+Frontend: calculate minShares with 1% tolerance:
+- const minShares = expectedShares * 0.99
+- Pass minShares into contract call
+
+UI: show slippage warning if price impact > 5%:
+- const priceImpact = abs(priceAfter - priceBefore) / priceBefore
+- if (priceImpact > 0.05) show warning banner
+
+---
+
+## Contract Error Handling
+
+All require() guards in PredictionMarket.sol:
+
+createMarket(): require owner, endTime in future, seedAmount > 0
+buyShares(): require market not expired, not resolved, amount > 0, shares >= minShares
+resolveMarket(): require owner, market expired, not already resolved
+claimWinnings(): require market resolved, user has winning shares > 0
+
+Frontend catch block — translate errors to user-friendly messages:
+- "Market has expired" → "This market has closed"
+- "Slippage" → "Price moved too much, try again"
+- "Market already resolved" → "Market is already resolved"
+- fallback → "Transaction failed: " + err.shortMessage
+
+---
+
+## Frontend State Management (Zustand)
+
+Global stores:
+
+useWalletStore: { address, role, usdcBalance, usdcAllowance, isConnecting, connect(), disconnect(), refreshBalance() }
+useMarketStore: { markets[], activeCategory, activeSort, isLoading, fetchMarkets(), updateMarketFromSocket(), setExpired() }
+useAdminStore:  { pendingResolutions[], pendingCount, fetchPending(), addPending() }
+
+Local state (per component, NOT in Zustand):
+- TradingPanel: selectedOutcome, inputAmount, estimatedShares, priceImpact, txStatus
+- MarketDetail: market, livePool { yes, no }, trades[], chartRange
+
+---
+
+## Environment Variables
+
+.env.local (never commit):
+DATABASE_URL="postgresql://user:pass@localhost:5432/predmarket"
+DEPLOYER_PRIVATE_KEY="0x..."
+RPC_URL="https://polygon-mumbai.g.alchemy.com/v2/YOUR_KEY"
+NEXT_PUBLIC_CONTRACT_ADDRESS="0x..."
+NEXT_PUBLIC_USDC_ADDRESS="0x..."
+NEXT_PUBLIC_CHAIN_ID="80001"
+NEXT_PUBLIC_RPC_URL="https://polygon-mumbai.g.alchemy.com/v2/YOUR_KEY"
+NEXT_PUBLIC_ADMIN_ADDRESS="0x..."
+NEXT_PUBLIC_SOCKET_URL="http://localhost:3000"
+
+Commit .env.example with placeholder values.
+All env vars accessed via lib/constants.ts — never use raw process.env in components.
+
+---
+
+## Cron Job — Market Expiry
+
+Use node-cron package in server.ts. Runs every minute ('* * * * *').
+
+Logic:
+1. Query DB: WHERE status = "ACTIVE" AND endDate <= now()
+2. For each expired market: update status → "EXPIRED" in DB
+3. Emit market:expired to Socket.io room market:{id}
+4. Emit market:expired to room market:list
+5. Emit admin:resolve:pending to room admin
+
+server.ts boot order:
+1. Create HTTP server
+2. Attach Socket.io
+3. Start cron job
+4. Start Next.js handler
+5. Listen on port 3000
+
+---
+
+## White Label Architecture (v2 target, MVP must be built with this in mind)
+
+Each client gets their own deployment: separate server, separate database, separate smart contract instance. Same codebase — configured via env vars only. Adding a new client = config + deploy, never a code rewrite.
+
+### Contract tiers
+
+Shared (deployed once):
+- AMMPricer.sol — pricing library, no state, referenced by all PredictionMarket instances
+
+Per-client (deployed per tenant):
+- PredictionMarket.sol(ammPricerAddress, usdcAddress, ownerAddress)
+- Each client: own markets, own pools, own admin wallet, own contract address in .env
+
+### Per-client stack
+- Separate server (VPS or container)
+- Separate PostgreSQL database
+- Separate .env with CONTRACT_ADDRESS, ADMIN_ADDRESS, branding, RPC
+- Same git codebase, configured via env vars
+- Separate domain or subdomain
+
+### Branding — never hardcode, always config-driven
+tenant.config.ts reads from env vars at runtime:
+- TENANT_NAME, TENANT_LOGO_URL, TENANT_FAVICON_URL
+- TENANT_PRIMARY (primary color), TENANT_YES_COLOR, TENANT_NO_COLOR, TENANT_SUPPORT_URL
+
+Inject as CSS variables at app init so all components use var(--color-yes) not #22c55e.
+Rule: zero hardcoded hex values in components — always CSS variables.
+
+### What stays the same (shared codebase)
+All React components, API routes, Socket.io events, cron job, Prisma schema, AMMPricer.sol address, PredictionMarket.sol source code.
+
+### What differs per client (env vars only, zero code changes)
+CONTRACT_ADDRESS, ADMIN_ADDRESS, DATABASE_URL, TENANT_* branding vars, RPC_URL, domain.
+
+---
+
+## Create Market Form (/create — admin only)
+
+### Fields
+
+| Field | Type | Rules |
+|---|---|---|
+| question | String | required, 10–140 chars. Written as a clear yes/no question. |
+| description | String | required, 20–1000 chars, free text. Used as context + resolution criteria. |
+| category | Dropdown | required, loaded from Category table |
+| endDate | Date picker | required |
+| endTime | Time picker | required, HH:MM format |
+| seedAmount | Number | required, min 10 USDC, max 10000 USDC |
+| imageUrl | File upload | optional, jpg/png/webp max 2MB, auto-cropped to square, stored in cloud storage (S3 or Cloudinary). Fallback: category emoji. |
+| yesLabel | String | optional, default "YES", max 20 chars (e.g. "Lakers", "Hoće", "Above $5k") |
+| noLabel | String | optional, default "NO", max 20 chars. Must be set if yesLabel is set, and vice versa. |
+
+### Validation rules
+- endDateTime (combined): must be at least 1 hour in the future, stored as UTC
+- seedAmount: must be <= admin's current USDC balance (show balance next to field)
+- yesLabel + noLabel: both must be set or both empty — never one without the other
+- All fields validated client-side before tx is sent, inline errors shown per field
+
+### Submit flow
+1. Validate all fields — show inline errors if invalid
+2. Upload image to cloud storage if provided → get back imageUrl
+3. Check admin USDC allowance — if insufficient, show "Approve USDC" step
+4. Approve USDC (seedAmount) if needed — wait for confirmation
+5. Call createMarket(question, endTimestamp, seedAmount) on-chain
+6. On tx confirm: save description, category, imageUrl, yesLabel, noLabel to DB; emit market:created via Socket.io; redirect to /market/[newId]
+
+### UI details
+- Character counter on question and description fields
+- Live preview of market card updates as admin types (right side of form)
+- Image upload: drag-and-drop zone, preview thumbnail after upload, category emoji shown as fallback placeholder
+- yesLabel / noLabel: side-by-side inputs, live preview updates outcome buttons in market card preview, placeholder text "YES"/"NO" shows default
+- endDateTime displayed in both local time and UTC
+- seedAmount field shows "Initial price — YES: 50% / NO: 50%"
+- Step indicator when approval needed: "1. Approve USDC → 2. Create Market"
+- Submit button disabled while any tx is pending
+
+---
+
+## Blockchain Developer Spec
+
+### Deliverables
+- AMMPricer.sol — pure library, no constructor, no state
+- PredictionMarket.sol — main contract, imports AMMPricer
+- MockUSDC.sol — ERC20 + mint(), testnet only
+- deploy/ — Hardhat or Foundry scripts + verify
+- test/ — unit tests for all functions and edge cases
+
+### Contract events (emit exactly — backend listens to these)
+event MarketCreated(uint indexed marketId, string question, uint endTime, uint seedAmount);
+event SharesBought(uint indexed marketId, address indexed buyer, bool isYes, uint usdcAmount, uint sharesReceived, uint newYesPool, uint newNoPool);
+event MarketResolved(uint indexed marketId, bool outcome);
+event WinningsClaimed(uint indexed marketId, address indexed claimer, uint usdcAmount);
+
+### View functions (for frontend reads)
+getMarket(uint marketId) → Market struct
+getShares(address, uint marketId) → (uint yesShares, uint noShares)
+getYesPrice(uint marketId) → uint (1e18 scaled)
+getNoPrice(uint marketId) → uint (1e18 scaled)
+getTotalPool(uint marketId) → uint
+
+### Unit tests required for
+AMMPricer: getYesPrice, getNoPrice, getShares, getPriceAfterBuy, assertInvariant
+PredictionMarket: createMarket, buyShares (YES + NO), resolveMarket, claimWinnings
+Edge cases: expired market buy, double claim, zero amount, slippage rejection
+
+---
+
+## Backend Developer Spec
+
+### Deliverables
+server.ts, lib/prisma.ts, lib/socket.ts, lib/eventListener.ts, lib/cron.ts, prisma/seed.ts, POST /api/upload
+
+### API response shapes
+
+GET /api/markets?status&category&sort&page&limit
+{ markets: [{ id, contractId, question, description, category:{id,name,slug,icon}, endDate, status, resolved, outcome, imageUrl, yesLabel, noLabel, yesPool, noPool, yesPrice, noPrice, volume, createdAt }], total, page, limit }
+
+GET /api/markets/[id]
+{ market: {...}, trades: [{ id, trader, outcome, amount, shares, txHash, createdAt }] }  // last 50 desc
+
+POST /api/trades — called by event listener only, not frontend directly
+
+GET /api/portfolio/[address]
+{ positions: [{ market, yesShares, noShares, currentYesPrice, currentNoPrice, unrealizedPnl, claimable, claimableAmount }] }
+
+GET /api/admin/resolve/pending — verify wallet === ADMIN_ADDRESS
+{ markets: [{ id, question, endDate, yesPool, noPool, volume, yesPrice, noPrice }] }
+
+### Event listener (lib/eventListener.ts)
+On SharesBought: upsert trade, update pools, compute prices, emit market:trade to room market:{id} and market:list
+On MarketResolved: update DB, emit market:resolved to room market:{id}
+On MarketCreated: emit market:created to room market:list
+
+### Socket.io auth
+Verify wallet signature using viem verifyMessage(). Guests connect without auth. Traders/Admins send: { address, signature, message: 'Connect to PredictX' }
+
+### Image upload (POST /api/upload)
+multipart/form-data, field "image", max 2MB, jpg/png/webp. Resize to 400x400 using sharp. Upload to S3 or Cloudinary. Return { imageUrl }
+
+---
+
+## Frontend Developer Spec
+
+### Folder structure
+app/ — page.tsx, market/[id]/page.tsx, portfolio/, create/, admin/resolve/, admin/categories/
+components/layout/ — Header.tsx, RoleGate.tsx
+components/market/ — MarketCard.tsx, MarketGrid.tsx, CategoryFilter.tsx, PriceChart.tsx, TradingPanel.tsx, ActivityFeed.tsx, ResolutionBanner.tsx
+components/admin/ — PendingResolutionList.tsx, ResolveModal.tsx, CreateMarketForm.tsx, ImageUpload.tsx
+components/shared/ — Toast.tsx, Skeleton.tsx, EmptyState.tsx
+hooks/ — useRole.ts, useMarketSocket.ts, useMarketListSocket.ts, useAdminSocket.ts, useTrade.ts, usePortfolio.ts
+lib/ — wagmi.ts, socket.ts, constants.ts, abi/, tenant.config.ts
+store/ — walletStore.ts, marketStore.ts, adminStore.ts
+
+### Key wagmi hooks
+useReadContract({ functionName: 'getMarket', args: [marketId] }) — read pool from chain
+useReadContract({ functionName: 'allowance', args: [userAddress, CONTRACT_ADDRESS] }) — USDC allowance
+useWriteContract() — buyShares, approve, resolveMarket, claimWinnings
+
+### useTrade.ts flow
+1. setStatus('approving') — check allowance, approve(MaxUint256) if needed
+2. setStatus('buying') — minShares = expectedShares * 0.99, buyShares(marketId, isYes, amount, minShares)
+3. setStatus('confirmed')
+
+### Socket.io client (lib/socket.ts)
+io(SOCKET_URL, { autoConnect: false, auth: { address, signature, message: 'Connect to PredictX' } })
+Connect manually after wallet auth. Guests connect without auth.
+
+### useMarketSocket(marketId)
+On mount: join room market:{marketId}. Listen: market:trade, market:resolved, market:expired. On unmount: leave + remove listeners.
+
+### RoleGate.tsx
+Hierarchy GUEST=0, TRADER=1, ADMIN=2. If userRole < required → return null.
+Usage: <RoleGate role="TRADER"><TradingPanel /></RoleGate>`;
+
+  function copyAll() {
+    navigator.clipboard.writeText(fullPrompt).then(() => {
+      const btns = document.querySelectorAll('.copy-all-btn, .use-btn');
+      btns.forEach(b => { b.textContent = 'Copied! ✓'; });
+      setTimeout(() => {
+        document.querySelector('.copy-all-btn').textContent = 'Copy full prompt ↗';
+        document.querySelector('.use-btn').textContent = 'Copy full prompt ↗';
+      }, 2000);
+    });
+  }
+</script>
+</body>
+</html>
+
+</body>
+</html>
