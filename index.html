@@ -701,6 +701,27 @@ export interface MarketTradeEvent {
 }
 <span class="hl-amber">// same types imported on frontend hooks — no drift between server emit and client receive</span>
 
+<span class="hl-purple">// Prerequisites</span>
+Node.js >= 18 (LTS recommended)
+npm >= 9
+
+<span class="hl-purple">// Key packages per workspace</span>
+<span class="hl-teal">packages/contracts:</span>
+  hardhat, @nomicfoundation/hardhat-toolbox, ethers@6,
+  @openzeppelin/contracts, ts-node, typescript
+
+<span class="hl-teal">packages/web:</span>
+  next@14, react@18, typescript, tailwindcss,
+  wagmi@2, viem@2, @rainbow-me/rainbowkit,
+  socket.io, socket.io-client,
+  @prisma/client, prisma,
+  zustand, recharts,
+  node-cron, sharp,
+  ethers@6
+
+<span class="hl-teal">packages/shared:</span>
+  typescript
+
 <span class="hl-purple">// Dev workflow</span>
 1. npm install          <span class="hl-amber">// installs all workspaces</span>
 2. npm run compile      <span class="hl-amber">// compile contracts, generate ABIs</span>
@@ -746,10 +767,22 @@ mapping(uint =&gt; mapping(address =&gt; uint)) public noShares;
   → transfers seedAmount USDC from admin to both pools equally
   → sets initial yesPool = noPool = seedAmount / 2
 
-<span class="hl-teal">buyShares</span>(marketId, isYes, usdcAmount)
-  → calls AMMPricer.getShares() to calculate shares
-  → transfers USDC from user to contract
-  → updates yesPool or noPool
+<span class="hl-purple">// Fee configuration (owner-only)</span>
+uint public feeBps = 100;      <span class="hl-amber">// basis points: 100 = 1%, 0 = fee disabled, max 500 = 5%</span>
+address public treasury;       <span class="hl-amber">// wallet that receives collected fees</span>
+
+<span class="hl-teal">setFeeBps</span>(uint newFeeBps)     → owner only, require(newFeeBps &lt;= 500)
+<span class="hl-teal">setTreasury</span>(address newAddr)  → owner only, require(newAddr != address(0))
+<span class="hl-teal">withdrawFees</span>()               → treasury only, pulls all accumulated fees to treasury wallet</span>
+
+<span class="hl-teal">buyShares</span>(marketId, isYes, usdcAmount, minShares)
+  → fee = (usdcAmount * feeBps) / 10000        <span class="hl-amber">// 0 when feeBps = 0</span>
+  → netAmount = usdcAmount - fee
+  → fee stays in contract (not added to pool)
+  → calls AMMPricer.getShares(pool, netAmount, isYes) to calculate shares
+  → require(shares >= minShares)               <span class="hl-amber">// slippage guard</span>
+  → transfers usdcAmount from user to contract
+  → updates yesPool or noPool with netAmount
   → mints shares to user mapping
   → emits SharesBought(marketId, user, isYes, usdcAmount, shares)
 
@@ -758,6 +791,9 @@ mapping(uint =&gt; mapping(address =&gt; uint)) public noShares;
   → reads user's winning shares
   → payout = (userShares / totalWinningShares) * totalPool
   → transfers USDC to user, zeroes out their shares
+<span class="hl-amber">// Pull model — user must claim manually. No expiry.</span>
+<span class="hl-amber">// Unclaimed USDC stays in contract forever — always claimable.</span>
+<span class="hl-amber">// No admin withdrawal of unclaimed funds.</span>
 </div>
 <div class="prompt-block" style="margin-top: 8px;"><button class="copy-btn" onclick="copyBlock(this)">copy</button><span class="hl-purple">// AMMPricer.sol — Solidity library</span>
 <span class="hl-amber">// Constant Product AMM pricing logic, separated for clarity and testability</span>
@@ -781,7 +817,8 @@ library AMMPricer {
 
   <span class="hl-teal">// How many shares does usdcAmount buy?</span>
 <span class="hl-amber">// shares = usdcAmount / price</span>
-<span class="hl-amber">// Example: buying YES at 0.30 with 30 USDC → 100 YES shares</span>
+<span class="hl-amber">// Always called with netAmount (after fee) — fee never enters pool</span>
+<span class="hl-amber">// Example: 100 USDC trade, 1% fee → netAmount=99, getShares(pool, 99, isYes)</span>
   function getShares(Pool memory p, uint usdcAmount, bool isYes) → uint shares
 
   <span class="hl-teal">// Simulate price impact — what will price be AFTER this buy?</span>
@@ -1164,6 +1201,8 @@ Right (narrower, sticky):
 - Live computed as user types:
     "You receive: ~142 YES shares"
     "Avg price: $0.42 per share"
+    "Platform fee: $1.00 (1%)"          <span class="hl-amber">// shown only if feeBps > 0</span>
+    "Amount into pool: $99.00"
     "Potential payout: ~$338 if YES wins"
 - Price impact warning if > 5%: ⚠ "High price impact: 7.2%"
 - Button states:
@@ -1205,6 +1244,11 @@ Right (narrower, sticky):
 <span class="hl-teal">// Claim flow</span>
 Click Claim → claimWinnings(marketId) tx
 Confirmed → row shows "Claimed ✓", Claimable card decrements
+
+<span class="hl-amber">// Pull model — winnings are NEVER sent automatically.</span>
+<span class="hl-amber">// User must claim manually. No deadline — unclaimed USDC stays</span>
+<span class="hl-amber">// locked in the contract forever, claimable at any time.</span>
+<span class="hl-amber">// Toast on login if user has unclaimed winnings: "You have unclaimed winnings!"</span>
 
 <span class="hl-purple">// ────────────────────────────────────</span>
 <span class="hl-purple">// PAGE 4 — Create Market  (/create)</span>
@@ -1675,6 +1719,10 @@ cron.schedule('* * * * *', async () =&gt; {
 - Optimistic UI updates where possible
 - Empty states for no markets / no positions
 - Price chart: line chart via Recharts with time-range selector (1D/1W/1M)
+- Error boundaries: wrap each page in a React ErrorBoundary component
+  catches unexpected runtime errors, shows friendly fallback UI
+  never let a single component crash the whole page
+- 404 page for unknown market IDs (/market/[id] not found)
 </div>
 </div>
 </div>
@@ -1804,6 +1852,8 @@ NEXT_PUBLIC_RPC_URL="https://polygon-mumbai.g.alchemy.com/v2/YOUR_KEY"
 
 <span class="hl-purple"># Admin</span>
 NEXT_PUBLIC_ADMIN_ADDRESS="0x..."     <span class="hl-amber"># wallet address that gets Admin role</span>
+TREASURY_ADDRESS="0x..."              <span class="hl-amber"># wallet that receives platform fees</span>
+FEE_BPS="100"                         <span class="hl-amber"># fee in basis points: 100=1%, 0=disabled, max 500</span>
 <span class="hl-purple"># Socket.io</span>
 NEXT_PUBLIC_SOCKET_URL="http://localhost:3000"  <span class="hl-amber"># prod: your domain</span>
 
@@ -1907,6 +1957,8 @@ TENANT_SUPPORT_URL="https://..."
 <span class="hl-purple">// What differs per client (config + env only, zero code changes)</span>
 - CONTRACT_ADDRESS        → their PredictionMarket instance
 - ADMIN_ADDRESS           → their admin wallet
+- TREASURY_ADDRESS        → their fee collection wallet
+- FEE_BPS                 → their fee rate (0–500), set at deploy via constructor
 - DATABASE_URL            → their own database
 - TENANT_* vars           → branding
 - RPC_URL                 → can use same or different RPC provider
@@ -2049,11 +2101,119 @@ networks: {
 }
 <span class="hl-amber">// After deploy: print contract addresses, copy to .env</span>
 <span class="hl-amber">// Run: npx hardhat verify --network mumbai CONTRACT_ADDRESS CONSTRUCTOR_ARGS</span>
+<span class="hl-amber">// Constructor args: (usdcAddress, treasuryAddress, feeBps)</span>
+<span class="hl-amber">// e.g. deploy(usdcAddress, process.env.TREASURY_ADDRESS, 100) // 1% fee</span>
 
 <span class="hl-purple">// Unit tests required for</span>
 - AMMPricer: getYesPrice, getNoPrice, getShares, getPriceAfterBuy, assertInvariant
 - PredictionMarket: createMarket, buyShares (YES + NO), resolveMarket, claimWinnings
-- Edge cases: expired market buy attempt, double claim, zero amount, slippage rejection</span>
+- Edge cases: expired market buy, double claim, zero amount, slippage rejection
+- Fee tests: correct fee deducted, feeBps=0 behaves same as no fee, setFeeBps above max rejected, withdrawFees only callable by treasury</span>
+    </div>
+    <div class="prompt-block" style="margin-top: 8px;"><button class="copy-btn" onclick="copyBlock(this)">copy</button><span class="hl-purple">// Test file structure</span>
+packages/contracts/test/
+  AMMPricer.test.ts
+  PredictionMarket.test.ts
+
+<span class="hl-purple">// Test setup (shared beforeEach)</span>
+<span class="hl-teal">deploy:</span>
+  mockUSDC   = deploy MockUSDC
+  treasury   = signers[1]
+  trader1    = signers[2]
+  trader2    = signers[3]
+  market     = deploy PredictionMarket(mockUSDC.address, treasury.address, 100) <span class="hl-amber">// 1% fee</span>
+  mint 10000 USDC to trader1, trader2, owner
+  approve market contract from all signers (MaxUint256)
+
+<span class="hl-purple">// ─── AMMPricer.test.ts ────────────────────────────────</span>
+
+<span class="hl-teal">getYesPrice / getNoPrice</span>
+  ✓ equal pools (500/500) → both return 0.5e18
+  ✓ yesPool > noPool → yesPrice < 0.5, noPrice > 0.5
+  ✓ yesPrice + noPrice always === 1e18 (invariant holds)
+  ✓ extreme ratio (999/1) → prices near 0 and 1 but never 0 or 1
+
+<span class="hl-teal">getShares</span>
+  ✓ correct share count at 50/50 pool: 100 USDC → 200 shares at price 0.5
+  ✓ correct share count after pool imbalance
+  ✓ zero amount → returns 0 shares (no revert)
+
+<span class="hl-teal">getPriceAfterBuy</span>
+  ✓ buying YES increases noPrice, decreases yesPrice
+  ✓ buying NO increases yesPrice, decreases noPrice
+  ✓ large buy has larger price impact than small buy
+
+<span class="hl-teal">assertInvariant</span>
+  ✓ returns true for valid pools
+  ✓ reverts if pools produce prices that don't sum to 1e18
+
+<span class="hl-purple">// ─── PredictionMarket.test.ts ─────────────────────────</span>
+
+<span class="hl-teal">createMarket</span>
+  ✓ owner can create market with valid params
+  ✓ yesPool = noPool = seedAmount / 2 after creation
+  ✓ emits MarketCreated with correct args
+  ✓ reverts if caller is not owner
+  ✓ reverts if endTime is in the past
+  ✓ reverts if seedAmount is 0
+
+<span class="hl-teal">buyShares — happy path</span>
+  ✓ trader buys YES: correct shares minted, yesPool updated, noPool unchanged
+  ✓ trader buys NO: correct shares minted, noPool updated, yesPool unchanged
+  ✓ fee deducted: netAmount = usdcAmount - fee enters pool, fee stays in contract
+  ✓ feeBps=0: full usdcAmount enters pool, accumulated fees = 0
+  ✓ emits SharesBought with correct args (marketId, buyer, isYes, usdcAmount, shares, newYesPool, newNoPool)
+  ✓ price moves correctly after buy (yesPrice changes as expected)
+  ✓ two traders buy same side: second gets fewer shares (price impact)
+  ✓ slippage guard: passes when shares >= minShares
+  ✓ USDC transferred from trader to contract
+
+<span class="hl-teal">buyShares — edge cases / reverts</span>
+  ✓ reverts if market has expired (block.timestamp > endTime)
+  ✓ reverts if market is already resolved
+  ✓ reverts if usdcAmount is 0
+  ✓ reverts if shares received < minShares (slippage)
+  ✓ reverts if trader has insufficient USDC balance
+  ✓ reverts if trader has insufficient allowance
+
+<span class="hl-teal">resolveMarket</span>
+  ✓ owner can resolve expired market with outcome YES
+  ✓ owner can resolve expired market with outcome NO
+  ✓ emits MarketResolved(marketId, outcome)
+  ✓ reverts if caller is not owner
+  ✓ reverts if market not yet expired (endTime in future)
+  ✓ reverts if market already resolved
+
+<span class="hl-teal">claimWinnings</span>
+  ✓ YES winner claims correct payout: (userYesShares / totalYesShares) * totalPool
+  ✓ NO winner claims correct payout
+  ✓ payout includes fee-reduced pool (fees never part of pool)
+  ✓ user shares zeroed after claim
+  ✓ emits WinningsClaimed(marketId, claimer, amount)
+  ✓ reverts if market not resolved
+  ✓ reverts if user has no winning shares
+  ✓ reverts on double claim (shares already 0)
+  ✓ loser cannot claim (has shares on wrong side)
+  ✓ USDC transferred to claimer
+
+<span class="hl-teal">fee management</span>
+  ✓ setFeeBps: owner sets new fee, emits FeeBpsUpdated
+  ✓ setFeeBps: reverts if caller not owner
+  ✓ setFeeBps: reverts if newFeeBps > 500
+  ✓ setTreasury: owner sets new treasury address
+  ✓ setTreasury: reverts if caller not owner
+  ✓ setTreasury: reverts if address(0)
+  ✓ withdrawFees: treasury pulls all accumulated fees
+  ✓ withdrawFees: reverts if caller is not treasury
+  ✓ withdrawFees: reverts if accumulated fees = 0
+  ✓ fees accumulate correctly across multiple trades
+
+<span class="hl-teal">full lifecycle integration test</span>
+  ✓ create market → trader1 buys YES → trader2 buys NO →
+    market expires → owner resolves YES →
+    trader1 claims winnings → trader2 cannot claim →
+    treasury withdraws fees →
+    verify all balances correct</span>
     </div>
   </div>
 </div>
@@ -2425,6 +2585,13 @@ prediction-market/
             ├── market.ts         // Market, Trade, Category interfaces
             └── socket.ts         // Socket event payload types (MarketTradeEvent, etc.)
 
+Prerequisites: Node.js >= 18 (LTS), npm >= 9
+
+Key packages:
+- packages/contracts: hardhat, @nomicfoundation/hardhat-toolbox, ethers@6, @openzeppelin/contracts
+- packages/web: next@14, react@18, wagmi@2, viem@2, @rainbow-me/rainbowkit, socket.io, socket.io-client, @prisma/client, prisma, zustand, recharts, node-cron, sharp, ethers@6
+- packages/shared: typescript
+
 Root scripts: dev / compile / test / deploy / db:push / db:seed
 
 ABI sharing: after compile, packages/web/lib/abi/ imports directly from packages/contracts/artifacts/ — no manual copying.
@@ -2466,9 +2633,13 @@ struct Market { id, question, endTime, resolved, outcome, yesPool, noPool, total
 mapping(marketId => mapping(address => uint)) yesShares / noShares
 
 - createMarket(question, endTime, seedAmount) — seeds both pools equally (seedAmount/2 each)
-- buyShares(marketId, isYes, usdcAmount) — calls AMMPricer.getShares(), updates pools, mints shares
+- buyShares(marketId, isYes, usdcAmount, minShares) — deducts fee (feeBps/10000), calls AMMPricer.getShares(pool, netAmount, isYes), fee stays in contract (not in pool), updates pools with netAmount, mints shares, require(shares >= minShares)
+- setFeeBps(uint) — owner only, max 500 (5%). feeBps=0 disables fee entirely, behavior identical to no-fee
+- setTreasury(address) — owner only
+- withdrawFees() — treasury only, pulls all accumulated fees to treasury wallet
 - resolveMarket(marketId, outcome) — owner only
 - claimWinnings(marketId) — payout = (userShares / totalWinningShares) * totalPool
+- Pull model: user must claim manually. No expiry — unclaimed USDC stays in contract forever, always claimable. No admin withdrawal of unclaimed funds.
 
 ### MockUSDC.sol
 ERC20 with public mint() for testnet testing.
@@ -2510,12 +2681,14 @@ MarketCard: image/emoji · question (2-line clamp) · category pill · YES/NO pr
 ### Page 2 — Market Detail (/market/[id])
 Two-column layout (stacked mobile). Left: question, description (collapsible), meta row, PriceChart (Recharts, 1D/1W/1M tabs, hover tooltip), ActivityFeed (last 50 trades, live prepend). Right sticky: TradingPanel + market info card.
 
-TradingPanel — ACTIVE: YES/NO toggle (yesLabel/noLabel), USDC amount input + MAX, live preview of shares/price/payout, price impact warning >5%. Button states: Guest=connect prompt / no allowance=Approve USDC / ready=Buy YES|NO / pending=spinner / confirmed=checkmark. Step indicator during approve flow.
+TradingPanel — ACTIVE: YES/NO toggle (yesLabel/noLabel), USDC amount input + MAX, live preview of shares/price/fee (hidden when feeBps=0)/amount into pool/payout, price impact warning >5%. Button states: Guest=connect prompt / no allowance=Approve USDC / ready=Buy YES|NO / pending=spinner / confirmed=checkmark. Step indicator during approve flow.
 TradingPanel — EXPIRED: gray banner "Market closed · Awaiting resolution", read-only prices.
 TradingPanel — RESOLVED: ResolutionBanner with outcome, Claim button if user won, lost message if lost.
 
 ### Page 3 — Portfolio (/portfolio)
 Trader+ only (Guest redirected). 3 summary cards: Open Positions / Unrealized P&L / Claimable. Tabs: Open / Resolved. Position rows show shares, labels, price, P&L, and status-appropriate action (nothing / awaiting / claim button / lost). Claim triggers claimWinnings() tx.
+
+Pull model: winnings are never sent automatically — user must claim manually. No deadline, unclaimed USDC stays in contract forever. On wallet connect, check for unclaimed winnings and show toast if any exist.
 
 ### Page 4 — Create Market (/create)
 Admin only. Two-column: form left, live market card preview right (updates as admin types). Form grouped: ① Market Info (question+counter, description+counter, category) ② Timing (endDate+endTime, "Ends in X days") ③ Liquidity (seedAmount, balance shown, 50/50 preview) ④ Appearance (image upload drag-drop, yesLabel+noLabel side by side). Submit states: uploading → approving → creating → redirect to new market.
@@ -2585,6 +2758,8 @@ GET  /api/portfolio/[addr]  - positions for a wallet address
 - Toast notifications: pending → confirmed → error
 - Optimistic UI updates where possible
 - Empty states for no markets / no positions
+- Error boundaries: wrap each page in React ErrorBoundary, never let one component crash the whole app
+- 404 page for unknown market IDs
 
 ---
 
@@ -2882,6 +3057,8 @@ NEXT_PUBLIC_CHAIN_ID="80001"
 NEXT_PUBLIC_RPC_URL="https://polygon-mumbai.g.alchemy.com/v2/YOUR_KEY"
 NEXT_PUBLIC_ADMIN_ADDRESS="0x..."
 NEXT_PUBLIC_SOCKET_URL="http://localhost:3000"
+TREASURY_ADDRESS="0x..."              # fee collection wallet
+FEE_BPS="100"                         # basis points: 100=1%, 0=disabled, max 500
 TENANT_NAME="PredictX"
 TENANT_LOGO_URL="https://..."
 TENANT_FAVICON_URL="https://..."
@@ -2947,7 +3124,7 @@ Rule: zero hardcoded hex values in components — always CSS variables.
 All React components, API routes, Socket.io events, cron job, Prisma schema, AMMPricer.sol address, PredictionMarket.sol source code.
 
 ### What differs per client (env vars only, zero code changes)
-CONTRACT_ADDRESS, ADMIN_ADDRESS, DATABASE_URL, TENANT_* branding vars, RPC_URL, domain.
+CONTRACT_ADDRESS, ADMIN_ADDRESS, TREASURY_ADDRESS, FEE_BPS (0–500, set at deploy via constructor), DATABASE_URL, TENANT_* branding vars, RPC_URL, domain.
 
 ---
 
@@ -3015,10 +3192,22 @@ getYesPrice(uint marketId) → uint (1e18 scaled)
 getNoPrice(uint marketId) → uint (1e18 scaled)
 getTotalPool(uint marketId) → uint
 
-### Unit tests required for
-AMMPricer: getYesPrice, getNoPrice, getShares, getPriceAfterBuy, assertInvariant
-PredictionMarket: createMarket, buyShares (YES + NO), resolveMarket, claimWinnings
-Edge cases: expired market buy, double claim, zero amount, slippage rejection
+### Unit tests (packages/contracts/test/)
+
+AMMPricer.test.ts:
+- getYesPrice/getNoPrice: equal pools → 0.5, invariant yesPrice+noPrice=1e18 always holds, extreme ratios
+- getShares: correct count at 50/50 pool, correct after imbalance, zero amount → 0
+- getPriceAfterBuy: YES buy increases noPrice, large buy has more price impact than small
+- assertInvariant: valid pools pass, invalid reverts
+
+PredictionMarket.test.ts:
+- createMarket: owner creates, yesPool=noPool=seed/2, emits MarketCreated, reverts (not owner / past endTime / zero seed)
+- buyShares happy path: correct shares minted, pool updated, fee deducted (netAmount in pool), feeBps=0 → full amount in pool, emits SharesBought, price moves correctly, slippage guard passes, USDC transferred
+- buyShares reverts: expired market, already resolved, zero amount, slippage, insufficient balance/allowance
+- resolveMarket: YES and NO outcomes, emits MarketResolved, reverts (not owner / not expired / already resolved)
+- claimWinnings: correct payout (userShares/totalWinningShares)*totalPool, shares zeroed after claim, emits WinningsClaimed, reverts (not resolved / no winning shares / double claim / loser tries to claim)
+- Fee management: setFeeBps owner-only max 500, setTreasury owner-only no zero address, withdrawFees treasury-only correct amount reverts if 0, fees accumulate correctly across trades
+- Full lifecycle integration test: create → buy YES → buy NO → expire → resolve YES → winner claims → loser cannot claim → treasury withdraws fees → verify all USDC balances
 
 ---
 
@@ -3039,6 +3228,10 @@ POST /api/trades — called by event listener only, not frontend directly
 
 GET /api/portfolio/[address]
 { positions: [{ market, yesShares, noShares, currentYesPrice, currentNoPrice, unrealizedPnl, claimable, claimableAmount }] }
+// claimable = true when: market.resolved = true AND user is on winning side AND shares > 0
+// claimableAmount = (userWinningShares / totalWinningShares) * totalPool
+// No expiry — claimable stays true until user calls claimWinnings() on-chain
+// After claim tx confirmed: re-read shares from chain (should be 0), set claimable = false
 
 GET /api/admin/resolve/pending — verify wallet === ADMIN_ADDRESS
 { markets: [{ id, question, endDate, yesPool, noPool, volume, yesPrice, noPrice }] }
@@ -3087,7 +3280,12 @@ On mount: join room market:{marketId}. Listen: market:trade, market:resolved, ma
 
 ### RoleGate.tsx
 Hierarchy GUEST=0, TRADER=1, ADMIN=2. If userRole < required → return null.
-Usage: <RoleGate role="TRADER"><TradingPanel /></RoleGate>`;
+Usage: <RoleGate role="TRADER"><TradingPanel /></RoleGate>
+
+### Unclaimed winnings notification
+On wallet connect: fetch GET /api/portfolio/[address], check if any positions have claimable=true.
+If yes → show persistent toast or banner: "You have unclaimed winnings — go to Portfolio"
+This runs once per session on connect, not on every page load.`;
 
   function copyAll() {
     navigator.clipboard.writeText(fullPrompt).then(() => {
