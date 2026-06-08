@@ -490,35 +490,36 @@
   <span class="toc-group">① OVERVIEW</span>
   <span class="toc-item" onclick="toggleSection('s1')">01 Context & Goal</span>
   <span class="toc-item" onclick="toggleSection('s2')">02 Tech Stack</span>
+  <span class="toc-item" onclick="toggleSection('s24')">03 Project Structure</span>
   <span class="toc-group">② SMART CONTRACTS</span>
-  <span class="toc-item" onclick="toggleSection('s3')">03 Smart Contracts</span>
-  <span class="toc-item" onclick="toggleSection('s14')">04 Slippage Protection</span>
-  <span class="toc-item" onclick="toggleSection('s15')">05 Contract Error Handling</span>
+  <span class="toc-item" onclick="toggleSection('s3')">04 Smart Contracts</span>
+  <span class="toc-item" onclick="toggleSection('s14')">05 Slippage Protection</span>
+  <span class="toc-item" onclick="toggleSection('s15')">06 Contract Error Handling</span>
   <span class="toc-group">③ DATA</span>
-  <span class="toc-item" onclick="toggleSection('s6')">06 Database Schema</span>
-  <span class="toc-item" onclick="toggleSection('s8')">07 Data Storage Strategy</span>
-  <span class="toc-item" onclick="toggleSection('s5')">08 Market Categories</span>
+  <span class="toc-item" onclick="toggleSection('s6')">07 Database Schema</span>
+  <span class="toc-item" onclick="toggleSection('s8')">08 Data Storage Strategy</span>
+  <span class="toc-item" onclick="toggleSection('s5')">09 Market Categories</span>
   <span class="toc-group">④ FEATURES</span>
-  <span class="toc-item" onclick="toggleSection('s4')">09 Pages & Features</span>
-  <span class="toc-item" onclick="toggleSection('s20')">10 Create Market Form</span>
-  <span class="toc-item" onclick="toggleSection('s10')">11 Roles & Permissions</span>
+  <span class="toc-item" onclick="toggleSection('s4')">10 Pages & Features</span>
+  <span class="toc-item" onclick="toggleSection('s20')">11 Create Market Form</span>
+  <span class="toc-item" onclick="toggleSection('s10')">12 Roles & Permissions</span>
   <span class="toc-group">⑤ REALTIME</span>
-  <span class="toc-item" onclick="toggleSection('s9')">12 Realtime Updates</span>
-  <span class="toc-item" onclick="toggleSection('s18')">13 Cron Job — Market Expiry</span>
+  <span class="toc-item" onclick="toggleSection('s9')">13 Realtime Updates</span>
+  <span class="toc-item" onclick="toggleSection('s18')">14 Cron Job — Market Expiry</span>
   <span class="toc-group">⑥ FRONTEND</span>
-  <span class="toc-item" onclick="toggleSection('s7')">14 UI / UX Guidelines</span>
-  <span class="toc-item" onclick="toggleSection('s16')">15 Frontend State Management</span>
-  <span class="toc-item" onclick="toggleSection('s13')">16 USDC Approval Flow</span>
+  <span class="toc-item" onclick="toggleSection('s7')">15 UI / UX Guidelines</span>
+  <span class="toc-item" onclick="toggleSection('s16')">16 Frontend State Management</span>
+  <span class="toc-item" onclick="toggleSection('s13')">17 USDC Approval Flow</span>
   <span class="toc-group">⑦ CONFIG</span>
-  <span class="toc-item" onclick="toggleSection('s17')">17 Environment Variables</span>
-  <span class="toc-item" onclick="toggleSection('s19')">18 White Label Architecture</span>
+  <span class="toc-item" onclick="toggleSection('s17')">18 Environment Variables</span>
+  <span class="toc-item" onclick="toggleSection('s19')">19 White Label Architecture</span>
   <span class="toc-group">⑧ EXECUTION</span>
-  <span class="toc-item" onclick="toggleSection('s11')">19 Build Order</span>
-  <span class="toc-item" onclick="toggleSection('s12')">20 MVP Scope</span>
+  <span class="toc-item" onclick="toggleSection('s11')">20 Build Order</span>
+  <span class="toc-item" onclick="toggleSection('s12')">21 MVP Scope</span>
   <span class="toc-group">⑨ DEVELOPER SPECS</span>
-  <span class="toc-item" onclick="toggleSection('s21')">21 Blockchain Dev</span>
-  <span class="toc-item" onclick="toggleSection('s22')">22 Backend Dev</span>
-  <span class="toc-item" onclick="toggleSection('s23')">23 Frontend Dev</span>
+  <span class="toc-item" onclick="toggleSection('s21')">22 Blockchain Dev</span>
+  <span class="toc-item" onclick="toggleSection('s22')">23 Backend Dev</span>
+  <span class="toc-item" onclick="toggleSection('s23')">24 Frontend Dev</span>
 </div>
 
 <div class="group-header"><span class="group-title">① OVERVIEW</span></div>
@@ -604,10 +605,119 @@ The result must be a functional, production-ready app with clean architecture de
 
 <div class="group-header"><span class="group-title">② SMART CONTRACTS</span></div>
 
+<div class="section" id="s24">
+<div class="section-header" onclick="toggleSection('s24')">
+<div class="section-title">
+<span class="section-num">03</span>
+<span class="section-label">Project Structure</span>
+<span class="section-tag tag-arch">monorepo</span>
+</div>
+<span class="chevron" id="chev-s24">▾</span>
+</div>
+<div class="section-body" id="body-s24">
+<div class="prompt-block"><button class="copy-btn" onclick="copyBlock(this)">copy</button><span class="hl-purple">// Monorepo with npm workspaces — one git repository</span>
+<span class="hl-amber">// Reason: shared TypeScript types between contracts and frontend,</span>
+<span class="hl-amber">// single deploy pipeline, easier white label management.</span>
+
+prediction-market/
+├── package.json              <span class="hl-amber">// root — workspaces config + shared scripts</span>
+├── .env.example
+├── README.md
+│
+├── packages/
+│   ├── contracts/            <span class="hl-amber">// Solidity + Hardhat</span>
+│   │   ├── package.json
+│   │   ├── hardhat.config.ts
+│   │   ├── contracts/
+│   │   │   ├── AMMPricer.sol
+│   │   │   ├── PredictionMarket.sol
+│   │   │   └── MockUSDC.sol
+│   │   ├── scripts/
+│   │   │   └── deploy.ts
+│   │   ├── test/
+│   │   │   ├── AMMPricer.test.ts
+│   │   │   └── PredictionMarket.test.ts
+│   │   └── artifacts/        <span class="hl-amber">// auto-generated ABIs after compile</span>
+│   │
+│   ├── web/                  <span class="hl-amber">// Next.js 14 — frontend + backend + socket server</span>
+│   │   ├── package.json
+│   │   ├── server.ts         <span class="hl-amber">// custom server: Next.js + Socket.io + cron</span>
+│   │   ├── next.config.ts
+│   │   ├── tailwind.config.ts
+│   │   ├── .env.local        <span class="hl-amber">// never commit</span>
+│   │   ├── app/              <span class="hl-amber">// Next.js App Router pages</span>
+│   │   ├── components/
+│   │   ├── hooks/
+│   │   ├── store/
+│   │   ├── lib/
+│   │   │   ├── wagmi.ts
+│   │   │   ├── socket.ts
+│   │   │   ├── prisma.ts
+│   │   │   ├── eventListener.ts
+│   │   │   ├── cron.ts
+│   │   │   ├── constants.ts
+│   │   │   └── abi/          <span class="hl-amber">// symlinked or copied from packages/contracts/artifacts</span>
+│   │   └── prisma/
+│   │       ├── schema.prisma
+│   │       └── seed.ts
+│   │
+│   └── shared/               <span class="hl-amber">// shared TypeScript types used by both packages</span>
+│       ├── package.json
+│       └── types/
+│           ├── market.ts     <span class="hl-amber">// Market, Trade, Category interfaces</span>
+│           ├── socket.ts     <span class="hl-amber">// Socket event payload types</span>
+│           └── index.ts
+
+<span class="hl-purple">// root package.json workspaces config</span>
+{
+  "workspaces": ["packages/*"],
+  "scripts": {
+    "dev":      "npm run dev --workspace=packages/web",
+    "compile":  "npm run compile --workspace=packages/contracts",
+    "test":     "npm run test --workspace=packages/contracts",
+    "deploy":   "npm run deploy --workspace=packages/contracts",
+    "db:push":  "npm run db:push --workspace=packages/web",
+    "db:seed":  "npm run db:seed --workspace=packages/web"
+  }
+}
+
+<span class="hl-purple">// ABI sharing strategy</span>
+<span class="hl-amber">// After `npm run compile`, Hardhat generates ABIs in packages/contracts/artifacts/</span>
+<span class="hl-amber">// packages/web/lib/abi/ imports directly from there:</span>
+import PredictionMarketABI from '../../contracts/artifacts/contracts/PredictionMarket.sol/PredictionMarket.json'
+
+<span class="hl-purple">// shared/types/socket.ts — used by both web/lib/socket.ts and web/lib/eventListener.ts</span>
+export interface MarketTradeEvent {
+  marketId: string
+  trader: string
+  isYes: boolean
+  outcomeLabel: string
+  usdcAmount: number
+  shares: number
+  yesPool: number
+  noPool: number
+  yesPrice: number
+  noPrice: number
+  volume: number
+  timestamp: string
+}
+<span class="hl-amber">// same types imported on frontend hooks — no drift between server emit and client receive</span>
+
+<span class="hl-purple">// Dev workflow</span>
+1. npm install          <span class="hl-amber">// installs all workspaces</span>
+2. npm run compile      <span class="hl-amber">// compile contracts, generate ABIs</span>
+3. npm run deploy       <span class="hl-amber">// deploy to testnet, copy addresses to .env</span>
+4. npm run db:push      <span class="hl-amber">// push Prisma schema to DB</span>
+5. npm run db:seed      <span class="hl-amber">// seed categories + sample markets</span>
+6. npm run dev          <span class="hl-amber">// start Next.js + Socket.io + cron</span></span>
+</div>
+</div>
+</div>
+
 <div class="section" id="s3">
 <div class="section-header" onclick="toggleSection('s3')">
 <div class="section-title">
-<span class="section-num">03</span>
+<span class="section-num">04</span>
 <span class="section-label">Smart Contracts</span>
 <span class="section-tag tag-contract">solidity</span>
 </div>
@@ -739,7 +849,7 @@ MockUSDC.sol         ← testnet only
 <div class="section" id="s14">
 <div class="section-header" onclick="toggleSection('s14')">
 <div class="section-title">
-<span class="section-num">04</span>
+<span class="section-num">05</span>
 <span class="section-label">Slippage Protection</span>
 <span class="section-tag tag-contract">solidity</span>
 </div>
@@ -776,7 +886,7 @@ if (priceImpact &gt; 0.05) showWarning("High price impact: " + (priceImpact*100)
 <div class="section" id="s15">
 <div class="section-header" onclick="toggleSection('s15')">
 <div class="section-title">
-<span class="section-num">05</span>
+<span class="section-num">06</span>
 <span class="section-label">Contract Error Handling</span>
 <span class="section-tag tag-contract">solidity</span>
 </div>
@@ -822,7 +932,7 @@ try {
 <div class="section" id="s6">
 <div class="section-header" onclick="toggleSection('s6')">
 <div class="section-title">
-<span class="section-num">06</span>
+<span class="section-num">07</span>
 <span class="section-label">Database Schema</span>
 <span class="section-tag tag-db">prisma</span>
 </div>
@@ -891,7 +1001,7 @@ DEL  /api/admin/categories/[id]→ delete custom category
 <div class="section" id="s8">
 <div class="section-header" onclick="toggleSection('s8')">
 <div class="section-title">
-<span class="section-num">07</span>
+<span class="section-num">08</span>
 <span class="section-label">Data Storage Strategy</span>
 <span class="section-tag tag-contract">blockchain</span>
 </div>
@@ -933,7 +1043,7 @@ deleted. Resolved markets remain queryable on-chain forever.
 <div class="section" id="s5">
 <div class="section-header" onclick="toggleSection('s5')">
 <div class="section-title">
-<span class="section-num">08</span>
+<span class="section-num">09</span>
 <span class="section-label">Market Categories</span>
 <span class="section-tag tag-cat">taxonomy</span>
 </div>
@@ -988,7 +1098,7 @@ Crypto · Politics · Sports · Science · Entertainment · Finance · World Eve
 <div class="section" id="s4">
 <div class="section-header" onclick="toggleSection('s4')">
 <div class="section-title">
-<span class="section-num">09</span>
+<span class="section-num">10</span>
 <span class="section-label">Pages &amp; Features</span>
 <span class="section-tag tag-feature">MVP</span>
 </div>
@@ -1166,7 +1276,7 @@ useAdminSocket → on admin:resolve:pending → new row appears, badge increment
 <div class="section" id="s20">
 <div class="section-header" onclick="toggleSection('s20')">
 <div class="section-title">
-<span class="section-num">10</span>
+<span class="section-num">11</span>
 <span class="section-label">Create Market Form</span>
 <span class="section-tag tag-feature">admin</span>
 </div>
@@ -1254,7 +1364,7 @@ noLabel        String   <span class="hl-amber">// optional, default: "NO"</span>
 <div class="section" id="s10">
 <div class="section-header" onclick="toggleSection('s10')">
 <div class="section-title">
-<span class="section-num">11</span>
+<span class="section-num">12</span>
 <span class="section-label">Roles &amp; Permissions</span>
 <span class="section-tag tag-roles">auth</span>
 </div>
@@ -1345,7 +1455,7 @@ POST /api/admin/resolve/[id]     → trigger resolution (admin only, server-side
 <div class="section" id="s9">
 <div class="section-header" onclick="toggleSection('s9')">
 <div class="section-title">
-<span class="section-num">12</span>
+<span class="section-num">13</span>
 <span class="section-label">Realtime Updates</span>
 <span class="section-tag tag-stack">socket.io</span>
 </div>
@@ -1485,7 +1595,7 @@ Admins:  same as Trader but server also joins them to 'admin' room
 <div class="section" id="s18">
 <div class="section-header" onclick="toggleSection('s18')">
 <div class="section-title">
-<span class="section-num">13</span>
+<span class="section-num">14</span>
 <span class="section-label">Cron Job — Market Expiry</span>
 <span class="section-tag tag-stack">node-cron</span>
 </div>
@@ -1545,7 +1655,7 @@ cron.schedule('* * * * *', async () =&gt; {
 <div class="section" id="s7">
 <div class="section-header" onclick="toggleSection('s7')">
 <div class="section-title">
-<span class="section-num">14</span>
+<span class="section-num">15</span>
 <span class="section-label">UI / UX Guidelines</span>
 <span class="section-tag tag-ui">design</span>
 </div>
@@ -1572,7 +1682,7 @@ cron.schedule('* * * * *', async () =&gt; {
 <div class="section" id="s16">
 <div class="section-header" onclick="toggleSection('s16')">
 <div class="section-title">
-<span class="section-num">15</span>
+<span class="section-num">16</span>
 <span class="section-label">Frontend State Management</span>
 <span class="section-tag tag-stack">zustand</span>
 </div>
@@ -1627,7 +1737,7 @@ cron.schedule('* * * * *', async () =&gt; {
 <div class="section" id="s13">
 <div class="section-header" onclick="toggleSection('s13')">
 <div class="section-title">
-<span class="section-num">16</span>
+<span class="section-num">17</span>
 <span class="section-label">USDC Approval Flow</span>
 <span class="section-tag tag-contract">web3</span>
 </div>
@@ -1671,7 +1781,7 @@ usdc.approve(CONTRACT_ADDRESS, seedAmount)  <span class="hl-amber">// called in 
 <div class="section" id="s17">
 <div class="section-header" onclick="toggleSection('s17')">
 <div class="section-title">
-<span class="section-num">17</span>
+<span class="section-num">18</span>
 <span class="section-label">Environment Variables</span>
 <span class="section-tag tag-arch">config</span>
 </div>
@@ -1728,7 +1838,7 @@ NEXT_PUBLIC_SOCKET_URL="http://localhost:3000"
 <div class="section" id="s19">
 <div class="section-header" onclick="toggleSection('s19')">
 <div class="section-title">
-<span class="section-num">18</span>
+<span class="section-num">19</span>
 <span class="section-label">White Label Architecture</span>
 <span class="section-tag tag-arch">future / v2</span>
 </div>
@@ -1810,7 +1920,7 @@ TENANT_SUPPORT_URL="https://..."
 <div class="section" id="s11">
 <div class="section-header" onclick="toggleSection('s11')">
 <div class="section-title">
-<span class="section-num">19</span>
+<span class="section-num">20</span>
 <span class="section-label">Build Order</span>
 <span class="section-tag tag-arch">step-by-step</span>
 </div>
@@ -1837,7 +1947,7 @@ TENANT_SUPPORT_URL="https://..."
 <div class="section" id="s12">
 <div class="section-header" onclick="toggleSection('s12')">
 <div class="section-title">
-<span class="section-num">20</span>
+<span class="section-num">21</span>
 <span class="section-label">MVP Scope</span>
 <span class="section-tag tag-arch">in / out</span>
 </div>
@@ -1883,7 +1993,7 @@ TENANT_SUPPORT_URL="https://..."
 <div class="section" id="s21">
   <div class="section-header" onclick="toggleSection('s21')">
     <div class="section-title">
-      <span class="section-num">21</span>
+      <span class="section-num">22</span>
       <span class="section-label">Blockchain Developer Spec</span>
       <span class="section-tag tag-contract">solidity</span>
     </div>
@@ -1952,7 +2062,7 @@ networks: {
 <div class="section" id="s22">
   <div class="section-header" onclick="toggleSection('s22')">
     <div class="section-title">
-      <span class="section-num">22</span>
+      <span class="section-num">23</span>
       <span class="section-label">Backend Developer Spec</span>
       <span class="section-tag tag-db">node</span>
     </div>
@@ -2282,6 +2392,55 @@ Build an MVP prediction market web platform inspired by Polymarket. Users bet on
 
 ---
 
+## Project Structure
+
+Monorepo with npm workspaces — one git repository, three packages.
+
+prediction-market/
+├── package.json                  // root workspaces config + shared scripts
+├── .env.example
+├── README.md
+└── packages/
+    ├── contracts/                // Solidity + Hardhat
+    │   ├── contracts/
+    │   │   ├── AMMPricer.sol
+    │   │   ├── PredictionMarket.sol
+    │   │   └── MockUSDC.sol
+    │   ├── scripts/deploy.ts
+    │   ├── test/
+    │   └── artifacts/            // auto-generated ABIs after compile
+    ├── web/                      // Next.js 14 — frontend + backend + socket server
+    │   ├── server.ts             // custom server: Next.js + Socket.io + cron
+    │   ├── app/                  // Next.js App Router pages
+    │   ├── components/
+    │   ├── hooks/
+    │   ├── store/
+    │   ├── lib/
+    │   │   ├── wagmi.ts, socket.ts, prisma.ts
+    │   │   ├── eventListener.ts, cron.ts, constants.ts
+    │   │   └── abi/              // imports directly from packages/contracts/artifacts
+    │   └── prisma/schema.prisma
+    └── shared/                   // shared TypeScript types
+        └── types/
+            ├── market.ts         // Market, Trade, Category interfaces
+            └── socket.ts         // Socket event payload types (MarketTradeEvent, etc.)
+
+Root scripts: dev / compile / test / deploy / db:push / db:seed
+
+ABI sharing: after compile, packages/web/lib/abi/ imports directly from packages/contracts/artifacts/ — no manual copying.
+
+Shared types: socket event payload interfaces defined once in packages/shared/types/socket.ts, imported by both server (eventListener.ts) and client (hooks) — no drift between emit and receive shapes.
+
+Dev workflow:
+1. npm install         // installs all workspaces
+2. npm run compile     // compile contracts, generate ABIs
+3. npm run deploy      // deploy to testnet, copy addresses to .env
+4. npm run db:push     // push Prisma schema
+5. npm run db:seed     // seed categories + sample markets
+6. npm run dev         // start Next.js + Socket.io + cron
+
+---
+
 ## Smart Contracts
 
 Three contracts total: AMMPricer (library), PredictionMarket (main), MockUSDC (testnet).
@@ -2606,7 +2765,7 @@ Three roles exist in the system:
 
 ## Build Order
 
-1. Project setup — Next.js custom server.ts, Tailwind, wagmi + RainbowKit config
+1. Monorepo setup — init workspaces, install dependencies, configure TypeScript paths
 2. Smart contracts — AMMPricer.sol + MockUSDC.sol + PredictionMarket.sol, unit tests, deploy to testnet
 3. Database — Prisma schema (User + Market + Trade + Category), migrations, seed script
 4. Role system — useRole() hook, RoleGate component, auto-assign Trader on wallet connect
