@@ -717,7 +717,10 @@ function getPriceAfterBuy(yesPool, noPool, amount, isYes) {
 }
 </div>
 <div class="prompt-block" style="margin-top: 8px;"><button class="copy-btn" onclick="copyBlock(this)">copy</button><span class="hl-purple">// MockUSDC.sol</span>
-ERC20 with public mint() — anyone can mint for testnet testing
+ERC20 with public mint()
+
+<span class="hl-amber">// Note: yesLabel / noLabel are off-chain only (stored in DB, not in contract).</span>
+<span class="hl-amber">// Contract uses bool isYes internally. Frontend maps isYes → yesLabel/noLabel for display.</span> — anyone can mint for testnet testing
 
 <span class="hl-purple">// Contract architecture</span>
 AMMPricer.sol        ← pure library, no state, fully testable in isolation
@@ -992,51 +995,172 @@ Crypto · Politics · Sports · Science · Entertainment · Finance · World Eve
 <span class="chevron" id="chev-s4">▾</span>
 </div>
 <div class="section-body" id="body-s4">
-<div class="feature-list">
-<div class="feature-item">
-<div class="feature-dot dot-yes"></div>
-<div>
-<div class="feature-text">Wallet authentication (MetaMask, Coinbase Wallet via wagmi)</div>
-<div class="feature-note">/ — show address + balance in header</div>
-</div>
-</div>
-<div class="feature-item">
-<div class="feature-dot dot-yes"></div>
-<div>
-<div class="feature-text">Market listing page — grid of active markets with YES/NO odds, volume, end date, category</div>
-<div class="feature-note">/  — filter by category, sort by volume/date/new</div>
-</div>
-</div>
-<div class="feature-item">
-<div class="feature-dot dot-yes"></div>
-<div>
-<div class="feature-text">Market detail page — price history chart (Recharts), YES/NO trading panel, activity feed</div>
-<div class="feature-note">/market/[id]</div>
-</div>
-</div>
-<div class="feature-item">
-<div class="feature-dot dot-yes"></div>
-<div>
-<div class="feature-text">Trading panel — toggle YES/NO, amount input, estimated shares + potential payout, Buy button</div>
-<div class="feature-note">Calls buyShares() on-chain with pending/confirmed/error toasts</div>
-</div>
-</div>
-<div class="feature-item">
-<div class="feature-dot dot-yes"></div>
-<div>
-<div class="feature-text">Portfolio page — user positions, unrealized P&amp;L, claimWinnings button for resolved markets</div>
-<div class="feature-note">/portfolio</div>
-</div>
-</div>
-<div class="feature-item">
-<div class="feature-dot dot-yes"></div>
-<div>
-<div class="feature-text">Admin create market page — question, description, end date, category, initial liquidity</div>
-<div class="feature-note">/create — wallet address gated, calls createMarket() on-chain</div>
-</div>
-</div>
-</div>
-</div>
+    <div class="prompt-block"><button class="copy-btn" onclick="copyBlock(this)">copy</button><span class="hl-purple">// GLOBAL LAYOUT</span>
+All pages share a persistent Header:
+- Left: logo + platform name (from tenant.config)
+- Center: nav links — Markets / Portfolio (Trader+)
+- Right: wallet connect button (RainbowKit)
+         when connected: truncated address + USDC balance
+         Admin: "Admin ▾" dropdown → Create Market / Resolve / Categories
+         Badge on "Resolve" showing count of pending resolutions
+- Mobile: hamburger menu
+
+<span class="hl-purple">// ────────────────────────────────────</span>
+<span class="hl-purple">// PAGE 1 — Market Listing  (/)</span>
+<span class="hl-purple">// ────────────────────────────────────</span>
+
+<span class="hl-teal">// Layout</span>
+- Sticky category filter bar below header
+  Pills: "All" + one per category (icon + name), active pill highlighted
+- Sort controls right-aligned: Volume / New / Ending Soon
+- Market grid: 3 cols desktop / 2 tablet / 1 mobile
+- Empty state if no markets match filter
+
+<span class="hl-teal">// MarketCard</span>
+- Market image (48px square) or category emoji fallback
+- Question text (2-line clamp)
+- Category pill (small, colored)
+- YES / NO price bars:
+    [██████░░░░] YES 62%  NO 38%
+    labels use yesLabel / noLabel from DB
+- Volume ("Vol: $12,450"), time remaining ("3d 14h" / "Expired" / "Resolved")
+- Status badge: ACTIVE (green dot) / EXPIRED (gray) / RESOLVED (outcome color)
+- Full card clickable → /market/[id]
+- Realtime: price bars animate on market:trade socket event
+
+<span class="hl-purple">// ────────────────────────────────────</span>
+<span class="hl-purple">// PAGE 2 — Market Detail  (/market/[id])</span>
+<span class="hl-purple">// ────────────────────────────────────</span>
+
+<span class="hl-teal">// Layout — two column desktop, stacked mobile</span>
+Left (wider):
+  - Market image + question (h1)
+  - Description (collapsible if > 3 lines)
+  - Meta row: category · end date · total volume · liquidity
+  - PriceChart: Recharts LineChart, YES price over time
+      Time range tabs: 1D / 1W / 1M
+      Hover tooltip: price + timestamp
+  - ActivityFeed below chart:
+      "Recent Trades" — address (truncated) · YES/NO label · amount · shares · time ago
+      Live: new trades prepend with fade-in
+
+Right (narrower, sticky):
+  - TradingPanel (see below)
+  - Market info card: creator, end date (local + UTC), contract link to explorer
+
+<span class="hl-teal">// TradingPanel — ACTIVE market (Trader+)</span>
+- Toggle: [ YES ] [ NO ] (yesLabel / noLabel), selected highlighted green/red
+- Amount input (USDC) + MAX button
+- Live computed as user types:
+    "You receive: ~142 YES shares"
+    "Avg price: $0.42 per share"
+    "Potential payout: ~$338 if YES wins"
+- Price impact warning if > 5%: ⚠ "High price impact: 7.2%"
+- Button states:
+    Guest         → "Connect wallet to trade"
+    No allowance  → "Approve USDC" (step 1 of 2)
+    Ready         → "Buy YES" / "Buy NO"
+    Pending       → spinner + "Approving..." / "Buying..."
+    Confirmed     → green check + "Trade confirmed!"
+- Step indicator during approve: ① Approve USDC  →  ② Buy Shares
+
+<span class="hl-teal">// TradingPanel — EXPIRED market</span>
+- Panel replaced with gray banner: "Market closed · Awaiting resolution"
+- Final YES/NO percentages shown read-only
+
+<span class="hl-teal">// TradingPanel — RESOLVED market</span>
+- ResolutionBanner: "✓ YES wins" (green) or "✗ NO wins" (red)
+- User won  → "Claim $157.40" button
+- User lost → "You lost · NO position" (muted)
+- No position → claim section hidden
+
+<span class="hl-purple">// ────────────────────────────────────</span>
+<span class="hl-purple">// PAGE 3 — Portfolio  (/portfolio)</span>
+<span class="hl-purple">// ────────────────────────────────────</span>
+
+<span class="hl-teal">// Access: Trader+ — Guest redirected to / with toast</span>
+
+<span class="hl-teal">// Layout</span>
+- 3 summary metric cards:
+    "Open Positions" · "Unrealized P&amp;L" · "Claimable"
+- Tabs: Open / Resolved
+- Position rows:
+    image + question · YES/NO shares (with labels) · current price · P&amp;L (green/red)
+    ACTIVE       → no action
+    EXPIRED      → "Awaiting resolution"
+    RESOLVED won → "Claim $XX.XX" button
+    RESOLVED lost→ "Lost" (muted)
+- Empty state: "No positions yet · Browse markets →"
+
+<span class="hl-teal">// Claim flow</span>
+Click Claim → claimWinnings(marketId) tx
+Confirmed → row shows "Claimed ✓", Claimable card decrements
+
+<span class="hl-purple">// ────────────────────────────────────</span>
+<span class="hl-purple">// PAGE 4 — Create Market  (/create)</span>
+<span class="hl-purple">// ────────────────────────────────────</span>
+
+<span class="hl-teal">// Access: Admin only</span>
+
+<span class="hl-teal">// Layout — two column</span>
+Left: form (see section 20 for full field spec)
+  Grouped visually:
+  ① Market Info — question (char counter), description (char counter), category
+  ② Timing — endDate + endTime side by side, "Ends in X days" helper
+  ③ Liquidity — seedAmount, admin USDC balance shown, "Initial: YES 50% / NO 50%"
+  ④ Appearance — image upload (drag-drop + preview), yesLabel + noLabel side by side
+Right: live market card preview, updates as admin types
+
+<span class="hl-teal">// Submit states</span>
+Uploading image → "Uploading image..."
+Needs approval  → step indicator: ① Approve USDC → ② Create Market
+Approving       → "Approving USDC..." spinner
+Creating        → "Creating market..." spinner
+Done            → redirect /market/[newId] + toast "Market created!"
+Error           → inline error, button re-enabled
+
+<span class="hl-purple">// ────────────────────────────────────</span>
+<span class="hl-purple">// PAGE 5 — Admin Resolve  (/admin/resolve)</span>
+<span class="hl-purple">// ────────────────────────────────────</span>
+
+<span class="hl-teal">// Access: Admin only</span>
+
+<span class="hl-teal">// Layout</span>
+- Title "Pending Resolution" + count badge
+- Empty state: "All markets resolved ✓"
+- List sorted oldest-expired first:
+    image + question · "Expired 2h ago" · Volume · YES% / NO%
+    [ ✓ YES ] [ ✗ NO ] buttons (uses yesLabel / noLabel)
+
+<span class="hl-teal">// Resolve flow</span>
+Click outcome → ResolveModal:
+  "Resolve: [question]" · "Winner: YES · Cannot be undone"
+  [ Cancel ] [ Confirm &amp; Resolve ]
+Confirm → resolveMarket(marketId, outcome) tx
+Confirmed → row removed, toast "Market resolved · YES wins"
+            Socket emits market:resolved → all users see result instantly
+            Nav badge decrements
+
+<span class="hl-teal">// Realtime</span>
+useAdminSocket → on admin:resolve:pending → new row appears, badge increments
+
+<span class="hl-purple">// ────────────────────────────────────</span>
+<span class="hl-purple">// PAGE 6 — Admin Categories  (/admin/categories)</span>
+<span class="hl-purple">// ────────────────────────────────────</span>
+
+<span class="hl-teal">// Access: Admin only</span>
+
+<span class="hl-teal">// Layout</span>
+- Category list: icon · name · slug · market count · "Default" badge
+  Default rows: no delete button (protected)
+  Custom rows: delete button → confirm dialog
+    If category has markets: warn "X markets will move to Other"
+- Inline "Add Category" form below list:
+    emoji input · name · slug (auto-generated, editable)
+    [ Add ] button, inline validation (unique name/slug, max 30 chars)
+    On submit → row appears in list immediately</span>
+    </div>
+  </div>
 </div>
 
 <div class="section" id="s20">
@@ -1180,7 +1304,7 @@ noLabel        String   <span class="hl-amber">// optional, default: "NO"</span>
 </tbody>
 </table>
 <div class="prompt-block" style="margin-top: 1rem;"><button class="copy-btn" onclick="copyBlock(this)">copy</button><span class="hl-teal">// Role assignment logic</span>
-<span class="hl-purple">Guest</span>   → no wallet connected; can browse all markets (read-only)
+<span class="hl-purple">Guest</span>   (role: "GUEST") → no wallet connected; can browse all markets (read-only)
 <span class="hl-teal">Trader</span>  → any wallet that connects is automatically assigned Trader role
             stored in DB: User { address, role: "TRADER", createdAt }
 <span class="hl-purple">Admin</span>   → wallet address matches NEXT_PUBLIC_ADMIN_ADDRESS env var
@@ -1233,48 +1357,127 @@ Socket.io server runs alongside Next.js (custom server.ts).
 Contract event listener → emits Socket.io events → all connected
 clients receive updates and re-render without page refresh.
 
-<span class="hl-purple">Events emitted by server</span>
-market:trade     → { marketId, outcome, amount, shares, yesPrice, noPrice, trader }
-market:resolved  → { marketId, outcome }
-market:created   → { marketId, question, category, endDate }
-market:expired   → { marketId }
-admin:resolve:pending → { marketId, question, endDate }  <span class="hl-amber">// admin room only</span>
-<span class="hl-teal">// Client usage (React hook)</span>
-useMarketSocket(marketId) {
-  on('market:trade')    → update price chart + activity feed + pools
-  on('market:resolved') → show resolution banner + enable claim button
-  on('market:expired')  → lock trading panel, show "Awaiting resolution" badge
+<span class="hl-purple">// ─── EVENT PAYLOADS ───────────────────────────────────</span>
+<span class="hl-amber">// These are the exact objects emitted — frontend destructures these directly</span>
+
+<span class="hl-teal">market:trade</span>  <span class="hl-amber">// room: market:{id} + market:list</span>
+{
+  marketId:   string,      <span class="hl-amber">// for routing / store lookup</span>
+  trader:     string,      <span class="hl-amber">// wallet address (truncated in UI)</span>
+  isYes:      boolean,     <span class="hl-amber">// which side was bought</span>
+  outcomeLabel: string,    <span class="hl-amber">// yesLabel or noLabel — ready for display</span>
+  usdcAmount: number,      <span class="hl-amber">// USDC spent (for activity feed)</span>
+  shares:     number,      <span class="hl-amber">// shares received (for activity feed)</span>
+  yesPool:    number,      <span class="hl-amber">// new pool state after trade</span>
+  noPool:     number,
+  yesPrice:   number,      <span class="hl-amber">// 0–1, e.g. 0.62 — frontend multiplies by 100 for %</span>
+  noPrice:    number,      <span class="hl-amber">// 0–1, always yesPrice + noPrice = 1</span>
+  volume:     number,      <span class="hl-amber">// updated total volume for this market</span>
+  timestamp:  string,      <span class="hl-amber">// ISO string — for activity feed "time ago"</span>
 }
 
-useMarketListSocket() {
-  on('market:trade')   → update odds % on listing cards
-  on('market:created') → prepend new market card to grid
-  on('market:expired') → update card status badge to "Expired"
+<span class="hl-teal">market:resolved</span>  <span class="hl-amber">// room: market:{id}</span>
+{
+  marketId:      string,
+  outcome:       boolean,  <span class="hl-amber">// true = YES won, false = NO won</span>
+  outcomeLabel:  string,   <span class="hl-amber">// winning label, e.g. "Lakers" — ready for display</span>
+  totalPool:     number,   <span class="hl-amber">// final pool for payout calculations</span>
+  resolvedAt:    string,   <span class="hl-amber">// ISO string</span>
 }
 
-useAdminSocket() {  <span class="hl-amber">// admin only</span>
-  on('admin:resolve:pending') → increment pending resolution counter in admin nav
+<span class="hl-teal">market:created</span>  <span class="hl-amber">// room: market:list</span>
+{
+  marketId:    string,
+  question:    string,
+  description: string,
+  category:    { id: string, name: string, slug: string, icon: string },
+  endDate:     string,     <span class="hl-amber">// ISO string</span>
+  yesLabel:    string,
+  noLabel:     string,
+  imageUrl:    string | null,
+  yesPrice:    number,     <span class="hl-amber">// 0.5 always on creation</span>
+  noPrice:     number,     <span class="hl-amber">// 0.5 always on creation</span>
+  yesPool:     number,
+  noPool:      number,
+  volume:      number,     <span class="hl-amber">// 0 on creation</span>
+  status:      "ACTIVE",
+  createdAt:   string,
 }
 
-<span class="hl-amber">// Flow — trade</span>
-1. User submits trade tx → tx confirmed on-chain
-2. Event listener detects SharesBought event
-3. Updates DB (trade record, pool sizes)
-4. Emits market:trade via Socket.io to room market:{id}
-5. All clients in that room update UI instantly
+<span class="hl-teal">market:expired</span>  <span class="hl-amber">// room: market:{id} + market:list</span>
+{
+  marketId: string,
+  expiredAt: string,       <span class="hl-amber">// ISO string — for "Expired X ago" display</span>
+}
 
-<span class="hl-amber">// Flow — market expiry</span>
-1. Cron job runs every minute, checks markets WHERE endDate &lt;= now AND status = "ACTIVE"
-2. For each expired market: update DB status → "EXPIRED"
-3. Emit market:expired to room market:{id} → clients lock trading panel
-4. Emit market:expired to room market:list → listing cards update badge
-5. Emit admin:resolve:pending to room admin → admin sees notification
+<span class="hl-teal">admin:resolve:pending</span>  <span class="hl-amber">// room: admin only</span>
+{
+  marketId:   string,
+  question:   string,
+  endDate:    string,      <span class="hl-amber">// ISO string</span>
+  yesPool:    number,
+  noPool:     number,
+  yesPrice:   number,
+  noPrice:    number,
+  yesLabel:   string,
+  noLabel:    string,
+  volume:     number,
+  imageUrl:   string | null,
+}
 
-<span class="hl-teal">// Rooms</span>
-- Each market detail page joins room: market:{marketId}
-- Listing page joins room: market:list
-- Admin panel joins room: admin (verified by wallet address)
-- Socket auth: verify wallet signature for Trader/Admin rooms
+<span class="hl-purple">// ─── CLIENT HOOKS ─────────────────────────────────────</span>
+
+<span class="hl-teal">useMarketSocket(marketId)</span>  <span class="hl-amber">// used on /market/[id]</span>
+on('market:trade') →
+  - prepend to ActivityFeed: { trader, outcomeLabel, usdcAmount, shares, timestamp }
+  - update TradingPanel pools: yesPool, noPool
+  - update PriceChart: add new data point { yesPrice, timestamp }
+  - update meta row volume
+
+on('market:resolved') →
+  - show ResolutionBanner with outcomeLabel
+  - replace TradingPanel with claim UI
+  - refetch user's portfolio positions for claim amount
+
+on('market:expired') →
+  - replace TradingPanel with "Awaiting resolution" banner
+  - update status badge
+
+<span class="hl-teal">useMarketListSocket()</span>  <span class="hl-amber">// used on /</span>
+on('market:trade') →
+  - find card by marketId in store
+  - update yesPrice, noPrice, volume on that card
+  - animate price bar transition
+
+on('market:created') →
+  - prepend full market object to grid
+  - animate card fade-in
+
+on('market:expired') →
+  - find card by marketId
+  - update status badge to "Expired"
+  - disable card click? No — still navigable, shows expired state
+
+<span class="hl-teal">useAdminSocket()</span>  <span class="hl-amber">// used on all admin pages</span>
+on('market:created') →
+  - prepend new market card to grid (payload includes yesLabel, noLabel, imageUrl — no extra fetch needed)
+  - animate card fade-in
+
+on('admin:resolve:pending') →
+  - increment pendingCount in adminStore
+  - if on /admin/resolve page: append new row to list
+  - payload has all fields needed to render the row: marketId, question, endDate, yesLabel, noLabel, yesPrice, noPrice, volume, imageUrl
+
+<span class="hl-purple">// ─── ROOMS ────────────────────────────────────────────</span>
+market:{marketId}  → joined by /market/[id] page on mount, left on unmount
+market:list        → joined by / (listing) on mount, left on unmount
+admin              → joined by Header on mount if role === ADMIN (persists across pages)
+
+<span class="hl-purple">// ─── AUTH ─────────────────────────────────────────────</span>
+Guests:  connect without auth, joined to public rooms only
+Traders: connect with { address, signature, message }
+         verified server-side → joined to market rooms
+Admins:  same as Trader but server also joins them to 'admin' room
 </div>
 </div>
 </div>
@@ -1493,6 +1696,15 @@ NEXT_PUBLIC_RPC_URL="https://polygon-mumbai.g.alchemy.com/v2/YOUR_KEY"
 NEXT_PUBLIC_ADMIN_ADDRESS="0x..."     <span class="hl-amber"># wallet address that gets Admin role</span>
 <span class="hl-purple"># Socket.io</span>
 NEXT_PUBLIC_SOCKET_URL="http://localhost:3000"  <span class="hl-amber"># prod: your domain</span>
+
+<span class="hl-purple"># White label / Tenant branding (see section 18)</span>
+TENANT_NAME="PredictX"
+TENANT_LOGO_URL="https://..."
+TENANT_FAVICON_URL="https://..."
+TENANT_PRIMARY="#7b6fff"      <span class="hl-amber"># primary accent color</span>
+TENANT_YES_COLOR="#22c55e"    <span class="hl-amber"># YES outcome color</span>
+TENANT_NO_COLOR="#ef4444"     <span class="hl-amber"># NO outcome color</span>
+TENANT_SUPPORT_URL="https://..."
 <span class="hl-teal">// lib/constants.ts — import these in code, never use raw env vars</span>
 export const CONTRACT_ADDRESS = process.env.NEXT_PUBLIC_CONTRACT_ADDRESS!;
 export const USDC_ADDRESS     = process.env.NEXT_PUBLIC_USDC_ADDRESS!;
@@ -1607,7 +1819,7 @@ TENANT_SUPPORT_URL="https://..."
 <div class="section-body" id="body-s11">
 <div class="step-list">
 <div class="step-item"><span class="step-n">01</span><span class="step-text">Project setup — Next.js custom server.ts, Tailwind, wagmi + RainbowKit config</span></div>
-<div class="step-item"><span class="step-n">02</span><span class="step-text">Smart contracts — MockUSDC.sol + PredictionMarket.sol, unit tests, deploy to testnet</span></div>
+<div class="step-item"><span class="step-n">02</span><span class="step-text">Smart contracts — AMMPricer.sol + MockUSDC.sol + PredictionMarket.sol, unit tests, deploy to testnet</span></div>
 <div class="step-item"><span class="step-n">03</span><span class="step-text">Database — Prisma schema (User + Market + Trade + Category), migrations, seed script</span></div>
 <div class="step-item"><span class="step-n">04</span><span class="step-text">Role system — useRole() hook, RoleGate component, auto-assign Trader on wallet connect</span></div>
 <div class="step-item"><span class="step-n">05</span><span class="step-text">API routes — markets CRUD + trades + portfolio + admin categories + admin resolve</span></div>
@@ -1825,7 +2037,13 @@ On <span class="hl-teal">MarketResolved</span>:
 
 On <span class="hl-teal">MarketCreated</span>:
   1. Market metadata already saved by /create API — just emit socket event
-  2. io.to('market:list').emit('market:created', { marketId, question, category, endDate })
+  2. io.to('market:list').emit('market:created', { marketId, question, category, endDate }
+
+<span class="hl-amber">// Cron job emits these (not contract events):</span>
+On market expired:
+  io.to(`market:${market.id}`).emit('market:expired', { marketId, expiredAt: new Date().toISOString() })
+  io.to('market:list').emit('market:expired', { marketId, expiredAt })
+  io.to('admin').emit('admin:resolve:pending', { marketId, question, endDate, yesPool, noPool, yesPrice, noPrice, yesLabel, noLabel, volume, imageUrl }))
 
 <span class="hl-purple">// Socket.io auth middleware</span>
 io.use((socket, next) => {
@@ -2123,29 +2341,31 @@ function getPriceAfterBuy(yesPool, noPool, amount, isYes) {
 
 ## Pages & Features
 
-### Authentication
-- Web3 wallet connect (MetaMask, Coinbase Wallet via wagmi)
-- Display wallet address + balance in header
+### Global layout
+Persistent header: logo + nav (Markets / Portfolio) + wallet connect button. Admin sees dropdown: Create Market / Resolve / Categories. Badge on Resolve shows pending count. Mobile: hamburger menu.
 
-### Market listing (/)
-- Grid of active markets: question, YES/NO %, volume, end date, category
-- Filter by category, sort by volume / date / new
+### Page 1 — Market Listing (/)
+Sticky category filter pills (All + per category). Sort: Volume / New / Ending Soon. Responsive market grid (3/2/1 cols).
+MarketCard: image/emoji · question (2-line clamp) · category pill · YES/NO price bars with yesLabel/noLabel · volume · time remaining · status badge. Full card clickable. Price bars animate on socket trade event.
 
-### Market detail (/market/[id])
-- Price history chart (Recharts, time-range: 1D/1W/1M)
-- YES/NO trading panel: toggle outcome, amount input, estimated shares + payout, Buy button
-- Activity feed (recent trades)
-- Market info: creator, end date, resolution source, liquidity
+### Page 2 — Market Detail (/market/[id])
+Two-column layout (stacked mobile). Left: question, description (collapsible), meta row, PriceChart (Recharts, 1D/1W/1M tabs, hover tooltip), ActivityFeed (last 50 trades, live prepend). Right sticky: TradingPanel + market info card.
 
-### Portfolio (/portfolio)
-- All user positions (YES/NO shares per market)
-- Unrealized P&L
-- Claim winnings button for resolved markets
+TradingPanel — ACTIVE: YES/NO toggle (yesLabel/noLabel), USDC amount input + MAX, live preview of shares/price/payout, price impact warning >5%. Button states: Guest=connect prompt / no allowance=Approve USDC / ready=Buy YES|NO / pending=spinner / confirmed=checkmark. Step indicator during approve flow.
+TradingPanel — EXPIRED: gray banner "Market closed · Awaiting resolution", read-only prices.
+TradingPanel — RESOLVED: ResolutionBanner with outcome, Claim button if user won, lost message if lost.
 
-### Admin create (/create)
-- Form: question, description, end date, category, initial liquidity
-- Wallet-address gated (admin only)
-- Calls createMarket() on-chain
+### Page 3 — Portfolio (/portfolio)
+Trader+ only (Guest redirected). 3 summary cards: Open Positions / Unrealized P&L / Claimable. Tabs: Open / Resolved. Position rows show shares, labels, price, P&L, and status-appropriate action (nothing / awaiting / claim button / lost). Claim triggers claimWinnings() tx.
+
+### Page 4 — Create Market (/create)
+Admin only. Two-column: form left, live market card preview right (updates as admin types). Form grouped: ① Market Info (question+counter, description+counter, category) ② Timing (endDate+endTime, "Ends in X days") ③ Liquidity (seedAmount, balance shown, 50/50 preview) ④ Appearance (image upload drag-drop, yesLabel+noLabel side by side). Submit states: uploading → approving → creating → redirect to new market.
+
+### Page 5 — Admin Resolve (/admin/resolve)
+Admin only. List of expired unresolved markets sorted oldest first. Each row: image, question, "Expired Xh ago", volume, YES%/NO%. Resolve buttons (yesLabel/noLabel) open confirmation modal. On confirm: resolveMarket() tx → row removed → socket emits market:resolved → all users update instantly. Realtime: new rows appear via admin:resolve:pending socket event.
+
+### Page 6 — Admin Categories (/admin/categories)
+Admin only. Category list: icon, name, slug, market count, Default badge. Default categories: no delete. Custom: delete with confirmation (warns if markets exist → moves to Other). Inline add form: emoji + name + slug (auto-generated) + Add button with inline validation.
 
 ---
 
@@ -2269,37 +2489,79 @@ Blockchain is the single source of truth. ALL market data lives on-chain permane
 
 Socket.io server runs alongside Next.js via a custom server.ts. The contract event listener emits Socket.io events to all connected clients, who re-render without page refresh.
 
-### Events emitted by server
-- market:trade    → { marketId, outcome, amount, shares, yesPrice, noPrice, trader }
-- market:resolved → { marketId, outcome }
-- market:created  → { marketId, question, category, endDate }
-- market:expired  → { marketId }
-- admin:resolve:pending → { marketId, question, endDate }  // admin room only
+### Event payloads (exact shapes — frontend destructures these directly)
+
+market:trade  // room: market:{id} AND market:list
+{
+  marketId, trader,          // string — wallet address
+  isYes,                     // boolean — which side was bought
+  outcomeLabel,              // string — yesLabel or noLabel, ready for display
+  usdcAmount, shares,        // number — for activity feed
+  yesPool, noPool,           // number — new pool state after trade
+  yesPrice, noPrice,         // number 0-1, always sum to 1.0
+  volume,                    // number — updated total volume
+  timestamp,                 // ISO string — for "time ago" display
+}
+
+market:resolved  // room: market:{id}
+{
+  marketId,
+  outcome,       // boolean — true = YES won
+  outcomeLabel,  // string — winning label ready for display
+  totalPool,     // number — final pool for payout calculation
+  resolvedAt,    // ISO string
+}
+
+market:created  // room: market:list
+{
+  marketId, question, description,
+  category: { id, name, slug, icon },
+  endDate,                   // ISO string
+  yesLabel, noLabel,
+  imageUrl,                  // string | null
+  yesPrice, noPrice,         // 0.5 on creation (always 1:1 seed)
+  yesPool, noPool, volume,   // volume = 0 on creation
+  status: "ACTIVE",
+  createdAt,                 // ISO string
+}
+
+market:expired  // room: market:{id} AND market:list
+{
+  marketId,
+  expiredAt,   // ISO string — for "Expired X ago" display
+}
+
+admin:resolve:pending  // room: admin only
+{
+  marketId, question, endDate,
+  yesPool, noPool, yesPrice, noPrice,
+  yesLabel, noLabel, volume, imageUrl,
+}
 
 ### Client hooks
-- useMarketSocket(marketId): on market:trade → update chart + activity feed + pools; on market:resolved → show resolution banner + enable claim button; on market:expired → lock trading panel, show "Awaiting resolution" badge
-- useMarketListSocket(): on market:trade → update odds % on listing cards; on market:created → prepend new card to grid; on market:expired → update card status badge
-- useAdminSocket(): on admin:resolve:pending → increment pending counter in admin nav
 
-### Flow — trade
-1. User submits trade tx → confirmed on-chain
-2. Event listener detects SharesBought event
-3. Updates DB (trade record + pool sizes)
-4. Emits market:trade to Socket.io room market:{id}
-5. All clients in that room update UI instantly
+useMarketSocket(marketId) — /market/[id] page
+  market:trade    → prepend ActivityFeed row, update pools + chart data point + volume
+  market:resolved → show ResolutionBanner, replace TradingPanel, refetch claim amount
+  market:expired  → replace TradingPanel with "Awaiting resolution" banner
 
-### Flow — market expiry
-1. Cron job runs every minute, checks markets WHERE endDate <= now AND status = "ACTIVE"
-2. For each expired market: update DB status → "EXPIRED"
-3. Emit market:expired to room market:{id} → clients lock trading panel
-4. Emit market:expired to room market:list → listing cards update badge
-5. Emit admin:resolve:pending to room admin → admin sees notification
+useMarketListSocket() — / listing page
+  market:trade    → find card by marketId, update yesPrice/noPrice/volume, animate bar
+  market:created  → prepend full market object to grid with fade-in
+  market:expired  → find card by marketId, update status badge to "Expired"
+
+useAdminSocket() — all admin pages (Header level)
+  admin:resolve:pending → increment adminStore.pendingCount, append row if on /admin/resolve
 
 ### Rooms
-- Market detail page joins room: market:{marketId}
-- Listing page joins room: market:list
-- Admin panel joins room: admin (verified by wallet address)
-- Socket auth: verify wallet signature for Trader/Admin rooms
+market:{marketId}  → joined on /market/[id] mount, left on unmount
+market:list        → joined on / mount, left on unmount
+admin              → joined by Header when role === ADMIN, persists across all pages
+
+### Auth
+Guests:  connect without auth — public rooms only
+Traders: connect with { address, signature, message: "Connect to PredictX" } — market rooms
+Admins:  same as Trader, server additionally joins them to "admin" room
 
 ---
 
@@ -2345,7 +2607,7 @@ Three roles exist in the system:
 ## Build Order
 
 1. Project setup — Next.js custom server.ts, Tailwind, wagmi + RainbowKit config
-2. Smart contracts — MockUSDC.sol + PredictionMarket.sol, unit tests, deploy to testnet
+2. Smart contracts — AMMPricer.sol + MockUSDC.sol + PredictionMarket.sol, unit tests, deploy to testnet
 3. Database — Prisma schema (User + Market + Trade + Category), migrations, seed script
 4. Role system — useRole() hook, RoleGate component, auto-assign Trader on wallet connect
 5. API routes — markets CRUD + trades + portfolio + admin categories + admin resolve
@@ -2461,6 +2723,13 @@ NEXT_PUBLIC_CHAIN_ID="80001"
 NEXT_PUBLIC_RPC_URL="https://polygon-mumbai.g.alchemy.com/v2/YOUR_KEY"
 NEXT_PUBLIC_ADMIN_ADDRESS="0x..."
 NEXT_PUBLIC_SOCKET_URL="http://localhost:3000"
+TENANT_NAME="PredictX"
+TENANT_LOGO_URL="https://..."
+TENANT_FAVICON_URL="https://..."
+TENANT_PRIMARY="#7b6fff"
+TENANT_YES_COLOR="#22c55e"
+TENANT_NO_COLOR="#ef4444"
+TENANT_SUPPORT_URL="https://..."
 
 Commit .env.example with placeholder values.
 All env vars accessed via lib/constants.ts — never use raw process.env in components.
