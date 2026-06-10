@@ -1,0 +1,22 @@
+node_modules
+**/node_modules
+.git
+.next
+**/.next
+packages/contracts/artifacts
+packages/contracts/cache
+packages/contracts/typechain-types
+**/*.tsbuildinfo
+
+# never bake secrets or local-only state into the image
+.env
+.env.*
+**/.env
+**/.env.*
+deployments.json
+**/deployments.json
+packages/web/public/uploads
+
+.DS_Store
+*.log
+npm-debug.log*

@@ -1,0 +1,54 @@
+{
+  "name": "@predictx/web",
+  "version": "0.1.0",
+  "private": true,
+  "description": "PredictX web app — Next.js 14 frontend + Socket.io server + cron + event listener",
+  "scripts": {
+    "dev": "cross-env NODE_ENV=development tsx watch --clear-screen=false server.ts",
+    "build": "next build",
+    "start": "cross-env NODE_ENV=production tsx server.ts",
+    "lint": "next lint",
+    "typecheck": "tsc --noEmit",
+    "db:push": "prisma db push",
+    "db:generate": "prisma generate",
+    "db:seed": "tsx prisma/seed.ts",
+    "db:studio": "prisma studio"
+  },
+  "prisma": {
+    "seed": "tsx prisma/seed.ts"
+  },
+  "dependencies": {
+    "@predictx/shared": "*",
+    "@prisma/client": "^5.18.0",
+    "@rainbow-me/rainbowkit": "^2.1.5",
+    "@tanstack/react-query": "^5.51.21",
+    "clsx": "^2.1.1",
+    "ethers": "^6.13.2",
+    "next": "^14.2.5",
+    "node-cron": "^3.0.3",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "recharts": "^2.12.7",
+    "sharp": "^0.33.4",
+    "socket.io": "^4.7.5",
+    "socket.io-client": "^4.7.5",
+    "viem": "^2.19.4",
+    "wagmi": "^2.12.5",
+    "zustand": "^4.5.4"
+  },
+  "devDependencies": {
+    "@types/node": "^20.14.15",
+    "@types/node-cron": "^3.0.11",
+    "@types/react": "^18.3.3",
+    "@types/react-dom": "^18.3.0",
+    "autoprefixer": "^10.4.20",
+    "cross-env": "^7.0.3",
+    "eslint": "^8.57.0",
+    "eslint-config-next": "^14.2.5",
+    "postcss": "^8.4.41",
+    "prisma": "^5.18.0",
+    "tailwindcss": "^3.4.10",
+    "tsx": "^4.17.0",
+    "typescript": "^5.5.4"
+  }
+}

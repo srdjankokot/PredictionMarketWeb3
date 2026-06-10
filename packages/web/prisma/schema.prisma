@@ -1,0 +1,72 @@
+// PredictX off-chain cache. The blockchain is the source of truth; this DB
+// mirrors chain state for fast queries/filtering/sorting and can be fully
+// rebuilt by replaying contract events.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  address   String   @id // wallet address (lowercased)
+  role      String   @default("TRADER") // "TRADER" | "ADMIN"
+  createdAt DateTime @default(now())
+  trades    Trade[]
+}
+
+model Category {
+  id        String   @id @default(cuid())
+  name      String   @unique // e.g. "Crypto"
+  slug      String   @unique // e.g. "crypto"
+  icon      String // emoji or icon name
+  isDefault Boolean  @default(false)
+  createdAt DateTime @default(now())
+  markets   Market[]
+}
+
+model Market {
+  id          String   @id // off-chain id (we use String(contractId))
+  contractId  Int      @unique // on-chain market ID
+  question    String
+  description String
+  categoryId  String
+  category    Category @relation(fields: [categoryId], references: [id])
+  endDate     DateTime
+  resolved    Boolean  @default(false)
+  outcome     String? // "YES" | "NO" | null
+  status      String   @default("ACTIVE") // "ACTIVE" | "EXPIRED" | "RESOLVED"
+  imageUrl    String? // optional, cloud storage URL
+  yesLabel    String   @default("YES") // max 20 chars
+  noLabel     String   @default("NO") // max 20 chars
+  // Cached chain state (human USDC), updated by the event listener on each trade.
+  // Prices are derived from the pools; not the source of truth (chain is).
+  yesPool     Float    @default(0)
+  noPool      Float    @default(0)
+  volume      Float    @default(0)
+  createdAt   DateTime @default(now())
+  trades      Trade[]
+
+  @@index([status])
+  @@index([categoryId])
+  @@index([endDate])
+}
+
+model Trade {
+  id        String   @id @default(cuid())
+  marketId  String
+  market    Market   @relation(fields: [marketId], references: [id])
+  trader    String // wallet address (lowercased)
+  user      User?    @relation(fields: [trader], references: [address])
+  outcome   String // "YES" | "NO"
+  amount    Float // USDC (human units)
+  shares    Float
+  txHash    String   @unique // ensures idempotent event replay
+  createdAt DateTime @default(now())
+
+  @@index([marketId])
+  @@index([trader])
+}

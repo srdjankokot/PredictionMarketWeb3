@@ -2480,6 +2480,59 @@ function RoleGate({ role, children }) {
 <span class="hl-amber">// Usage: &lt;RoleGate role="TRADER"&gt;&lt;TradingPanel /&gt;&lt;/RoleGate&gt;</span>
 <span class="hl-amber">//        &lt;RoleGate role="ADMIN"&gt;&lt;AdminNav /&gt;&lt;/RoleGate&gt;</span></span>
     </div>
+    <div class="prompt-block" style="margin-top: 8px;"><button class="copy-btn" onclick="copyBlock(this)">copy</button><span class="hl-purple">// Wallet reconnect — never open modal automatically</span>
+<span class="hl-amber">// wagmi v2 reconnects from localStorage on mount via the injected/WalletConnect connector.</span>
+<span class="hl-amber">// During that process isReconnecting=true. Treat it as a loading state, not "not connected".</span>
+<span class="hl-amber">// NEVER call openConnectModal() inside a useEffect — it fires on every page load/refresh.</span>
+
+<span class="hl-teal">// lib/wagmi.ts — storage connector enables silent reconnect</span>
+import { createConfig, http } from 'wagmi'
+import { injected, walletConnect } from 'wagmi/connectors'
+
+export const config = createConfig({
+  chains: [chain],
+  connectors: [injected(), walletConnect({ projectId: WC_PROJECT_ID })],
+  transports: { [chain.id]: http(RPC_URL) },
+  <span class="hl-amber">// wagmi v2 persists last connector to localStorage automatically</span>
+  <span class="hl-amber">// and retries on mount — no extra config needed</span>
+})
+
+<span class="hl-teal">// hooks/useRole.ts — always check isReconnecting before acting on isConnected</span>
+function useRole() {
+  const { address, isConnected, isReconnecting } = useAccount()
+
+  if (isReconnecting) return { role: 'GUEST', isLoading: true }
+  if (!isConnected || !address) return { role: 'GUEST', isLoading: false }
+
+  const isAdmin = address.toLowerCase() === process.env.NEXT_PUBLIC_ADMIN_ADDRESS?.toLowerCase()
+  return { role: isAdmin ? 'ADMIN' : 'TRADER', isLoading: false }
+}
+
+<span class="hl-teal">// components/layout/RoleGate.tsx — wait for reconnect before rendering</span>
+function RoleGate({ role, children }) {
+  const { role: userRole, isLoading } = useRole()
+  const hierarchy = { GUEST: 0, TRADER: 1, ADMIN: 2 }
+
+  if (isLoading) return null  <span class="hl-amber">// wagmi still reconnecting — render nothing, not guest view</span>
+  if (hierarchy[userRole] &lt; hierarchy[role]) return null
+  return children
+}
+
+<span class="hl-teal">// components/layout/Header.tsx — connect button only, no auto-open</span>
+function Header() {
+  const { isConnected, isReconnecting } = useAccount()
+  <span class="hl-amber">// Do NOT: useEffect(() => { if (!isConnected) openConnectModal?.() }, [])</span>
+  <span class="hl-amber">// ConnectButton renders a button the user clicks — that's it</span>
+  return (
+    &lt;header&gt;
+      &lt;ConnectButton /&gt;  <span class="hl-amber">// RainbowKit — handles all connect/disconnect UI</span>
+    &lt;/header&gt;
+  )
+}
+
+<span class="hl-amber">// Rule: isReconnecting must be checked anywhere isConnected drives UI or routing decisions.</span>
+<span class="hl-amber">// A component that redirects or hides content based on isConnected must guard with isReconnecting first.</span></span>
+    </div>
   </div>
 </div>
 
@@ -3286,7 +3339,46 @@ Usage: <RoleGate role="TRADER"><TradingPanel /></RoleGate>
 ### Unclaimed winnings notification
 On wallet connect: fetch GET /api/portfolio/[address], check if any positions have claimable=true.
 If yes → show persistent toast or banner: "You have unclaimed winnings — go to Portfolio"
-This runs once per session on connect, not on every page load.`;
+This runs once per session on connect, not on every page load.
+
+---
+
+### Wallet Reconnect — never open modal automatically
+
+wagmi v2 reconnects from localStorage on mount via the injected/WalletConnect connector.
+During that process isReconnecting=true. Treat it as a loading state, not "not connected".
+NEVER call openConnectModal() inside a useEffect — it fires on every page load/refresh.
+
+lib/wagmi.ts — storage connector enables silent reconnect:
+createConfig({
+  connectors: [injected(), walletConnect({ projectId: WC_PROJECT_ID })],
+  // wagmi v2 persists last connector to localStorage automatically and retries on mount
+})
+
+hooks/useRole.ts — always check isReconnecting before acting on isConnected:
+function useRole() {
+  const { address, isConnected, isReconnecting } = useAccount()
+  if (isReconnecting) return { role: 'GUEST', isLoading: true }
+  if (!isConnected || !address) return { role: 'GUEST', isLoading: false }
+  const isAdmin = address.toLowerCase() === process.env.NEXT_PUBLIC_ADMIN_ADDRESS?.toLowerCase()
+  return { role: isAdmin ? 'ADMIN' : 'TRADER', isLoading: false }
+}
+
+RoleGate.tsx — wait for reconnect before rendering:
+function RoleGate({ role, children }) {
+  const { role: userRole, isLoading } = useRole()
+  const hierarchy = { GUEST: 0, TRADER: 1, ADMIN: 2 }
+  if (isLoading) return null  // wagmi still reconnecting — render nothing, not guest view
+  if (hierarchy[userRole] < hierarchy[role]) return null
+  return children
+}
+
+Header.tsx — connect button only, no auto-open:
+// Do NOT: useEffect(() => { if (!isConnected) openConnectModal?.() }, [])
+// ConnectButton renders a button the user clicks — that's it
+
+Rule: isReconnecting must be checked anywhere isConnected drives UI or routing decisions.
+A component that redirects or hides content based on isConnected must guard with isReconnecting first.`;
 
   function copyAll() {
     navigator.clipboard.writeText(fullPrompt).then(() => {

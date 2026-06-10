@@ -1,0 +1,41 @@
+# dependencies
+node_modules/
+.pnp
+.pnp.js
+
+# env
+.env
+.env.local
+.env*.local
+
+# contracts (generated)
+packages/contracts/artifacts/
+packages/contracts/cache/
+packages/contracts/typechain-types/
+packages/contracts/coverage/
+packages/contracts/coverage.json
+deployments.json
+deployments.*.json
+
+# next.js
+packages/web/.next/
+packages/web/out/
+packages/web/next-env.d.ts
+packages/web/tsconfig.tsbuildinfo
+
+# prisma local sqlite (if used)
+packages/web/prisma/*.db
+packages/web/prisma/*.db-journal
+
+# uploads (local fallback storage)
+packages/web/public/uploads/
+
+# misc
+.DS_Store
+*.log
+npm-debug.log*
+yarn-error.log*
+coverage/
+.idea/
+.vscode/
+*.tsbuildinfo

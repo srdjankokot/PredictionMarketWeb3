@@ -1,0 +1,26 @@
+{
+  "name": "predictx",
+  "version": "0.1.0",
+  "private": true,
+  "description": "PredictX — a Polymarket-style prediction market MVP (npm workspaces monorepo)",
+  "engines": {
+    "node": ">=18",
+    "npm": ">=9"
+  },
+  "workspaces": [
+    "packages/shared",
+    "packages/contracts",
+    "packages/web"
+  ],
+  "scripts": {
+    "compile": "npm run compile --workspace packages/contracts",
+    "test": "npm run test --workspace packages/contracts",
+    "deploy": "npm run deploy --workspace packages/contracts",
+    "db:push": "npm run db:push --workspace packages/web",
+    "db:seed": "npm run db:seed --workspace packages/web",
+    "dev": "npm run dev --workspace packages/web",
+    "build": "npm run build --workspace packages/web",
+    "start": "npm run start --workspace packages/web",
+    "lint": "npm run lint --workspace packages/web"
+  }
+}

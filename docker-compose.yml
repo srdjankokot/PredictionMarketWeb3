@@ -1,0 +1,54 @@
+# Self-contained VPS deploy: Postgres + the PredictX app in one stack.
+# Put the vars below in a `.env` file next to this one, then:  docker compose up -d --build
+services:
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: predictx
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-predictx}
+      POSTGRES_DB: predictx
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U predictx']
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  app:
+    build:
+      context: .
+      args:
+        NEXT_PUBLIC_CONTRACT_ADDRESS: ${NEXT_PUBLIC_CONTRACT_ADDRESS}
+        NEXT_PUBLIC_USDC_ADDRESS: ${NEXT_PUBLIC_USDC_ADDRESS}
+        NEXT_PUBLIC_CHAIN_ID: ${NEXT_PUBLIC_CHAIN_ID}
+        NEXT_PUBLIC_RPC_URL: ${NEXT_PUBLIC_RPC_URL}
+        NEXT_PUBLIC_ADMIN_ADDRESS: ${NEXT_PUBLIC_ADMIN_ADDRESS}
+        NEXT_PUBLIC_SOCKET_URL: ${NEXT_PUBLIC_SOCKET_URL}
+        NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID: ${NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID}
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: postgresql://predictx:${POSTGRES_PASSWORD:-predictx}@db:5432/predictx
+      RPC_URL: ${RPC_URL}
+      DEPLOYER_PRIVATE_KEY: ${DEPLOYER_PRIVATE_KEY}
+      TREASURY_ADDRESS: ${TREASURY_ADDRESS}
+      FEE_BPS: ${FEE_BPS:-100}
+      NEXT_PUBLIC_CONTRACT_ADDRESS: ${NEXT_PUBLIC_CONTRACT_ADDRESS}
+      NEXT_PUBLIC_USDC_ADDRESS: ${NEXT_PUBLIC_USDC_ADDRESS}
+      NEXT_PUBLIC_CHAIN_ID: ${NEXT_PUBLIC_CHAIN_ID}
+      NEXT_PUBLIC_RPC_URL: ${NEXT_PUBLIC_RPC_URL}
+      NEXT_PUBLIC_ADMIN_ADDRESS: ${NEXT_PUBLIC_ADMIN_ADDRESS}
+      NEXT_PUBLIC_SOCKET_URL: ${NEXT_PUBLIC_SOCKET_URL}
+      NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID: ${NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID}
+      TENANT_NAME: ${TENANT_NAME:-PredictX}
+      TENANT_PRIMARY: ${TENANT_PRIMARY:-#7b6fff}
+      PORT: 3000
+    ports:
+      - '3000:3000'
+
+volumes:
+  pgdata:
