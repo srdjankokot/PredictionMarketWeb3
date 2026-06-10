@@ -40,12 +40,11 @@ describe("AMMPricer", () => {
 
     it("handles extreme ratios (lopsided pools)", async () => {
       const { harness } = await loadFixture(deployHarness);
-      // tiny yes pool -> yes is cheap, no is expensive
+      // tiny YES pool -> YES is cheap, NO is expensive
       const yes = await harness.getYesPrice(1n, 1_000_000n);
       const no = await harness.getNoPrice(1n, 1_000_000n);
-      expect(yes).to.be.greaterThan(no - 0n); // yes ~ 0.999..., no ~ tiny
-      expect(yes).to.be.greaterThan((ONE * 99n) / 100n);
-      expect(no).to.be.lessThan(ONE / 100n);
+      expect(no).to.be.greaterThan((ONE * 99n) / 100n); // no ~ 0.999...
+      expect(yes).to.be.lessThan(ONE / 100n); // yes ~ tiny
     });
 
     it("returns 0 for an empty pool", async () => {
@@ -65,10 +64,10 @@ describe("AMMPricer", () => {
 
     it("returns correct shares after the pool is imbalanced", async () => {
       const { harness } = await loadFixture(deployHarness);
-      // yesPool=600, noPool=500, buy YES 100 -> 100 * 1100 / 500 = 220
-      expect(await harness.getShares(600n, 500n, 100n, true)).to.equal(220n);
-      // buy NO 100 -> 100 * 1100 / 600 = 183 (floored)
-      expect(await harness.getShares(600n, 500n, 100n, false)).to.equal(183n);
+      // price = ownPool/total -> buy YES 100 uses yesPool: 100 * 1100 / 600 = 183 (floored)
+      expect(await harness.getShares(600n, 500n, 100n, true)).to.equal(183n);
+      // buy NO 100 uses noPool: 100 * 1100 / 500 = 220
+      expect(await harness.getShares(600n, 500n, 100n, false)).to.equal(220n);
     });
 
     it("returns 0 for a zero amount", async () => {
@@ -78,22 +77,22 @@ describe("AMMPricer", () => {
   });
 
   describe("getPriceAfterBuy", () => {
-    it("a YES buy raises the NO price", async () => {
+    it("a YES buy raises the YES price (and lowers NO)", async () => {
       const { harness } = await loadFixture(deployHarness);
-      const noBefore = await harness.getNoPrice(1000n, 1000n);
-      const noAfter = await harness.getNoPrice(1000n + 500n, 1000n); // pools after YES buy
-      expect(noAfter).to.be.greaterThan(noBefore);
-      // sanity: the function returns the bought (YES) side's new, lower price
+      const yesBefore = await harness.getYesPrice(1000n, 1000n); // 0.5
       const yesAfter = await harness.getPriceAfterBuy(1000n, 1000n, 500n, true);
-      expect(yesAfter).to.be.lessThan(ONE / 2n);
+      expect(yesAfter).to.be.greaterThan(yesBefore);
+      // the NO price drops below 0.5
+      const noAfter = await harness.getNoPrice(1000n + 500n, 1000n);
+      expect(noAfter).to.be.lessThan(ONE / 2n);
     });
 
     it("a larger buy has more price impact than a smaller one", async () => {
       const { harness } = await loadFixture(deployHarness);
       const small = await harness.getPriceAfterBuy(1000n, 1000n, 100n, true);
       const big = await harness.getPriceAfterBuy(1000n, 1000n, 1000n, true);
-      // both push the YES price below 0.5; the bigger buy pushes it further
-      expect(big).to.be.lessThan(small);
+      // both push the YES price above 0.5; the bigger buy pushes it further
+      expect(big).to.be.greaterThan(small);
     });
   });
 

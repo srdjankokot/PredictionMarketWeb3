@@ -1,6 +1,7 @@
 import { ethers, network } from "hardhat";
 import * as fs from "fs";
 import * as path from "path";
+import type { MockUSDC as MockUSDCContract } from "../typechain-types";
 
 /**
  * Deploys MockUSDC + PredictionMarket, mints test USDC to the deployer, seeds a
@@ -103,12 +104,20 @@ async function main() {
   console.log(`Treasury: ${treasury}`);
   console.log(`Fee bps:  ${FEE_BPS}`);
 
-  // 1. MockUSDC
+  // 1. MockUSDC — reuse an existing token across redeploys if EXISTING_USDC is
+  //    set, so holders keep their balances (they only re-approve the new market).
+  const existingUsdc = process.env.EXISTING_USDC?.trim();
   const MockUSDC = await ethers.getContractFactory("MockUSDC");
-  const usdc = await MockUSDC.deploy();
-  await usdc.waitForDeployment();
+  let usdc: MockUSDCContract;
+  if (existingUsdc) {
+    usdc = MockUSDC.attach(existingUsdc) as unknown as MockUSDCContract;
+    console.log(`\nMockUSDC reused:          ${existingUsdc}`);
+  } else {
+    usdc = (await MockUSDC.deploy()) as unknown as MockUSDCContract;
+    await usdc.waitForDeployment();
+    console.log(`\nMockUSDC deployed:        ${await usdc.getAddress()}`);
+  }
   const usdcAddr = await usdc.getAddress();
-  console.log(`\nMockUSDC deployed:        ${usdcAddr}`);
 
   // 2. PredictionMarket (AMMPricer is an internal library — inlined, no separate deploy)
   const PredictionMarket = await ethers.getContractFactory("PredictionMarket");
@@ -117,12 +126,15 @@ async function main() {
   const marketAddr = await market.getAddress();
   console.log(`PredictionMarket deployed: ${marketAddr}`);
 
-  // 3. Mint test USDC to the deployer and approve the market for seeding
-  const totalSeed = SAMPLE_MARKETS.reduce((acc, m) => acc + m.seedUsdc, 0);
-  const mintAmount = ethers.parseUnits(String(Math.max(1_000_000, totalSeed * 10)), 6);
-  await (await usdc.mint(deployerAddr, mintAmount)).wait();
+  // 3. Ensure the deployer has USDC (only mint for a fresh token) and approve the
+  //    new market to spend it.
+  if (!existingUsdc) {
+    const mintAmount = ethers.parseUnits("1000000", 6);
+    await (await usdc.mint(deployerAddr, mintAmount)).wait();
+    console.log(`Minted ${ethers.formatUnits(mintAmount, 6)} USDC to deployer.`);
+  }
   await (await usdc.approve(marketAddr, ethers.MaxUint256)).wait();
-  console.log(`Minted ${ethers.formatUnits(mintAmount, 6)} USDC to deployer & approved market.`);
+  console.log(`Approved market to spend deployer USDC.`);
 
   // 4. Seed sample markets on-chain (skip with SEED_MARKETS=false — e.g. on a
   //    shared testnet where the admin creates markets via the UI instead).

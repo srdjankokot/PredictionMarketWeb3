@@ -16,6 +16,8 @@ export function FeesPanel() {
   const { push } = useToast();
   const refetchBalances = useWalletStore((s) => s.refetch);
   const [busy, setBusy] = useState(false);
+  const [feeInput, setFeeInput] = useState('');
+  const [settingFee, setSettingFee] = useState(false);
 
   const enabled = Boolean(CONTRACT_ADDRESS);
   const feesQuery = useReadContract({
@@ -63,6 +65,33 @@ export function FeesPanel() {
     }
   }
 
+  async function updateFee() {
+    if (!publicClient) return;
+    const pct = Number(feeInput);
+    if (!Number.isFinite(pct) || pct < 0 || pct > 5) {
+      push('error', 'Fee must be between 0% and 5%');
+      return;
+    }
+    const bps = Math.round(pct * 100);
+    setSettingFee(true);
+    try {
+      const hash = await writeContractAsync({
+        address: CONTRACT_ADDRESS,
+        abi: PredictionMarketABI,
+        functionName: 'setFeeBps',
+        args: [BigInt(bps)],
+      });
+      await publicClient.waitForTransactionReceipt({ hash });
+      push('success', `Fee updated to ${pct}%`);
+      setFeeInput('');
+      void feeBpsQuery.refetch();
+    } catch (err) {
+      push('error', parseContractError(err));
+    } finally {
+      setSettingFee(false);
+    }
+  }
+
   return (
     <div className="max-w-lg space-y-4">
       <div className="grid grid-cols-2 gap-4">
@@ -94,6 +123,30 @@ export function FeesPanel() {
             ? 'No fees to withdraw'
             : `Withdraw ${formatUsd(feesUsd)}`}
       </button>
+
+      <div className="card space-y-2 p-4">
+        <p className="text-sm font-semibold text-ink">Set fee rate</p>
+        <div className="flex items-end gap-2">
+          <div className="flex-1">
+            <label className="label">New fee (%) · max 5</label>
+            <input
+              inputMode="decimal"
+              value={feeInput}
+              onChange={(e) => setFeeInput(e.target.value.replace(/[^0-9.]/g, ''))}
+              placeholder={`current ${feeBps / 100}%`}
+              className="input"
+            />
+          </div>
+          <button
+            onClick={updateFee}
+            disabled={settingFee || !feeInput || !isTreasury}
+            className="btn btn-ghost"
+          >
+            {settingFee ? 'Updating…' : 'Update'}
+          </button>
+        </div>
+        <p className="text-xs text-muted">Owner only · applies to future trades.</p>
+      </div>
 
       <p className="text-xs text-muted">
         Fees accrue at {feeBps / 100}% of every trade and are held in the contract until the

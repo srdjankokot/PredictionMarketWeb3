@@ -121,8 +121,8 @@ describe("PredictionMarket", () => {
       expect(m.yesPool).to.equal(usdc6(600));
       expect(m.noPool).to.equal(usdc6(500));
 
-      // price moved: yesPrice = noPool/total = 500/1100
-      expect(await ctx.market.getYesPrice(id)).to.equal((usdc6(500) * 10n ** 18n) / usdc6(1100));
+      // price moved: yesPrice = yesPool/total = 600/1100
+      expect(await ctx.market.getYesPrice(id)).to.equal((usdc6(600) * 10n ** 18n) / usdc6(1100));
       // USDC pulled from buyer
       expect(await ctx.usdc.balanceOf(ctx.alice.address)).to.equal(before - usdc6(100));
     });
@@ -260,34 +260,32 @@ describe("PredictionMarket", () => {
       const ctx = await loadFixture(deployNoFee);
       const { id, endTime } = await createMarket(ctx); // pools 500/500
 
-      // alice YES 100 -> 200 shares; pools 600/500
+      // three buys at imbalanced pools; exact share counts are read back from chain
       await ctx.market.connect(ctx.alice).buyShares(id, true, usdc6(100), 0);
-      // carol YES 100 -> 100*1100/500 = 220 shares; pools 700/500
       await ctx.market.connect(ctx.carol).buyShares(id, true, usdc6(100), 0);
-      // bob NO 100 -> 100*1200/700 = 171.428571 shares; pools 700/600
       await ctx.market.connect(ctx.bob).buyShares(id, false, usdc6(100), 0);
 
       await time.increaseTo(endTime + 1);
       await ctx.market.connect(ctx.owner).resolveMarket(id, true); // YES wins
 
-      const totalPool = await ctx.market.getTotalPool(id); // 1300 USDC
+      const totalPool = await ctx.market.getTotalPool(id);
       expect(totalPool).to.equal(usdc6(1300));
-      const totalYes = await ctx.market.totalYesShares(id); // 420
-      expect(totalYes).to.equal(usdc6(420));
+      const totalYes = await ctx.market.totalYesShares(id);
+      const [aliceYesShares] = await ctx.market.getShares(ctx.alice.address, id);
+      const [carolYesShares] = await ctx.market.getShares(ctx.carol.address, id);
 
       const aliceBefore = await ctx.usdc.balanceOf(ctx.alice.address);
       await expect(ctx.market.connect(ctx.alice).claimWinnings(id)).to.emit(
         ctx.market,
         "WinningsClaimed",
       );
-      const aliceAfter = await ctx.usdc.balanceOf(ctx.alice.address);
-      const alicePayout = aliceAfter - aliceBefore;
-      // 200/420 * 1300
-      expect(alicePayout).to.equal((usdc6(200) * usdc6(1300)) / usdc6(420));
+      const alicePayout = (await ctx.usdc.balanceOf(ctx.alice.address)) - aliceBefore;
+      // payout = userShares / totalWinningShares * totalPool
+      expect(alicePayout).to.equal((aliceYesShares * totalPool) / totalYes);
 
       // alice shares zeroed -> double claim reverts
-      const [aliceYes] = await ctx.market.getShares(ctx.alice.address, id);
-      expect(aliceYes).to.equal(0n);
+      const [aliceYesAfter] = await ctx.market.getShares(ctx.alice.address, id);
+      expect(aliceYesAfter).to.equal(0n);
       await expect(ctx.market.connect(ctx.alice).claimWinnings(id)).to.be.revertedWith(
         "PM: no winning shares",
       );
@@ -301,7 +299,7 @@ describe("PredictionMarket", () => {
       const carolBefore = await ctx.usdc.balanceOf(ctx.carol.address);
       await ctx.market.connect(ctx.carol).claimWinnings(id);
       const carolPayout = (await ctx.usdc.balanceOf(ctx.carol.address)) - carolBefore;
-      expect(carolPayout).to.equal((usdc6(220) * usdc6(1300)) / usdc6(420));
+      expect(carolPayout).to.equal((carolYesShares * totalPool) / totalYes);
 
       // winners together drain the pool (allow tiny rounding dust)
       const dust = await ctx.usdc.balanceOf(ctx.marketAddr);

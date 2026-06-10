@@ -2,18 +2,18 @@
  * Frontend replica of AMMPricer.sol — lets the UI preview trades instantly
  * without a chain round-trip. Operates on human USDC numbers (not 6-dec ints).
  * Must stay in lock-step with the Solidity library:
- *   yesPrice = noPool / (yesPool + noPool)
+ *   yesPrice = yesPool / (yesPool + noPool)   (buying YES raises the YES price)
  *   shares   = usdcAmount / price
  */
 
 export function getYesPrice(yesPool: number, noPool: number): number {
   const total = yesPool + noPool;
-  return total === 0 ? 0.5 : noPool / total;
+  return total === 0 ? 0.5 : yesPool / total;
 }
 
 export function getNoPrice(yesPool: number, noPool: number): number {
   const total = yesPool + noPool;
-  return total === 0 ? 0.5 : yesPool / total;
+  return total === 0 ? 0.5 : noPool / total;
 }
 
 /** Shares received for `amount` USDC on the chosen side. */
