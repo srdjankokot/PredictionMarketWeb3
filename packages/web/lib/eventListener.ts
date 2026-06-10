@@ -85,6 +85,97 @@ export async function reconcileMarketsFromChain(): Promise<void> {
 }
 
 /**
+ * Rebuilds the Trade table (activity feed) from on-chain SharesBought logs, then
+ * recomputes each market's volume from the restored trades. Runs on startup so a
+ * cache wipe doesn't lose trade history — the chain is the source of truth.
+ * Scans the last SYNC_LOOKBACK_BLOCKS (or from SYNC_FROM_BLOCK) in chunks.
+ */
+export async function backfillTradesFromChain(): Promise<void> {
+  if (!CONTRACT_ADDRESS) return;
+
+  let latest: bigint;
+  try {
+    latest = await publicClient.getBlockNumber();
+  } catch (e) {
+    console.error('[backfill] getBlockNumber failed', e);
+    return;
+  }
+
+  const lookback = BigInt(process.env.SYNC_LOOKBACK_BLOCKS ?? '120000');
+  const from = process.env.SYNC_FROM_BLOCK
+    ? BigInt(process.env.SYNC_FROM_BLOCK)
+    : latest > lookback
+      ? latest - lookback
+      : 0n;
+  const CHUNK = 5000n;
+  let count = 0;
+
+  for (let start = from; start <= latest; start += CHUNK + 1n) {
+    const end = start + CHUNK > latest ? latest : start + CHUNK;
+    let logs;
+    try {
+      logs = await publicClient.getContractEvents({
+        address: CONTRACT_ADDRESS,
+        abi: PredictionMarketABI,
+        eventName: 'SharesBought',
+        fromBlock: start,
+        toBlock: end,
+      });
+    } catch (e) {
+      console.error(`[backfill] getLogs ${start}-${end} failed`, e);
+      continue;
+    }
+
+    for (const log of logs) {
+      const a = log.args as unknown as {
+        marketId: bigint;
+        buyer: string;
+        isYes: boolean;
+        usdcAmount: bigint;
+        sharesReceived: bigint;
+      };
+      const txHash = log.transactionHash;
+      if (!txHash) continue;
+      const marketId = String(a.marketId);
+      const market = await prisma.market.findUnique({ where: { id: marketId } });
+      if (!market) continue;
+
+      const trader = a.buyer.toLowerCase();
+      await prisma.user.upsert({
+        where: { address: trader },
+        update: {},
+        create: { address: trader, role: isAdminAddress(trader) ? 'ADMIN' : 'TRADER' },
+      });
+      await prisma.trade
+        .upsert({
+          where: { txHash },
+          update: {},
+          create: {
+            marketId,
+            trader,
+            outcome: a.isYes ? 'YES' : 'NO',
+            amount: fromUsdcUnits(a.usdcAmount),
+            shares: fromUsdcUnits(a.sharesReceived),
+            txHash,
+          },
+        })
+        .catch(() => undefined);
+      count += 1;
+    }
+  }
+
+  // recompute volumes from the (now-restored) trade table
+  const sums = await prisma.trade.groupBy({ by: ['marketId'], _sum: { amount: true } });
+  for (const s of sums) {
+    await prisma.market
+      .update({ where: { id: s.marketId }, data: { volume: s._sum.amount ?? 0 } })
+      .catch(() => undefined);
+  }
+
+  if (count) console.log(`[backfill] restored ${count} trade(s) from chain logs`);
+}
+
+/**
  * Watches PredictionMarket events and mirrors them into the DB + Socket.io.
  *  - SharesBought  -> update pools/volume, upsert trade, emit market:trade
  *  - MarketResolved-> mark resolved, emit market:resolved
@@ -234,8 +325,11 @@ export function startEventListener(): () => void {
     return () => undefined;
   }
 
-  // Catch up on anything missed while the process was down, then watch forward.
-  reconcileMarketsFromChain().catch((e) => console.error('[listener] reconcile failed', e));
+  // Catch up on anything missed while the process was down (markets + trades),
+  // then watch forward.
+  reconcileMarketsFromChain()
+    .then(() => backfillTradesFromChain())
+    .catch((e) => console.error('[listener] startup sync failed', e));
 
   const safe =
     (fn: (log: Log) => Promise<void>) =>
