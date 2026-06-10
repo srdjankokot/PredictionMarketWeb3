@@ -3,6 +3,11 @@
 FROM node:22-bookworm-slim AS app
 WORKDIR /app
 
+# Prisma's engines need OpenSSL, which the slim image omits.
+RUN apt-get update -y \
+ && apt-get install -y --no-install-recommends openssl ca-certificates \
+ && rm -rf /var/lib/apt/lists/*
+
 # 1) Install all workspace deps (dev deps are needed to build).
 COPY package.json package-lock.json ./
 COPY packages/shared/package.json ./packages/shared/
