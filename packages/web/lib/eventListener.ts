@@ -17,27 +17,71 @@ import { toCreatedEvent } from './serialize';
  */
 export async function reconcileMarketsFromChain(): Promise<void> {
   if (!CONTRACT_ADDRESS) return;
-  const markets = await prisma.market.findMany();
+
+  let total: number;
+  try {
+    const count = (await publicClient.readContract({
+      address: CONTRACT_ADDRESS,
+      abi: PredictionMarketABI,
+      functionName: 'marketCount',
+    })) as bigint;
+    total = Number(count);
+  } catch (e) {
+    console.error('[listener] reconcile: cannot read marketCount', e);
+    return;
+  }
+  if (total === 0) return;
+
+  const other = await prisma.category.findUnique({ where: { slug: 'other' } });
   const now = new Date();
   let updated = 0;
-  for (const m of markets) {
-    const oc = await readOnChainMarket(m.contractId);
+  let created = 0;
+
+  for (let i = 1; i <= total; i += 1) {
+    const oc = await readOnChainMarket(i);
     if (!oc) continue;
+    const id = String(i);
     const resolved = oc.resolved;
-    const status = resolved ? 'RESOLVED' : m.endDate <= now ? 'EXPIRED' : 'ACTIVE';
-    await prisma.market.update({
-      where: { id: m.id },
-      data: {
-        yesPool: fromUsdcUnits(oc.yesPool),
-        noPool: fromUsdcUnits(oc.noPool),
-        resolved,
-        outcome: resolved ? (oc.outcome ? 'YES' : 'NO') : null,
-        status,
-      },
-    });
-    updated += 1;
+    const endDate = new Date(Number(oc.endTime) * 1000);
+    const status = resolved ? 'RESOLVED' : endDate <= now ? 'EXPIRED' : 'ACTIVE';
+    const outcome = resolved ? (oc.outcome ? 'YES' : 'NO') : null;
+    const yesPool = fromUsdcUnits(oc.yesPool);
+    const noPool = fromUsdcUnits(oc.noPool);
+
+    const existing = await prisma.market.findUnique({ where: { id } });
+    if (existing) {
+      // keep off-chain metadata, refresh chain-derived fields
+      await prisma.market.update({
+        where: { id },
+        data: { yesPool, noPool, resolved, outcome, status },
+      });
+      updated += 1;
+    } else if (other) {
+      // metadata was lost (e.g. a cache wipe) or the market was created externally —
+      // rebuild a minimal row from chain so it reappears and stays tradeable.
+      await prisma.market.create({
+        data: {
+          id,
+          contractId: i,
+          question: oc.question,
+          description: '',
+          categoryId: other.id,
+          endDate,
+          status,
+          resolved,
+          outcome,
+          yesPool,
+          noPool,
+          volume: 0,
+        },
+      });
+      created += 1;
+    }
   }
-  if (updated) console.log(`[listener] reconciled ${updated} market(s) from chain on startup`);
+
+  if (updated || created) {
+    console.log(`[listener] reconciled ${updated} + recreated ${created} market(s) from chain`);
+  }
 }
 
 /**
