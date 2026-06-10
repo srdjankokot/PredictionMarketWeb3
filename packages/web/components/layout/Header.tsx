@@ -18,6 +18,7 @@ const ADMIN_LINKS = [
   { href: '/create', label: 'Create Market' },
   { href: '/admin/resolve', label: 'Resolve', badge: true },
   { href: '/admin/categories', label: 'Categories' },
+  { href: '/admin/fees', label: 'Fees' },
 ];
 
 export function Header() {
