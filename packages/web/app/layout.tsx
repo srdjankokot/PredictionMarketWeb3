@@ -1,10 +1,13 @@
 import type { CSSProperties } from 'react';
 import type { Metadata } from 'next';
+import { Inter } from 'next/font/google';
 import './globals.css';
 import { Header } from '@/components/layout/Header';
 import { getPublicEnv } from '@/lib/constants';
 import { getTenantConfig, tenantCssVars } from '@/lib/tenant.config';
 import { Providers } from './providers';
+
+const inter = Inter({ subsets: ['latin'], variable: '--font-sans', display: 'swap' });
 
 // Render per-request so process.env (public config) is read at runtime, not build.
 export const dynamic = 'force-dynamic';
@@ -23,8 +26,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   const cssVars = tenantCssVars(tenant) as CSSProperties;
 
   return (
-    <html lang="en" className="dark" style={cssVars} suppressHydrationWarning>
-      <body className="min-h-screen bg-canvas text-ink">
+    <html lang="en" className={`dark ${inter.variable}`} style={cssVars} suppressHydrationWarning>
+      <body className="min-h-screen bg-canvas font-sans text-ink antialiased">
         {/* Runtime public config — must run before the app bundles read constants. */}
         <script
           dangerouslySetInnerHTML={{

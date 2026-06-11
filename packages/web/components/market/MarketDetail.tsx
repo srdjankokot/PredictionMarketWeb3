@@ -3,7 +3,7 @@
 import { useCallback, useState } from 'react';
 import type { Market, Trade } from '@predictx/shared';
 import { ActivityFeed } from '@/components/market/ActivityFeed';
-import { PriceBars } from '@/components/market/PriceBars';
+import { ProbabilityBar } from '@/components/market/ProbabilityBar';
 import { PriceChart, type PricePoint } from '@/components/market/PriceChart';
 import { TradingPanel } from '@/components/market/TradingPanel';
 import { ErrorBoundary } from '@/components/shared/ErrorBoundary';
@@ -112,7 +112,12 @@ export function MarketDetail({
         </div>
 
         <div className="card p-4">
-          <PriceBars yesLabel={market.yesLabel} noLabel={market.noLabel} yesPrice={market.yesPrice} />
+          <ProbabilityBar
+            yesLabel={market.yesLabel}
+            noLabel={market.noLabel}
+            yesPrice={market.yesPrice}
+            size="lg"
+          />
         </div>
 
         {market.description && (

@@ -5,30 +5,39 @@
 /* Base dark theme. Brand tokens (--color-primary / --color-yes / --color-no)
    are overridden per-tenant by inline style on <html> (white-label). */
 :root {
-  --color-bg: #0b0d12;
-  --color-bg-soft: #11141b;
-  --color-card: #151a24;
-  --color-border: #232b3a;
-  --color-text: #e7ebf3;
-  --color-text-muted: #8a93a6;
+  --color-bg: #0a0b0f;
+  --color-bg-soft: #111319;
+  --color-card: #14161d;
+  --color-border: #20242e;
+  --color-text: #e9edf5;
+  --color-text-muted: #828b9e;
   --color-primary: #7b6fff;
   --color-yes: #22c55e;
   --color-no: #ef4444;
 }
 
-html,
-body {
-  background-color: var(--color-bg);
+html {
   color: var(--color-text);
   -webkit-font-smoothing: antialiased;
 }
 
+body {
+  background-color: var(--color-bg);
+  /* subtle brand glow at the top — sleek dark fintech */
+  background-image: radial-gradient(
+    900px 480px at 50% -10%,
+    color-mix(in srgb, var(--color-primary) 13%, transparent),
+    transparent 72%
+  );
+  background-attachment: fixed;
+}
+
 @layer components {
   .card {
-    @apply rounded-xl border bg-card;
+    @apply rounded-2xl border bg-card shadow-card;
   }
   .card-hover {
-    @apply transition hover:border-brand hover:shadow-lg hover:shadow-black/30;
+    @apply transition duration-200 ease-out hover:-translate-y-0.5 hover:border-brand hover:shadow-glow;
   }
 
   /* Translucent sticky-bar background (alpha on a CSS-var color via color-mix). */
@@ -42,9 +51,11 @@ body {
   .btn-primary {
     background-color: var(--color-primary);
     color: #fff;
+    box-shadow: 0 6px 20px -8px color-mix(in srgb, var(--color-primary) 60%, transparent);
   }
   .btn-primary:hover:not(:disabled) {
     filter: brightness(1.08);
+    box-shadow: 0 10px 28px -8px color-mix(in srgb, var(--color-primary) 72%, transparent);
   }
   .btn-yes {
     background-color: var(--color-yes);

@@ -9,6 +9,13 @@ const config: Config = {
   content: ['./app/**/*.{ts,tsx}', './components/**/*.{ts,tsx}'],
   theme: {
     extend: {
+      fontFamily: {
+        sans: ['var(--font-sans)', 'ui-sans-serif', 'system-ui', 'sans-serif'],
+      },
+      boxShadow: {
+        glow: '0 0 0 1px color-mix(in srgb, var(--color-primary) 40%, transparent), 0 8px 30px -8px color-mix(in srgb, var(--color-primary) 45%, transparent)',
+        card: '0 1px 2px rgba(0,0,0,0.3), 0 8px 24px -12px rgba(0,0,0,0.5)',
+      },
       colors: {
         yes: 'var(--color-yes)',
         no: 'var(--color-no)',

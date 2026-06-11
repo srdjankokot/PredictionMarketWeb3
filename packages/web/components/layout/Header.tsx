@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { ChevronDown, Menu } from 'lucide-react';
 import { ConnectButton } from '@rainbow-me/rainbowkit';
 import { useTenant } from '@/components/TenantProvider';
 import { useAdminSocket } from '@/hooks/useAdminSocket';
@@ -66,9 +67,10 @@ export function Header() {
               <div className="relative">
                 <button
                   onClick={() => setAdminOpen((v) => !v)}
-                  className="relative rounded-lg px-3 py-1.5 text-sm font-medium text-muted hover:text-ink"
+                  className="relative inline-flex items-center gap-1 rounded-lg px-3 py-1.5 text-sm font-medium text-muted hover:text-ink"
                 >
-                  Admin ▾
+                  Admin
+                  <ChevronDown className="h-3.5 w-3.5" />
                   {pendingCount > 0 && <Badge count={pendingCount} />}
                 </button>
                 {adminOpen && (
@@ -97,11 +99,11 @@ export function Header() {
             <ConnectButton showBalance={false} accountStatus="address" chainStatus="icon" />
           </div>
           <button
-            className="rounded-lg border px-3 py-1.5 text-sm md:hidden"
+            className="rounded-lg border p-2 md:hidden"
             onClick={() => setMobileOpen((v) => !v)}
             aria-label="Menu"
           >
-            ☰
+            <Menu className="h-5 w-5" />
           </button>
         </div>
       </div>
