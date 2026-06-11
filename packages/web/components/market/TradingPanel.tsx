@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from 'react';
 import { ConnectButton } from '@rainbow-me/rainbowkit';
-import { useAccount, usePublicClient, useWriteContract } from 'wagmi';
+import { useAccount, usePublicClient, useReadContract, useWriteContract } from 'wagmi';
 import type { Market } from '@predictx/shared';
 import { ResolutionBanner } from '@/components/market/ResolutionBanner';
 import { useToast } from '@/components/shared/Toast';
@@ -187,6 +187,21 @@ function ResolvedPanel({ market, onClaimed }: { market: Market; onClaimed: () =>
   const [claiming, setClaiming] = useState(false);
   const [claimed, setClaimed] = useState(false);
 
+  // Read this wallet's shares so we only offer claim when there's actually a win.
+  const sharesQuery = useReadContract({
+    address: CONTRACT_ADDRESS || undefined,
+    abi: PredictionMarketABI,
+    functionName: 'getShares',
+    args: address ? [address, BigInt(market.contractId)] : undefined,
+    query: { enabled: Boolean(address && CONTRACT_ADDRESS) },
+  });
+  const shares = sharesQuery.data as readonly [bigint, bigint] | undefined;
+  const yesShares = shares?.[0] ?? 0n;
+  const noShares = shares?.[1] ?? 0n;
+  const winningShares = market.outcome === 'YES' ? yesShares : noShares;
+  const hasWinnings = winningShares > 0n;
+  const hasPosition = yesShares > 0n || noShares > 0n;
+
   async function handleClaim() {
     if (!address || !publicClient) return;
     setClaiming(true);
@@ -201,6 +216,7 @@ function ResolvedPanel({ market, onClaimed }: { market: Market; onClaimed: () =>
       setClaimed(true);
       push('success', 'Winnings claimed!');
       refetchBalances();
+      void sharesQuery.refetch();
       onClaimed();
     } catch (err) {
       push('error', parseContractError(err));
@@ -212,18 +228,23 @@ function ResolvedPanel({ market, onClaimed }: { market: Market; onClaimed: () =>
   return (
     <Panel>
       <ResolutionBanner market={market} />
-      {address ? (
-        <button onClick={handleClaim} disabled={claiming || claimed} className="btn btn-primary mt-3 w-full">
-          {claimed ? 'Claimed ✓' : claiming ? 'Claiming…' : 'Claim winnings'}
-        </button>
-      ) : (
-        <div className="mt-3">
+      <div className="mt-3">
+        {!address ? (
           <ConnectButton />
-        </div>
-      )}
-      <p className="mt-2 text-center text-xs text-muted">
-        If you held losing shares, there is nothing to claim.
-      </p>
+        ) : claimed ? (
+          <p className="text-center text-sm text-yes">Winnings claimed ✓</p>
+        ) : hasWinnings ? (
+          <button onClick={handleClaim} disabled={claiming} className="btn btn-primary w-full">
+            {claiming ? 'Claiming…' : 'Claim winnings'}
+          </button>
+        ) : hasPosition ? (
+          <p className="text-center text-sm text-muted">
+            You held losing shares — nothing to claim.
+          </p>
+        ) : (
+          <p className="text-center text-sm text-muted">You had no position in this market.</p>
+        )}
+      </div>
     </Panel>
   );
 }
