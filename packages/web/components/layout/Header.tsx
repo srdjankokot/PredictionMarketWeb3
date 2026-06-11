@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { ChevronDown, Menu } from 'lucide-react';
 import { ConnectButton } from '@rainbow-me/rainbowkit';
+import { ThemeToggle } from '@/components/ThemeToggle';
 import { useTenant } from '@/components/TenantProvider';
 import { useAdminSocket } from '@/hooks/useAdminSocket';
 import { useRole } from '@/hooks/useRole';
@@ -95,6 +96,7 @@ export function Header() {
         </div>
 
         <div className="flex items-center gap-2">
+          <ThemeToggle />
           <div className="hidden sm:block">
             <ConnectButton showBalance={false} accountStatus="address" chainStatus="icon" />
           </div>

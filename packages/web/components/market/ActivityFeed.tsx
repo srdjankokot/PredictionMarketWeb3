@@ -1,6 +1,7 @@
 'use client';
 
 import type { Trade } from '@predictx/shared';
+import { Avatar } from '@/components/shared/Avatar';
 import { formatShares, formatUsd, timeAgo, truncateAddress } from '@/lib/format';
 
 export function ActivityFeed({ trades }: { trades: Trade[] }) {
@@ -16,7 +17,8 @@ export function ActivityFeed({ trades }: { trades: Trade[] }) {
           {trades.map((t) => (
             <li key={t.id} className="flex animate-fade-in items-center justify-between px-4 py-2.5 text-sm">
               <div className="flex items-center gap-2">
-                <span className={`badge ${t.outcome === 'YES' ? 'badge-resolved' : 'badge-expired'}`}>
+                <Avatar address={t.trader} size={22} />
+                <span className={`badge ${t.outcome === 'YES' ? 'badge-yes' : 'badge-no'}`}>
                   {t.outcome}
                 </span>
                 <span className="font-mono text-xs text-muted">{truncateAddress(t.trader)}</span>

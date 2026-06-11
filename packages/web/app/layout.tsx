@@ -26,8 +26,14 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   const cssVars = tenantCssVars(tenant) as CSSProperties;
 
   return (
-    <html lang="en" className={`dark ${inter.variable}`} style={cssVars} suppressHydrationWarning>
+    <html lang="en" className={inter.variable} style={cssVars} suppressHydrationWarning>
       <body className="min-h-screen bg-canvas font-sans text-ink antialiased">
+        {/* Apply theme before paint to avoid a flash. */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `(function(){try{var t=localStorage.getItem('predictx-theme');if(t!=='light'&&t!=='dark')t='dark';document.documentElement.classList.add(t);}catch(e){document.documentElement.classList.add('dark');}})();`,
+          }}
+        />
         {/* Runtime public config — must run before the app bundles read constants. */}
         <script
           dangerouslySetInnerHTML={{

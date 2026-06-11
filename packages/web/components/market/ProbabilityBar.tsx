@@ -7,11 +7,13 @@ export function ProbabilityBar({
   noLabel,
   yesPrice,
   size = 'sm',
+  showLabels = true,
 }: {
   yesLabel: string;
   noLabel: string;
   yesPrice: number;
   size?: 'sm' | 'lg';
+  showLabels?: boolean;
 }) {
   const yesPct = Math.max(0, Math.min(100, Math.round(yesPrice * 100)));
   const noPct = 100 - yesPct;
@@ -20,16 +22,18 @@ export function ProbabilityBar({
 
   return (
     <div>
-      <div className={`mb-1.5 flex items-center justify-between font-semibold tabular-nums ${textSize}`}>
-        <span className="flex min-w-0 items-center gap-1.5 text-yes">
-          <Dot side="yes" />
-          <span className="truncate">{yesLabel}</span> {yesPct}%
-        </span>
-        <span className="flex min-w-0 items-center gap-1.5 text-no">
-          {noPct}% <span className="truncate">{noLabel}</span>
-          <Dot side="no" />
-        </span>
-      </div>
+      {showLabels && (
+        <div className={`mb-1.5 flex items-center justify-between font-semibold tabular-nums ${textSize}`}>
+          <span className="flex min-w-0 items-center gap-1.5 text-yes">
+            <Dot side="yes" />
+            <span className="truncate">{yesLabel}</span> {yesPct}%
+          </span>
+          <span className="flex min-w-0 items-center gap-1.5 text-no">
+            {noPct}% <span className="truncate">{noLabel}</span>
+            <Dot side="no" />
+          </span>
+        </div>
+      )}
       <div className={`flex ${barH} overflow-hidden rounded-full`}>
         <div
           className="transition-[width] duration-500 ease-out"

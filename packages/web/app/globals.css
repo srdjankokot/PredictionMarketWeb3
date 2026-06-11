@@ -32,6 +32,16 @@ body {
   background-attachment: fixed;
 }
 
+/* Light theme — only neutral tokens change; brand (primary/yes/no) stays tenant-driven. */
+html.light {
+  --color-bg: #f6f7f9;
+  --color-bg-soft: #eceef2;
+  --color-card: #ffffff;
+  --color-border: #e3e6ec;
+  --color-text: #0f1320;
+  --color-text-muted: #5c6678;
+}
+
 @layer components {
   .card {
     @apply rounded-2xl border bg-card shadow-card;
@@ -60,10 +70,12 @@ body {
   .btn-yes {
     background-color: var(--color-yes);
     color: #04140a;
+    box-shadow: 0 6px 20px -8px color-mix(in srgb, var(--color-yes) 55%, transparent);
   }
   .btn-no {
     background-color: var(--color-no);
     color: #1a0606;
+    box-shadow: 0 6px 20px -8px color-mix(in srgb, var(--color-no) 55%, transparent);
   }
   .btn-ghost {
     @apply border bg-transparent text-ink;
@@ -109,6 +121,14 @@ body {
   .badge-resolved {
     background-color: color-mix(in srgb, var(--color-yes) 16%, transparent);
     color: var(--color-yes);
+  }
+  .badge-yes {
+    background-color: color-mix(in srgb, var(--color-yes) 16%, transparent);
+    color: var(--color-yes);
+  }
+  .badge-no {
+    background-color: color-mix(in srgb, var(--color-no) 16%, transparent);
+    color: var(--color-no);
   }
 
   .tint-yes {

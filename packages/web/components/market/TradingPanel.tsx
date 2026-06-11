@@ -1,6 +1,7 @@
 'use client';
 
 import { useMemo, useState } from 'react';
+import { motion } from 'framer-motion';
 import { ConnectButton } from '@rainbow-me/rainbowkit';
 import { useAccount, usePublicClient, useReadContract, useWriteContract } from 'wagmi';
 import type { Market } from '@predictx/shared';
@@ -75,14 +76,22 @@ function ActivePanel({ market, onTraded }: { market: Market; onTraded: () => voi
 
   return (
     <Panel>
-      {/* YES / NO toggle */}
-      <div className="mb-4 grid grid-cols-2 gap-2">
-        <OutcomeToggle active={isYes} side="yes" onClick={() => setIsYes(true)} price={market.yesPrice}>
-          {market.yesLabel}
-        </OutcomeToggle>
-        <OutcomeToggle active={!isYes} side="no" onClick={() => setIsYes(false)} price={market.noPrice}>
-          {market.noLabel}
-        </OutcomeToggle>
+      {/* YES / NO segmented toggle */}
+      <div className="mb-4 grid grid-cols-2 gap-1 rounded-xl border bg-canvas p-1">
+        <SegButton
+          active={isYes}
+          side="yes"
+          label={market.yesLabel}
+          price={market.yesPrice}
+          onClick={() => setIsYes(true)}
+        />
+        <SegButton
+          active={!isYes}
+          side="no"
+          label={market.noLabel}
+          price={market.noPrice}
+          onClick={() => setIsYes(false)}
+        />
       </div>
 
       {/* amount */}
@@ -266,34 +275,40 @@ function Row({ label, children }: { label: string; children: React.ReactNode }) 
   );
 }
 
-function OutcomeToggle({
+function SegButton({
   active,
   side,
+  label,
   price,
   onClick,
-  children,
 }: {
   active: boolean;
   side: 'yes' | 'no';
+  label: string;
   price: number;
   onClick: () => void;
-  children: React.ReactNode;
 }) {
   return (
-    <button
-      onClick={onClick}
-      className={`flex flex-col items-center rounded-lg border px-3 py-2.5 transition ${
-        active
-          ? side === 'yes'
-            ? 'border-yes tint-yes'
-            : 'border-no tint-no'
-          : 'text-muted hover:text-ink'
-      }`}
-    >
-      <span className={`text-sm font-semibold ${active ? (side === 'yes' ? 'text-yes' : 'text-no') : 'text-ink'}`}>
-        {children}
+    <button onClick={onClick} className="relative flex flex-col items-center rounded-lg px-3 py-2.5">
+      {active && (
+        <motion.span
+          layoutId="seg-indicator"
+          className="absolute inset-0 rounded-lg"
+          style={{
+            background: `color-mix(in srgb, var(--color-${side}) 16%, transparent)`,
+            boxShadow: `inset 0 0 0 1px var(--color-${side}), 0 6px 18px -10px color-mix(in srgb, var(--color-${side}) 70%, transparent)`,
+          }}
+          transition={{ type: 'spring', stiffness: 380, damping: 30 }}
+        />
+      )}
+      <span
+        className={`relative z-10 text-sm font-semibold ${
+          active ? (side === 'yes' ? 'text-yes' : 'text-no') : 'text-ink'
+        }`}
+      >
+        {label}
       </span>
-      <span className="text-xs text-muted">{formatPercent(price)}</span>
+      <span className="relative z-10 text-xs text-muted">{formatPercent(price)}</span>
     </button>
   );
 }

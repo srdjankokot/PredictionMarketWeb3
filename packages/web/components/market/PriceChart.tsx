@@ -69,12 +69,15 @@ export function PriceChart({ points }: { points: PricePoint[] }) {
               width={40}
             />
             <Tooltip
+              cursor={{ stroke: 'var(--color-primary)', strokeWidth: 1, strokeDasharray: '4 4' }}
               contentStyle={{
                 background: 'var(--color-card)',
                 border: '1px solid var(--color-border)',
-                borderRadius: 8,
+                borderRadius: 10,
                 fontSize: 12,
+                boxShadow: '0 8px 24px -12px rgba(0,0,0,0.6)',
               }}
+              labelStyle={{ color: 'var(--color-text-muted)' }}
               formatter={(v: number) => [`${v}%`, 'YES']}
             />
             <Area
@@ -84,6 +87,7 @@ export function PriceChart({ points }: { points: PricePoint[] }) {
               strokeWidth={2}
               fill="url(#yesFill)"
               isAnimationActive={false}
+              activeDot={{ r: 4, fill: 'var(--color-yes)', stroke: 'var(--color-card)', strokeWidth: 2 }}
             />
           </AreaChart>
         </ResponsiveContainer>
