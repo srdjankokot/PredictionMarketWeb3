@@ -1,6 +1,6 @@
 import { NextResponse, type NextRequest } from 'next/server';
 import { Prisma } from '@prisma/client';
-import type { MarketSort, MarketStatus } from '@predictx/shared';
+import type { MarketSort } from '@predictx/shared';
 import { isAdminRequest } from '@/lib/auth';
 import { readOnChainMarket } from '@/lib/contractReads';
 import { fromUsdcUnits } from '@/lib/format';
@@ -10,21 +10,22 @@ import { toCreatedEvent, toMarketDTO } from '@/lib/serialize';
 
 export const dynamic = 'force-dynamic';
 
-const VALID_STATUS: MarketStatus[] = ['ACTIVE', 'EXPIRED', 'RESOLVED'];
-
-/** GET /api/markets?status&category&sort&page&limit */
+/** GET /api/markets?status&category&sort&page&limit
+ *  status: open (default, = not resolved) | resolved | all | active | expired */
 export async function GET(req: NextRequest) {
   const sp = req.nextUrl.searchParams;
-  const status = (sp.get('status') ?? 'all').toUpperCase();
+  const status = (sp.get('status') ?? 'open').toLowerCase();
   const category = sp.get('category');
   const sort = (sp.get('sort') ?? 'volume') as MarketSort;
   const page = Math.max(1, Number(sp.get('page') ?? '1') || 1);
   const limit = Math.min(60, Math.max(1, Number(sp.get('limit') ?? '24') || 24));
 
   const where: Prisma.MarketWhereInput = {};
-  if (status !== 'ALL' && VALID_STATUS.includes(status as MarketStatus)) {
-    where.status = status;
-  }
+  if (status === 'open') where.status = { not: 'RESOLVED' };
+  else if (status === 'resolved') where.status = 'RESOLVED';
+  else if (status === 'active') where.status = 'ACTIVE';
+  else if (status === 'expired') where.status = 'EXPIRED';
+  // 'all' -> no status filter
   if (category && category !== 'all') {
     where.category = { slug: category };
   }

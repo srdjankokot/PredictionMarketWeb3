@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import type { Category, MarketSort } from '@predictx/shared';
-import { useMarketStore } from '@/store/marketStore';
+import { useMarketStore, type StatusFilter } from '@/store/marketStore';
 
 const SORTS: { value: MarketSort; label: string }[] = [
   { value: 'volume', label: 'Volume' },
@@ -10,9 +10,16 @@ const SORTS: { value: MarketSort; label: string }[] = [
   { value: 'ending', label: 'Ending soon' },
 ];
 
+const STATUS_TABS: { value: StatusFilter; label: string }[] = [
+  { value: 'open', label: 'Open' },
+  { value: 'resolved', label: 'Resolved' },
+  { value: 'all', label: 'All' },
+];
+
 export function CategoryFilter() {
   const category = useMarketStore((s) => s.category);
   const sort = useMarketStore((s) => s.sort);
+  const status = useMarketStore((s) => s.status);
   const setFilters = useMarketStore((s) => s.setFilters);
   const [categories, setCategories] = useState<Category[]>([]);
 
@@ -30,21 +37,19 @@ export function CategoryFilter() {
   }, []);
 
   return (
-    <div className="glass sticky top-14 z-30 -mx-4 mb-4 border-b px-4 py-3 backdrop-blur">
-      <div className="flex items-center gap-3">
-        <div className="scroll-thin flex flex-1 items-center gap-2 overflow-x-auto pb-1">
-          <Pill active={category === 'all'} onClick={() => setFilters({ category: 'all' })}>
-            All
-          </Pill>
-          {categories.map((c) => (
-            <Pill
-              key={c.id}
-              active={category === c.slug}
-              onClick={() => setFilters({ category: c.slug })}
+    <div className="glass sticky top-14 z-30 -mx-4 mb-4 space-y-2 border-b px-4 py-3 backdrop-blur">
+      <div className="flex items-center justify-between gap-3">
+        <div className="flex gap-1">
+          {STATUS_TABS.map((t) => (
+            <button
+              key={t.value}
+              onClick={() => setFilters({ status: t.value })}
+              className={`rounded-md px-3 py-1 text-xs font-semibold transition ${
+                status === t.value ? 'tint-brand text-brand' : 'text-muted hover:text-ink'
+              }`}
             >
-              <span className="mr-1">{c.icon}</span>
-              {c.name}
-            </Pill>
+              {t.label}
+            </button>
           ))}
         </div>
 
@@ -60,6 +65,22 @@ export function CategoryFilter() {
             </option>
           ))}
         </select>
+      </div>
+
+      <div className="scroll-thin flex items-center gap-2 overflow-x-auto pb-1">
+        <Pill active={category === 'all'} onClick={() => setFilters({ category: 'all' })}>
+          All
+        </Pill>
+        {categories.map((c) => (
+          <Pill
+            key={c.id}
+            active={category === c.slug}
+            onClick={() => setFilters({ category: c.slug })}
+          >
+            <span className="mr-1">{c.icon}</span>
+            {c.name}
+          </Pill>
+        ))}
       </div>
     </div>
   );

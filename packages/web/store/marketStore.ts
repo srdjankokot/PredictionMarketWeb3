@@ -7,11 +7,14 @@ import type {
   MarketTradeEvent,
 } from '@predictx/shared';
 
+/** Listing status filter: open = not yet resolved (active + awaiting resolution). */
+export type StatusFilter = 'open' | 'resolved' | 'all';
+
 interface Filters {
   /** category slug or 'all' */
   category: string;
   sort: MarketSort;
-  status: MarketStatus | 'all';
+  status: StatusFilter;
 }
 
 interface MarketState extends Filters {
@@ -30,7 +33,7 @@ interface MarketState extends Filters {
 
 function buildQuery(f: Filters): string {
   const p = new URLSearchParams();
-  if (f.status !== 'all') p.set('status', f.status);
+  p.set('status', f.status);
   if (f.category !== 'all') p.set('category', f.category);
   p.set('sort', f.sort);
   return p.toString();
@@ -42,7 +45,7 @@ export const useMarketStore = create<MarketState>((set, get) => ({
   error: null,
   category: 'all',
   sort: 'volume',
-  status: 'all',
+  status: 'open',
 
   setFilters: (f) => {
     set(f);
