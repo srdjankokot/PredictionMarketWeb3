@@ -1,5 +1,3 @@
-import { mkdir, writeFile } from 'fs/promises';
-import path from 'path';
 import { NextResponse, type NextRequest } from 'next/server';
 import sharp from 'sharp';
 import { isAdminRequest } from '@/lib/auth';
@@ -12,8 +10,9 @@ const ALLOWED = ['image/jpeg', 'image/png', 'image/webp'];
 
 /**
  * POST /api/upload — multipart/form-data, field "image".
- * Validates type/size, crops to a 400x400 square (sharp), and stores the result.
- * MVP storage is the local public/uploads dir; swap for S3/Cloudinary in prod.
+ * Resizes to a small square (sharp) and returns it as a base64 data URI, which
+ * is stored directly in the DB. No filesystem: works on ephemeral hosts (Render
+ * free) and survives restarts/spin-downs. For very high volume, swap to S3/R2.
  */
 export async function POST(req: NextRequest) {
   if (!isAdminRequest(req)) {
@@ -32,21 +31,19 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Only JPG, PNG or WebP allowed' }, { status: 415 });
   }
 
+  const input = Buffer.from(await file.arrayBuffer());
+  let dataUrl: string;
   try {
-    const input = Buffer.from(await file.arrayBuffer());
     const output = await sharp(input)
-      .resize(400, 400, { fit: 'cover', position: 'centre' })
-      .webp({ quality: 82 })
+      .resize(256, 256, { fit: 'cover', position: 'centre' })
+      .webp({ quality: 80 })
       .toBuffer();
-
-    const dir = path.join(process.cwd(), 'public', 'uploads');
-    await mkdir(dir, { recursive: true });
-    const name = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}.webp`;
-    await writeFile(path.join(dir, name), output);
-
-    return NextResponse.json({ imageUrl: `/uploads/${name}` });
+    dataUrl = `data:image/webp;base64,${output.toString('base64')}`;
   } catch (err) {
-    console.error('[upload] failed', err);
-    return NextResponse.json({ error: 'Image processing failed' }, { status: 500 });
+    // sharp unavailable/failed — fall back to the original bytes (still capped at 2MB).
+    console.error('[upload] sharp failed, storing original', err);
+    dataUrl = `data:${file.type};base64,${input.toString('base64')}`;
   }
+
+  return NextResponse.json({ imageUrl: dataUrl });
 }
