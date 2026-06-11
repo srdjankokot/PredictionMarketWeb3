@@ -41,6 +41,9 @@ export interface Market {
   imageUrl: string | null;
   yesLabel: string;
   noLabel: string;
+  /** Optional images/logos for each outcome (e.g. team or candidate). */
+  yesImageUrl?: string | null;
+  noImageUrl?: string | null;
   /** Pool sizes in human USDC units (read from chain / mirrored in DB). */
   yesPool: number;
   noPool: number;

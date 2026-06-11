@@ -83,6 +83,7 @@ function ActivePanel({ market, onTraded }: { market: Market; onTraded: () => voi
           side="yes"
           label={market.yesLabel}
           price={market.yesPrice}
+          image={market.yesImageUrl}
           onClick={() => setIsYes(true)}
         />
         <SegButton
@@ -90,6 +91,7 @@ function ActivePanel({ market, onTraded }: { market: Market; onTraded: () => voi
           side="no"
           label={market.noLabel}
           price={market.noPrice}
+          image={market.noImageUrl}
           onClick={() => setIsYes(false)}
         />
       </div>
@@ -280,12 +282,14 @@ function SegButton({
   side,
   label,
   price,
+  image,
   onClick,
 }: {
   active: boolean;
   side: 'yes' | 'no';
   label: string;
   price: number;
+  image?: string | null;
   onClick: () => void;
 }) {
   return (
@@ -300,6 +304,10 @@ function SegButton({
           }}
           transition={{ type: 'spring', stiffness: 380, damping: 30 }}
         />
+      )}
+      {image && (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img src={image} alt="" className="relative z-10 mb-1 h-7 w-7 rounded-full object-cover" />
       )}
       <span
         className={`relative z-10 text-sm font-semibold ${

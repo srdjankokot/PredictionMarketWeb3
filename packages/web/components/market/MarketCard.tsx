@@ -28,7 +28,13 @@ export function MarketCard({ market }: { market: Market }) {
         </div>
       </div>
 
-      <ProbabilityBar yesLabel={market.yesLabel} noLabel={market.noLabel} yesPrice={market.yesPrice} />
+      <ProbabilityBar
+        yesLabel={market.yesLabel}
+        noLabel={market.noLabel}
+        yesPrice={market.yesPrice}
+        yesImageUrl={market.yesImageUrl}
+        noImageUrl={market.noImageUrl}
+      />
 
       <div className="mt-auto flex items-center justify-between pt-1 text-xs text-muted">
         <span className="inline-flex items-center gap-1 tabular-nums">

@@ -44,6 +44,8 @@ model Market {
   imageUrl    String? // optional, cloud storage URL
   yesLabel    String   @default("YES") // max 20 chars
   noLabel     String   @default("NO") // max 20 chars
+  yesImageUrl String? // optional image/logo for the YES outcome
+  noImageUrl  String? // optional image/logo for the NO outcome
   // Cached chain state (human USDC), updated by the event listener on each trade.
   // Prices are derived from the pools; not the source of truth (chain is).
   yesPool     Float    @default(0)

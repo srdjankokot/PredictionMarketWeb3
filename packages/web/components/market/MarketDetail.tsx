@@ -114,13 +114,25 @@ export function MarketDetail({
         <div className="card p-5">
           <div className="mb-3 grid grid-cols-2 gap-3">
             <div className="rounded-xl tint-yes px-3 py-2.5">
-              <div className="text-xs text-muted">{market.yesLabel}</div>
+              <div className="flex items-center gap-1.5 text-xs text-muted">
+                {market.yesImageUrl && (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img src={market.yesImageUrl} alt="" className="h-4 w-4 rounded-full object-cover" />
+                )}
+                <span className="truncate">{market.yesLabel}</span>
+              </div>
               <div className="text-3xl font-bold tabular-nums text-yes">
                 {Math.round(market.yesPrice * 100)}%
               </div>
             </div>
             <div className="rounded-xl tint-no px-3 py-2.5 text-right">
-              <div className="text-xs text-muted">{market.noLabel}</div>
+              <div className="flex items-center justify-end gap-1.5 text-xs text-muted">
+                {market.noImageUrl && (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img src={market.noImageUrl} alt="" className="h-4 w-4 rounded-full object-cover" />
+                )}
+                <span className="truncate">{market.noLabel}</span>
+              </div>
               <div className="text-3xl font-bold tabular-nums text-no">
                 {Math.round(market.noPrice * 100)}%
               </div>

@@ -94,6 +94,8 @@ export const useMarketStore = create<MarketState>((set, get) => ({
         imageUrl: e.imageUrl,
         yesLabel: e.yesLabel,
         noLabel: e.noLabel,
+        yesImageUrl: e.yesImageUrl,
+        noImageUrl: e.noImageUrl,
         yesPool: e.yesPool,
         noPool: e.noPool,
         yesPrice: e.yesPrice,

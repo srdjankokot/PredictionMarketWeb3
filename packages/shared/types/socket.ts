@@ -76,6 +76,8 @@ export interface MarketCreatedEvent {
   yesLabel: string;
   noLabel: string;
   imageUrl: string | null;
+  yesImageUrl?: string | null;
+  noImageUrl?: string | null;
   /** 0.5 on creation (always 1:1 seed). */
   yesPrice: number;
   noPrice: number;

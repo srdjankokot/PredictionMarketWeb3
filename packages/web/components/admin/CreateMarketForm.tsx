@@ -33,6 +33,8 @@ export function CreateMarketForm({ adminAddress }: { adminAddress: string }) {
   const [endTime, setEndTime] = useState('12:00');
   const [seedStr, setSeedStr] = useState('100');
   const [imageUrl, setImageUrl] = useState<string | null>(null);
+  const [yesImageUrl, setYesImageUrl] = useState<string | null>(null);
+  const [noImageUrl, setNoImageUrl] = useState<string | null>(null);
   const [yesLabel, setYesLabel] = useState('');
   const [noLabel, setNoLabel] = useState('');
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -68,6 +70,8 @@ export function CreateMarketForm({ adminAddress }: { adminAddress: string }) {
       imageUrl,
       yesLabel: yesLabel || 'YES',
       noLabel: noLabel || 'NO',
+      yesImageUrl,
+      noImageUrl,
       yesPool: seed / 2,
       noPool: seed / 2,
       yesPrice: 0.5,
@@ -75,7 +79,7 @@ export function CreateMarketForm({ adminAddress }: { adminAddress: string }) {
       volume: 0,
       createdAt: new Date().toISOString(),
     }),
-    [question, description, selectedCategory, endISO, imageUrl, yesLabel, noLabel, seed],
+    [question, description, selectedCategory, endISO, imageUrl, yesImageUrl, noImageUrl, yesLabel, noLabel, seed],
   );
 
   function validate(): Record<string, string> {
@@ -141,6 +145,8 @@ export function CreateMarketForm({ adminAddress }: { adminAddress: string }) {
           imageUrl,
           yesLabel: yesLabel.trim() || undefined,
           noLabel: noLabel.trim() || undefined,
+          yesImageUrl,
+          noImageUrl,
         }),
       });
       if (!res.ok) {
@@ -222,6 +228,27 @@ export function CreateMarketForm({ adminAddress }: { adminAddress: string }) {
             </Field>
           </div>
           {errors.labels && <p className="text-xs text-no">{errors.labels}</p>}
+
+          <div className="grid grid-cols-2 gap-3">
+            <Field label="YES image (optional)">
+              <ImageUpload
+                value={yesImageUrl}
+                fallback={yesLabel.trim()[0]?.toUpperCase() ?? '✓'}
+                adminAddress={adminAddress}
+                onChange={setYesImageUrl}
+                onError={(m) => push('error', m)}
+              />
+            </Field>
+            <Field label="NO image (optional)">
+              <ImageUpload
+                value={noImageUrl}
+                fallback={noLabel.trim()[0]?.toUpperCase() ?? '✕'}
+                adminAddress={adminAddress}
+                onChange={setNoImageUrl}
+                onError={(m) => push('error', m)}
+              />
+            </Field>
+          </div>
         </Section>
 
         {needsApproval && !busy && (

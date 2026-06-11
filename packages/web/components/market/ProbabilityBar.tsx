@@ -1,6 +1,6 @@
 /**
  * Combined YES/NO probability bar — one rounded track split green (YES) / red (NO),
- * with labels + percentages. Cleaner and more modern than two stacked bars.
+ * with labels + percentages. Optional per-outcome images replace the colored dot.
  */
 export function ProbabilityBar({
   yesLabel,
@@ -8,12 +8,16 @@ export function ProbabilityBar({
   yesPrice,
   size = 'sm',
   showLabels = true,
+  yesImageUrl,
+  noImageUrl,
 }: {
   yesLabel: string;
   noLabel: string;
   yesPrice: number;
   size?: 'sm' | 'lg';
   showLabels?: boolean;
+  yesImageUrl?: string | null;
+  noImageUrl?: string | null;
 }) {
   const yesPct = Math.max(0, Math.min(100, Math.round(yesPrice * 100)));
   const noPct = 100 - yesPct;
@@ -25,12 +29,12 @@ export function ProbabilityBar({
       {showLabels && (
         <div className={`mb-1.5 flex items-center justify-between font-semibold tabular-nums ${textSize}`}>
           <span className="flex min-w-0 items-center gap-1.5 text-yes">
-            <Dot side="yes" />
+            <Mark side="yes" image={yesImageUrl} size={size} />
             <span className="truncate">{yesLabel}</span> {yesPct}%
           </span>
           <span className="flex min-w-0 items-center gap-1.5 text-no">
             {noPct}% <span className="truncate">{noLabel}</span>
-            <Dot side="no" />
+            <Mark side="no" image={noImageUrl} size={size} />
           </span>
         </div>
       )}
@@ -48,10 +52,20 @@ export function ProbabilityBar({
   );
 }
 
-function Dot({ side }: { side: 'yes' | 'no' }) {
+function Mark({ side, image, size }: { side: 'yes' | 'no'; image?: string | null; size: 'sm' | 'lg' }) {
+  if (image) {
+    // eslint-disable-next-line @next/next/no-img-element
+    return (
+      <img
+        src={image}
+        alt=""
+        className={`${size === 'lg' ? 'h-5 w-5' : 'h-4 w-4'} shrink-0 rounded-full object-cover`}
+      />
+    );
+  }
   return (
     <span
-      className="inline-block h-1.5 w-1.5 shrink-0 rounded-full"
+      className={`inline-block ${size === 'lg' ? 'h-2 w-2' : 'h-1.5 w-1.5'} shrink-0 rounded-full`}
       style={{ background: `var(--color-${side})` }}
     />
   );

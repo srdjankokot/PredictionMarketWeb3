@@ -64,7 +64,18 @@ export async function POST(req: NextRequest) {
   const body = await req.json().catch(() => null);
   if (!body) return NextResponse.json({ error: 'Invalid JSON' }, { status: 400 });
 
-  const { contractId, question, description, categoryId, endDate, imageUrl, yesLabel, noLabel } = body;
+  const {
+    contractId,
+    question,
+    description,
+    categoryId,
+    endDate,
+    imageUrl,
+    yesLabel,
+    noLabel,
+    yesImageUrl,
+    noImageUrl,
+  } = body;
   if (!contractId || !question || !description || !categoryId || !endDate) {
     return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
   }
@@ -94,6 +105,8 @@ export async function POST(req: NextRequest) {
       imageUrl: imageUrl || null,
       yesLabel: yesLabel || 'YES',
       noLabel: noLabel || 'NO',
+      yesImageUrl: yesImageUrl || null,
+      noImageUrl: noImageUrl || null,
       yesPool,
       noPool,
     },
@@ -108,6 +121,8 @@ export async function POST(req: NextRequest) {
       imageUrl: imageUrl || null,
       yesLabel: yesLabel || 'YES',
       noLabel: noLabel || 'NO',
+      yesImageUrl: yesImageUrl || null,
+      noImageUrl: noImageUrl || null,
       yesPool,
       noPool,
       volume: 0,
