@@ -77,8 +77,8 @@ export const useMarketStore = create<MarketState>((set, get) => ({
   prependCreated: (e) =>
     set((state) => {
       if (state.markets.some((m) => m.id === e.marketId)) return state;
-      // Only surface in the current view if it matches the active filters.
-      const matchesStatus = state.status === 'all' || state.status === 'ACTIVE';
+      // A new market is ACTIVE -> show it unless the view is filtered to resolved.
+      const matchesStatus = state.status !== 'resolved';
       const matchesCategory = state.category === 'all' || state.category === e.category.slug;
       if (!matchesStatus || !matchesCategory) return state;
       const market: Market = {
