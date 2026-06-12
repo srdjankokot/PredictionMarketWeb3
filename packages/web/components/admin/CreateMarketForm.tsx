@@ -12,6 +12,7 @@ import { ERC20ABI, PredictionMarketABI } from '@/lib/abi';
 import { CONTRACT_ADDRESS, USDC_ADDRESS } from '@/lib/constants';
 import { parseContractError } from '@/lib/errors';
 import { formatDateTimeWithUtc, formatUsd, toUsdcUnits } from '@/lib/format';
+import { loader } from '@/store/loaderStore';
 import { useWalletStore } from '@/store/walletStore';
 
 type Status = 'idle' | 'approving' | 'creating' | 'saving';
@@ -105,6 +106,7 @@ export function CreateMarketForm({ adminAddress }: { adminAddress: string }) {
       const seedRaw = toUsdcUnits(seed);
       if (allowance < seedRaw) {
         setStatus('approving');
+        loader.show('Approving USDC…');
         const aHash = await writeContractAsync({
           address: USDC_ADDRESS,
           abi: ERC20ABI,
@@ -115,6 +117,7 @@ export function CreateMarketForm({ adminAddress }: { adminAddress: string }) {
       }
 
       setStatus('creating');
+      loader.show('Creating market…');
       const endSec = BigInt(Math.floor(endMs / 1000));
       const cHash = await writeContractAsync({
         address: CONTRACT_ADDRESS,
@@ -133,6 +136,7 @@ export function CreateMarketForm({ adminAddress }: { adminAddress: string }) {
       );
 
       setStatus('saving');
+      loader.show('Saving market…');
       const res = await fetch('/api/markets', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'x-wallet-address': adminAddress },
@@ -160,6 +164,8 @@ export function CreateMarketForm({ adminAddress }: { adminAddress: string }) {
     } catch (err) {
       push('error', parseContractError(err));
       setStatus('idle');
+    } finally {
+      loader.hide();
     }
   }
 

@@ -15,6 +15,7 @@ import { PredictionMarketABI } from '@/lib/abi';
 import { CONTRACT_ADDRESS, FEE_RATE, IS_FEE_ENABLED, PRICE_IMPACT_WARNING } from '@/lib/constants';
 import { parseContractError } from '@/lib/errors';
 import { formatPercent, formatShares, formatUsd, toUsdcUnits } from '@/lib/format';
+import { loader } from '@/store/loaderStore';
 import { useWalletStore } from '@/store/walletStore';
 
 export function TradingPanel({ market, onTraded }: { market: Market; onTraded: () => void }) {
@@ -216,6 +217,7 @@ function ResolvedPanel({ market, onClaimed }: { market: Market; onClaimed: () =>
   async function handleClaim() {
     if (!address || !publicClient) return;
     setClaiming(true);
+    loader.show('Claiming winnings…');
     try {
       const hash = await writeContractAsync({
         address: CONTRACT_ADDRESS,
@@ -233,6 +235,7 @@ function ResolvedPanel({ market, onClaimed }: { market: Market; onClaimed: () =>
       push('error', parseContractError(err));
     } finally {
       setClaiming(false);
+      loader.hide();
     }
   }
 

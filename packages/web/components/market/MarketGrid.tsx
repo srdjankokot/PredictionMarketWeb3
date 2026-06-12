@@ -3,8 +3,8 @@
 import { motion, type Variants } from 'framer-motion';
 import type { Market } from '@predictx/shared';
 import { MarketCard } from '@/components/market/MarketCard';
+import { CoinLoader } from '@/components/shared/CoinLoader';
 import { EmptyState } from '@/components/shared/EmptyState';
-import { MarketCardSkeleton } from '@/components/shared/Skeleton';
 
 const container: Variants = {
   hidden: {},
@@ -19,10 +19,9 @@ const item: Variants = {
 export function MarketGrid({ markets, isLoading }: { markets: Market[]; isLoading: boolean }) {
   if (isLoading) {
     return (
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        {Array.from({ length: 6 }).map((_, i) => (
-          <MarketCardSkeleton key={i} />
-        ))}
+      <div className="flex flex-col items-center justify-center gap-3 py-24">
+        <CoinLoader size={48} />
+        <p className="text-sm text-muted">Loading markets…</p>
       </div>
     );
   }

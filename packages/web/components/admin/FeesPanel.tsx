@@ -7,6 +7,7 @@ import { PredictionMarketABI } from '@/lib/abi';
 import { CONTRACT_ADDRESS } from '@/lib/constants';
 import { parseContractError } from '@/lib/errors';
 import { formatUsd, fromUsdcUnits, truncateAddress } from '@/lib/format';
+import { loader } from '@/store/loaderStore';
 import { useWalletStore } from '@/store/walletStore';
 
 export function FeesPanel() {
@@ -48,6 +49,7 @@ export function FeesPanel() {
   async function withdraw() {
     if (!publicClient) return;
     setBusy(true);
+    loader.show('Withdrawing fees…');
     try {
       const hash = await writeContractAsync({
         address: CONTRACT_ADDRESS,
@@ -62,6 +64,7 @@ export function FeesPanel() {
       push('error', parseContractError(err));
     } finally {
       setBusy(false);
+      loader.hide();
     }
   }
 
@@ -74,6 +77,7 @@ export function FeesPanel() {
     }
     const bps = Math.round(pct * 100);
     setSettingFee(true);
+    loader.show('Updating fee…');
     try {
       const hash = await writeContractAsync({
         address: CONTRACT_ADDRESS,
@@ -89,6 +93,7 @@ export function FeesPanel() {
       push('error', parseContractError(err));
     } finally {
       setSettingFee(false);
+      loader.hide();
     }
   }
 

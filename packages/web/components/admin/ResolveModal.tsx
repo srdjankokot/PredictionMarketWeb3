@@ -7,6 +7,7 @@ import { useToast } from '@/components/shared/Toast';
 import { PredictionMarketABI } from '@/lib/abi';
 import { CONTRACT_ADDRESS } from '@/lib/constants';
 import { parseContractError } from '@/lib/errors';
+import { loader } from '@/store/loaderStore';
 
 /**
  * Confirms a resolution. Tries the server-side path (POST /api/admin/resolve/[id],
@@ -35,6 +36,7 @@ export function ResolveModal({
 
   async function confirm() {
     setBusy(true);
+    loader.show('Resolving market…');
     try {
       const res = await fetch(`/api/admin/resolve/${market.id}`, {
         method: 'POST',
@@ -64,6 +66,7 @@ export function ResolveModal({
       push('error', parseContractError(err));
     } finally {
       setBusy(false);
+      loader.hide();
     }
   }
 

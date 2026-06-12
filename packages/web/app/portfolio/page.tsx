@@ -14,6 +14,7 @@ import { PredictionMarketABI } from '@/lib/abi';
 import { CONTRACT_ADDRESS } from '@/lib/constants';
 import { parseContractError } from '@/lib/errors';
 import { formatShares, formatUsd } from '@/lib/format';
+import { loader } from '@/store/loaderStore';
 import { useWalletStore } from '@/store/walletStore';
 
 type Tab = 'open' | 'resolved';
@@ -150,6 +151,7 @@ function PositionAction({ position, onClaimed }: { position: Position; onClaimed
   async function claim() {
     if (!publicClient) return;
     setClaiming(true);
+    loader.show('Claiming winnings…');
     try {
       const hash = await writeContractAsync({
         address: CONTRACT_ADDRESS,
@@ -165,6 +167,7 @@ function PositionAction({ position, onClaimed }: { position: Position; onClaimed
       push('error', parseContractError(err));
     } finally {
       setClaiming(false);
+      loader.hide();
     }
   }
 

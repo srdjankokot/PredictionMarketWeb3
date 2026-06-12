@@ -7,6 +7,7 @@ import { ERC20ABI, PredictionMarketABI } from '@/lib/abi';
 import { CONTRACT_ADDRESS, SLIPPAGE_TOLERANCE, USDC_ADDRESS } from '@/lib/constants';
 import { parseContractError } from '@/lib/errors';
 import { toUsdcUnits } from '@/lib/format';
+import { loader } from '@/store/loaderStore';
 import { useWalletStore } from '@/store/walletStore';
 
 export type TradeStatus = 'idle' | 'approving' | 'buying' | 'confirmed' | 'error';
@@ -39,6 +40,7 @@ export function useTrade(contractId: number) {
 
     try {
       // 1. Approve if allowance is insufficient.
+      loader.show('Checking allowance…');
       const allowance = (await publicClient.readContract({
         address: USDC_ADDRESS,
         abi: ERC20ABI,
@@ -48,6 +50,7 @@ export function useTrade(contractId: number) {
 
       if (allowance < amountRaw) {
         setStatus('approving');
+        loader.show('Approving USDC…');
         const approveHash = await writeContractAsync({
           address: USDC_ADDRESS,
           abi: ERC20ABI,
@@ -59,6 +62,7 @@ export function useTrade(contractId: number) {
 
       // 2. Buy with slippage protection.
       setStatus('buying');
+      loader.show('Buying shares…');
       const minShares = toUsdcUnits(expectedShares * (1 - SLIPPAGE_TOLERANCE));
       const hash = await writeContractAsync({
         address: CONTRACT_ADDRESS,
@@ -67,6 +71,7 @@ export function useTrade(contractId: number) {
         args: [BigInt(contractId), isYes, amountRaw, minShares],
       });
       setTxHash(hash);
+      loader.show('Confirming…');
       await publicClient.waitForTransactionReceipt({ hash });
 
       setStatus('confirmed');
@@ -76,6 +81,8 @@ export function useTrade(contractId: number) {
       setError(parseContractError(err));
       setStatus('error');
       return false;
+    } finally {
+      loader.hide();
     }
   }
 

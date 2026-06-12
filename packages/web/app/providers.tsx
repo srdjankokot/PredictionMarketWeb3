@@ -5,6 +5,7 @@ import { RainbowKitProvider, darkTheme } from '@rainbow-me/rainbowkit';
 import '@rainbow-me/rainbowkit/styles.css';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { WagmiProvider } from 'wagmi';
+import { AppLoader } from '@/components/AppLoader';
 import { SocketManager } from '@/components/SocketManager';
 import { TenantProvider } from '@/components/TenantProvider';
 import { ToastProvider } from '@/components/shared/Toast';
@@ -25,6 +26,7 @@ export function Providers({ tenant, children }: { tenant: TenantConfig; children
               <WalletSync />
               <SocketManager />
               <UnclaimedWinningsNotifier />
+              <AppLoader />
               {children}
             </ToastProvider>
           </TenantProvider>
