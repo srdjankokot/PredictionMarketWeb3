@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { maxUint256 } from 'viem';
+import { maxUint256, parseEventLogs } from 'viem';
 import { usePublicClient, useWriteContract } from 'wagmi';
 import type { Category, Market } from '@predictx/shared';
 import { ImageUpload } from '@/components/admin/ImageUpload';
@@ -125,15 +125,19 @@ export function CreateMarketForm({ adminAddress }: { adminAddress: string }) {
         functionName: 'createMarket',
         args: [question.trim(), endSec, seedRaw],
       });
-      await publicClient.waitForTransactionReceipt({ hash: cHash });
+      const receipt = await publicClient.waitForTransactionReceipt({ hash: cHash });
 
-      const contractId = Number(
-        await publicClient.readContract({
-          address: CONTRACT_ADDRESS,
-          abi: PredictionMarketABI,
-          functionName: 'marketCount',
-        }),
-      );
+      // Read the new market id from the MarketCreated event in THIS tx — reliable,
+      // unlike marketCount (a load-balanced RPC can return a stale value and the
+      // metadata would land on the wrong market).
+      const events = parseEventLogs({
+        abi: PredictionMarketABI,
+        eventName: 'MarketCreated',
+        logs: receipt.logs,
+      });
+      const marketId = (events[0] as { args?: { marketId?: bigint } } | undefined)?.args?.marketId;
+      if (marketId === undefined) throw new Error('Could not read the new market id from the transaction');
+      const contractId = Number(marketId);
 
       setStatus('saving');
       loader.show('Saving market…');

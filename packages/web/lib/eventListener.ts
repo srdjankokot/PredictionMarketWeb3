@@ -50,10 +50,11 @@ export async function reconcileMarketsFromChain(): Promise<void> {
 
     const existing = await prisma.market.findUnique({ where: { id } });
     if (existing) {
-      // keep off-chain metadata, refresh chain-derived fields
+      // Keep off-chain metadata, but the question is the on-chain commitment (truth),
+      // so always sync it — this also self-corrects any row whose title was mis-saved.
       await prisma.market.update({
         where: { id },
-        data: { yesPool, noPool, resolved, outcome, status },
+        data: { question: oc.question, yesPool, noPool, resolved, outcome, status },
       });
       updated += 1;
     } else if (other) {
