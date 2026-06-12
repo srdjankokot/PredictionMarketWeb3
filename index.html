@@ -3,43 +3,41 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>PredictX — Master Build Prompt</title>
+<title>PredictX — Master Build Prompt (detailed)</title>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Syne:wght@400;600;700;800&display=swap');
   * { box-sizing: border-box; margin: 0; padding: 0; }
   :root {
     --bg: #0a0a0f; --panel: #12121a; --line: rgba(255,255,255,.09);
-    --txt: #e8e6f0; --muted: #8a8699; --accent: #7b6fff; --yes: #22c55e; --no: #ef4444; --amber: #f5a524;
+    --txt: #e8e6f0; --muted: #8a8699; --accent: #7b6fff; --yes: #22c55e; --no: #ef4444; --amber: #f5a524; --teal:#2dd4bf;
   }
-  body { font-family: 'Syne', sans-serif; background: var(--bg); color: var(--txt); line-height: 1.55;
-    padding: 2.5rem 1.25rem 5rem; }
-  .wrap { max-width: 880px; margin: 0 auto; }
-  .badge { display:inline-block; font-family:'JetBrains Mono',monospace; font-size:10px; letter-spacing:.14em;
-    text-transform:uppercase; color:var(--accent); border:.5px solid rgba(123,111,255,.4); padding:3px 10px; border-radius:5px; }
+  body { font-family: 'Syne', sans-serif; background: var(--bg); color: var(--txt); line-height: 1.55; padding: 2.5rem 1.25rem 5rem; }
+  .wrap { max-width: 900px; margin: 0 auto; }
+  .badge { display:inline-block; font-family:'JetBrains Mono',monospace; font-size:10px; letter-spacing:.14em; text-transform:uppercase; color:var(--accent); border:.5px solid rgba(123,111,255,.4); padding:3px 10px; border-radius:5px; }
   h1 { font-size: 30px; font-weight: 800; color:#fff; line-height:1.15; margin:.7rem 0 .3rem; }
   h1 span { color: var(--accent); }
   .meta { font-family:'JetBrains Mono',monospace; font-size:12px; color:var(--muted); }
-  .copy { float:right; font-family:'JetBrains Mono',monospace; font-size:12px; color:var(--accent);
-    background:transparent; border:.5px solid rgba(123,111,255,.4); padding:7px 14px; border-radius:7px; cursor:pointer; }
+  .copy { float:right; font-family:'JetBrains Mono',monospace; font-size:12px; color:var(--accent); background:transparent; border:.5px solid rgba(123,111,255,.4); padding:7px 14px; border-radius:7px; cursor:pointer; }
   .copy:hover { background: rgba(123,111,255,.1); }
+  .toc { display:flex; flex-wrap:wrap; gap:.4rem; margin:1.4rem 0 .5rem; font-family:'JetBrains Mono',monospace; font-size:11px; }
+  .toc a { color:var(--muted); text-decoration:none; border:.5px solid var(--line); padding:3px 8px; border-radius:5px; }
+  .toc a:hover { color:var(--accent); border-color:rgba(123,111,255,.4); }
   section { border-top:.5px solid var(--line); padding:1.6rem 0; }
-  h2 { font-size:19px; font-weight:700; color:#fff; margin-bottom:.6rem; }
+  h2 { font-size:19px; font-weight:700; color:#fff; margin-bottom:.6rem; scroll-margin-top:1rem; }
   h2 .n { font-family:'JetBrains Mono',monospace; font-size:12px; color:var(--accent); margin-right:.55rem; }
-  h3 { font-size:14px; font-weight:700; color:#cfcadf; margin:1rem 0 .35rem; text-transform:uppercase; letter-spacing:.04em; }
-  p, li { font-size:14.5px; color:var(--txt); }
-  ul { margin:.3rem 0 .3rem 1.1rem; } li { margin:.18rem 0; }
+  h3 { font-size:13.5px; font-weight:700; color:#cfcadf; margin:1.1rem 0 .35rem; text-transform:uppercase; letter-spacing:.04em; }
+  p, li, td { font-size:14px; color:var(--txt); }
+  ul { margin:.3rem 0 .3rem 1.1rem; } li { margin:.16rem 0; }
   strong { color:#fff; } em { color: var(--amber); font-style:normal; }
   .muted { color: var(--muted); }
-  code { font-family:'JetBrains Mono',monospace; font-size:12.5px; background:rgba(255,255,255,.06);
-    padding:1px 6px; border-radius:4px; color:#d8d4ea; }
-  pre { font-family:'JetBrains Mono',monospace; font-size:12.5px; background:var(--panel); border:.5px solid var(--line);
-    border-radius:9px; padding:.85rem 1rem; overflow-x:auto; margin:.5rem 0; color:#cdd6e4; line-height:1.5; }
-  .note { border-left:2px solid var(--accent); background:rgba(123,111,255,.06); padding:.6rem .9rem; border-radius:0 8px 8px 0; margin:.6rem 0; font-size:13.5px; }
-  .warn { border-left:2px solid var(--amber); background:rgba(245,165,36,.07); padding:.6rem .9rem; border-radius:0 8px 8px 0; margin:.6rem 0; font-size:13.5px; }
-  .yes { color: var(--yes); } .no { color: var(--no); }
-  table { width:100%; border-collapse:collapse; margin:.5rem 0; font-size:13px; }
-  th, td { text-align:left; padding:.4rem .5rem; border-bottom:.5px solid var(--line); vertical-align:top; }
-  th { color:var(--muted); font-weight:600; font-size:11px; text-transform:uppercase; letter-spacing:.05em; }
+  code { font-family:'JetBrains Mono',monospace; font-size:12px; background:rgba(255,255,255,.06); padding:1px 6px; border-radius:4px; color:#d8d4ea; }
+  pre { font-family:'JetBrains Mono',monospace; font-size:12px; background:var(--panel); border:.5px solid var(--line); border-radius:9px; padding:.85rem 1rem; overflow-x:auto; margin:.5rem 0; color:#cdd6e4; line-height:1.5; white-space:pre; }
+  .note { border-left:2px solid var(--accent); background:rgba(123,111,255,.06); padding:.55rem .9rem; border-radius:0 8px 8px 0; margin:.55rem 0; font-size:13px; }
+  .warn { border-left:2px solid var(--amber); background:rgba(245,165,36,.07); padding:.55rem .9rem; border-radius:0 8px 8px 0; margin:.55rem 0; font-size:13px; }
+  .yes { color: var(--yes); } .no { color: var(--no); } .teal { color: var(--teal); }
+  table { width:100%; border-collapse:collapse; margin:.5rem 0; font-size:12.5px; }
+  th, td { text-align:left; padding:.38rem .5rem; border-bottom:.5px solid var(--line); vertical-align:top; }
+  th { color:var(--muted); font-weight:600; font-size:10.5px; text-transform:uppercase; letter-spacing:.05em; }
   footer { border-top:.5px solid var(--line); margin-top:2rem; padding-top:1.2rem; font-size:12px; color:var(--muted); }
 </style>
 </head>
@@ -47,256 +45,416 @@
 <div class="wrap" id="doc">
 
   <button class="copy" onclick="copyDoc()">Copy full prompt ↗</button>
-  <div class="badge">System Prompt · MVP · v2 (battle-tested)</div>
+  <div class="badge">System Prompt · MVP · v2 (detailed, battle-tested)</div>
   <h1>Build a <span>Prediction Market</span> Platform (PredictX)</h1>
   <div class="meta">Next.js 14 · Solidity 0.8.24 · viem/wagmi · Socket.io · Prisma · Docker — env-driven white-label</div>
 
-  <section>
-    <h2><span class="n">00</span>How to use this prompt</h2>
-    <p>This is the complete, corrected spec for a Polymarket-style prediction-market MVP. It already
-    bakes in every decision and fix discovered while building &amp; deploying it once — follow it literally
-    and you reproduce a working, deployed app without re-hitting the same traps. <em>Pay special attention
-    to the ⚠ items: each marks a mistake that is easy to make and expensive to undo.</em></p>
-  </section>
+  <div class="toc">
+    <a href="#s1">01 Goal</a><a href="#s2">02 Stack</a><a href="#s3">03 Structure</a><a href="#s4">04 Contracts</a>
+    <a href="#s5">05 Tests</a><a href="#s6">06 Slippage/Errors</a><a href="#s7">07 DB schema</a><a href="#s8">08 Data + self-heal</a>
+    <a href="#s9">09 API shapes</a><a href="#s10">10 Realtime</a><a href="#s11">11 Cron/expiry</a><a href="#s12">12 Pages</a>
+    <a href="#s13">13 Create form</a><a href="#s14">14 Edit/locks</a><a href="#s15">15 Images</a><a href="#s16">16 Roles</a>
+    <a href="#s17">17 State</a><a href="#s18">18 Approval</a><a href="#s19">19 Env</a><a href="#s20">20 White-label</a>
+    <a href="#s21">21 UI/UX</a><a href="#s22">22 Deploy</a><a href="#s23">23 Build order</a><a href="#s24">24 Dev specs</a>
+    <a href="#s25">25 Gotchas ⚠</a><a href="#s26">26 Scope</a>
+  </div>
 
-  <section>
+  <section id="s1">
     <h2><span class="n">01</span>Goal &amp; constraints</h2>
     <ul>
-      <li>Users bet on YES/NO outcomes of future events using on-chain USDC. AMM pricing, owner-resolved outcomes, live updates.</li>
-      <li>TypeScript everywhere, strict. All sensitive config via env. Every on-chain write has error handling + user-friendly messages.</li>
-      <li><strong>Blockchain is the single source of truth.</strong> Postgres is a <em>rebuildable cache</em> — it must be reconstructable purely from chain events/state (and the app must self-heal it on startup).</li>
-      <li>MVP scope; built to extend into a multi-tenant white-label protocol.</li>
+      <li>An MVP prediction market where users bet on YES/NO outcomes of future events with on-chain USDC. AMM pricing, owner-resolved outcomes, realtime updates. Production-ready, clean, extensible.</li>
+      <li>All TypeScript, strict. Sensitive config via env only. Every on-chain call has error handling + gas-safe patterns. README with local + deploy instructions.</li>
+      <li><strong>Blockchain is the single source of truth</strong> for markets, pools, share balances, trades (as events) and outcomes. PostgreSQL is a <em>rebuildable cache</em> — reconstructable purely from chain (and the app self-heals it on startup).</li>
+      <li>Designed for a white-label v2 (one codebase, per-tenant via env), so keep all config env-driven.</li>
     </ul>
   </section>
 
-  <section>
+  <section id="s2">
     <h2><span class="n">02</span>Tech stack</h2>
-    <p><strong>Contracts:</strong> Solidity ^0.8.20 (compile 0.8.24), Hardhat + hardhat-toolbox, ethers v6, OpenZeppelin v5 (Ownable needs <code>Ownable(msg.sender)</code>, ERC20 custom errors), TypeChain ethers-v6.</p>
-    <p><strong>Web:</strong> Next.js 14 (App Router) · React 18 · wagmi 2 / viem 2 / RainbowKit · Zustand · Recharts · Socket.io(-client) · Prisma + PostgreSQL · node-cron · sharp · tsx.</p>
-    <p><strong>UI:</strong> Tailwind (CSS-variable tokens) · Inter via <code>next/font</code> · lucide-react (icons, now 1.x) · framer-motion.</p>
-    <div class="warn">⚠ <strong>lucide-react</strong> is at 1.x now (long lived at 0.x). It is the real package (repo <code>lucide-icons/lucide</code>, no install scripts). Don't panic at the major version.</div>
+    <pre>packages/contracts:  hardhat, @nomicfoundation/hardhat-toolbox, ethers@6, @openzeppelin/contracts@5,
+                     dotenv, ts-node, typescript ; solidity 0.8.24 (optimizer 200) ; typechain ethers-v6
+packages/web:        next@14, react@18, wagmi@2, viem@2, @rainbow-me/rainbowkit,
+                     socket.io, socket.io-client, @prisma/client, prisma, zustand, recharts,
+                     node-cron, sharp, ethers@6, clsx, cross-env, tsx,
+                     lucide-react (1.x), framer-motion, Inter via next/font
+packages/shared:     typescript only (shared interfaces)</pre>
+    <p>OpenZeppelin v5: <code>Ownable(msg.sender)</code> in the constructor; ERC20 reverts are custom errors (<code>ERC20InsufficientAllowance</code>, …). Use SafeERC20 + ReentrancyGuard.</p>
+    <div class="warn">⚠ <strong>lucide-react is on 1.x</strong> (was long at 0.x). It is the genuine package (repo <code>lucide-icons/lucide</code>, homepage lucide.dev, no install scripts) — don't mistake the major bump for a typosquat.</div>
   </section>
 
-  <section>
-    <h2><span class="n">03</span>Monorepo structure</h2>
-    <pre>predictx/  (npm workspaces)
-├─ packages/contracts/   Solidity + Hardhat (AMMPricer, PredictionMarket, MockUSDC) + tests + deploy.ts
-├─ packages/web/         Next.js + custom server.ts (Next + Socket.io + cron + event listener)
-└─ packages/shared/      shared TS types (market + socket payloads) — one source of truth
-root: package.json (workspaces), tsconfig.base.json, Dockerfile, docker-compose.yml, DEPLOY.md, .env.example</pre>
-    <p>Web imports ABIs <em>directly</em> from <code>packages/contracts/artifacts</code> (run <code>npm run compile</code> first). Shared socket payload types are imported by both the server emitter and client hooks so emit/receive shapes can't drift.</p>
+  <section id="s3">
+    <h2><span class="n">03</span>Project structure (npm workspaces — one repo, three packages)</h2>
+    <pre>predictx/
+├─ package.json                 root workspaces + scripts (compile/test/deploy/db:push/db:seed/dev/build/start)
+├─ tsconfig.base.json  .env.example  Dockerfile  docker-compose.yml  DEPLOY.md  README.md
+└─ packages/
+   ├─ contracts/
+   │   ├─ contracts/  AMMPricer.sol  PredictionMarket.sol  MockUSDC.sol  AMMPricerHarness.sol(test-only)
+   │   ├─ scripts/deploy.ts        test/  hardhat.config.ts   (artifacts/ generated)
+   ├─ web/
+   │   ├─ server.ts                custom server: Next + Socket.io + cron + event listener
+   │   ├─ app/  page.tsx market/[id]/(page+edit) portfolio create admin/(resolve,categories,fees)
+   │   │        not-found.tsx error.tsx providers.tsx layout.tsx globals.css
+   │   │        api/ markets(+[id]) trades portfolio/[address] admin/(categories[+id],resolve/(pending,[id])) upload
+   │   ├─ components/  layout/(Header,RoleGate) market/(MarketCard,MarketGrid,CategoryFilter,PriceChart,
+   │   │               ProbabilityBar,TradingPanel,ActivityFeed,ResolutionBanner,MarketDetail)
+   │   │               admin/(CreateMarketForm,EditMarketForm,ImageUpload,PendingResolutionList,ResolveModal,FeesPanel)
+   │   │               shared/(Toast,Skeleton,EmptyState,ErrorBoundary,Avatar,AnimatedNumber)
+   │   │               TenantProvider,WalletSync,SocketManager,UnclaimedWinningsNotifier,ThemeToggle
+   │   ├─ hooks/  useRole useMarketSocket useMarketListSocket useAdminSocket useTrade usePortfolio useEffectiveStatus
+   │   ├─ store/  walletStore marketStore adminStore       (Zustand)
+   │   ├─ lib/    wagmi socket constants tenant.config chains prisma loadEnv amm format errors abi/
+   │   │          realtime socketServer chainServer eventListener cron serialize contractReads auth categories
+   │   └─ prisma/ schema.prisma  seed.ts  reset.ts
+   └─ shared/types/  market.ts  socket.ts  index.ts</pre>
+    <p>Web imports ABIs <em>directly</em> from <code>../../contracts/artifacts</code> (run <code>npm run compile</code> first). Shared socket types are imported by the server emitter and client hooks → emit/receive can't drift.</p>
   </section>
 
-  <section>
+  <section id="s4">
     <h2><span class="n">04</span>Smart contracts</h2>
-    <p>Three: <code>AMMPricer.sol</code> (internal pure library — inlined, no separate deploy/link), <code>PredictionMarket.sol</code>, <code>MockUSDC.sol</code> (6-dec ERC20 with open <code>mint()</code>/<code>faucet()</code> — testnet only).</p>
+    <p>Three contracts. <strong>AMMPricer</strong> = pure library, all functions <code>internal pure</code> (inlined → no deploy/link). <strong>MockUSDC</strong> = 6-dec ERC20 with open <code>mint(to,amt)</code> + <code>faucet()</code> (testnet only). <strong>PredictionMarket</strong> = the core.</p>
 
-    <h3>AMM pricing — get the direction right</h3>
-    <pre>yesPrice = yesPool / (yesPool + noPool)        // a side's OWN pool over the total
-noPrice  = noPool  / (yesPool + noPool)
-shares   = usdcAmount / price = usdcAmount * total / ownPool
-invariant: yesPrice + noPrice == 1.0  (±1 wei rounding)</pre>
-    <div class="warn">⚠ <strong>Buying a side RAISES that side's price</strong> (adds to its own pool → its price up, the other down) — like a real prediction market. Do NOT use <code>price = oppositePool/total</code> (that inverts it: buying YES would lower YES%). <code>getShares</code> uses the <em>own</em>-side pool. Keep the Solidity library and the frontend JS replica (<code>lib/amm.ts</code>) in lock-step.</div>
+    <h3>AMMPricer — constant-product, correct direction</h3>
+    <pre>getYesPrice(yesPool, noPool) -> (yesPool * 1e18) / (yesPool + noPool)   // OWN pool / total
+getNoPrice (yesPool, noPool) -> (noPool  * 1e18) / (yesPool + noPool)
+getShares(yesPool, noPool, usdcAmount, isYes) -> usdcAmount * total / ownPool   // = amount / price
+getPriceAfterBuy(yesPool, noPool, usdcAmount, isYes) -> price of bought side after amount enters its pool
+assertInvariant(yesPool, noPool) -> require total>0; yesPrice+noPrice within [1e18-1, 1e18]</pre>
+    <div class="warn">⚠ <strong>Direction matters.</strong> Buying a side adds to its OWN pool and RAISES its price (NO falls) — like Polymarket. Price = ownPool/total (NOT oppositePool/total, which inverts it). Keep <code>lib/amm.ts</code> (JS replica for instant UI preview) identical.</div>
+    <p><strong>Worked example:</strong> seed 1000 → pools 500/500 → YES 50%. Buy YES 100 (fee 0) → shares = 100·1000/500 = 200; pools 600/500 → YES = 600/1100 = <span class="yes">54.5%</span> (rises). Resolve YES, totalPool 1100, you hold 200 of totalYesShares → payout = 200/totalYes · 1100.</p>
 
-    <h3>PredictionMarket.sol</h3>
-    <ul>
-      <li><strong>State:</strong> Market{ id, question, endTime, resolved, outcome, yesPool, noPool, totalShares }; mappings yesShares/noShares[id][addr], totalYes/NoShares[id]; usdc (immutable), treasury, feeBps, accumulatedFees, marketCount.</li>
-      <li><strong>constructor(usdc, treasury, feeBps)</strong> — owner = deployer; require non-zero usdc/treasury, feeBps ≤ 500.</li>
-      <li><strong>createMarket(question, endTime, seedAmount)</strong> onlyOwner — seeds both pools (seedAmount/2 each, odd wei to NO); pulls seed USDC; emits MarketCreated. Seed mints no shares (it subsidises traders).</li>
-      <li><strong>buyShares(id, isYes, usdcAmount, minShares)</strong> — require not resolved, now &lt; endTime, amount&gt;0; fee = usdcAmount*feeBps/10000 kept for treasury (NOT in pool); net enters pool; shares = AMMPricer.getShares(...); require shares ≥ minShares (slippage); pull full usdcAmount; nonReentrant; emit SharesBought(id, buyer, isYes, usdcAmount, shares, newYesPool, newNoPool).</li>
-      <li><strong>resolveMarket(id, outcome)</strong> onlyOwner — require expired, not resolved.</li>
-      <li><strong>claimWinnings(id)</strong> — payout = userWinningShares / totalWinningShares * totalPool; zero the claimer's winning shares (prevents double claim); pool &amp; totals untouched so remaining winners keep proportions; nonReentrant; pull model, claimable forever, no admin withdrawal of unclaimed funds.</li>
-      <li><strong>Fees:</strong> setFeeBps(≤500) onlyOwner, setTreasury(non-zero) onlyOwner, withdrawFees() treasury-only (require &gt;0).</li>
-      <li><strong>Views:</strong> getMarket, getShares(addr,id), getYesPrice/getNoPrice (1e18), getTotalPool.</li>
-    </ul>
+    <h3>PredictionMarket — state</h3>
+    <pre>struct Market { uint id; string question; uint endTime; bool resolved; bool outcome;
+                uint yesPool; uint noPool; uint totalShares; }     // outcome: true = YES won
+mapping(id => Market) markets ;  mapping(id => mapping(addr => uint)) yesShares / noShares
+mapping(id => uint) totalYesShares / totalNoShares
+IERC20 immutable usdc ; address treasury ; uint feeBps ; uint accumulatedFees ; uint marketCount
+constants: MAX_FEE_BPS = 500 ; BPS_DENOMINATOR = 10000</pre>
 
-    <h3>Events (backend listens to these)</h3>
-    <pre>MarketCreated(uint indexed id, string question, uint endTime, uint seedAmount)
-SharesBought(uint indexed id, address indexed buyer, bool isYes, uint usdcAmount, uint shares, uint newYesPool, uint newNoPool)
-MarketResolved(uint indexed id, bool outcome)
-WinningsClaimed(uint indexed id, address indexed claimer, uint usdcAmount)</pre>
-
-    <h3>Tests (Hardhat, ~35, must pass)</h3>
-    <p>Use an <code>AMMPricerHarness.sol</code> to expose the internal library. Cover prices/invariant/extreme ratios; shares at 50/50 and imbalanced; createMarket happy + reverts; buyShares happy + fee + feeBps=0 + every revert (expired/resolved/zero/slippage/no-allowance via <code>revertedWithCustomError(usdc,'ERC20InsufficientAllowance')</code>); resolve YES/NO + reverts; claim pro-rata (read share counts back from chain — don't hardcode if you might tweak the formula) + loser/double-claim revert; fee mgmt; full lifecycle integration with balance reconciliation.</p>
-  </section>
-
-  <section>
-    <h2><span class="n">05</span>Slippage &amp; contract error handling</h2>
-    <ul>
-      <li>Frontend computes minShares = expectedShares * 0.99 (1% tolerance) and passes it in.</li>
-      <li>Show a price-impact warning when |priceAfter-priceBefore|/priceBefore &gt; 5%.</li>
-      <li>Map contract errors to friendly text: slippage→"Price moved too much", market expired→"This market has closed", already resolved, no winning shares, user rejected (4001), insufficient allowance/balance, fallback "Transaction failed: " + shortMessage. Parse nested viem shortMessage/details/cause.</li>
-    </ul>
-  </section>
-
-  <section>
-    <h2><span class="n">06</span>Database (Prisma · cache layer only)</h2>
-    <p>Models: <strong>User</strong>(address @id, role, createdAt), <strong>Category</strong>(id, name@unique, slug@unique, icon, isDefault), <strong>Market</strong>, <strong>Trade</strong>(id, marketId, trader, outcome, amount Float, shares Float, txHash @unique [idempotent replay], createdAt).</p>
-    <p><strong>Market</strong> = id (String = String(contractId)), contractId @unique Int, question, description, categoryId→Category, endDate, resolved, outcome?, status ("ACTIVE"|"EXPIRED"|"RESOLVED"), imageUrl?, yesLabel, noLabel, <em>yesImageUrl?, noImageUrl?</em>, <em>cached chain state: yesPool/noPool/volume Float</em>, createdAt. Index status, categoryId, endDate.</p>
-    <div class="warn">⚠ The original spec's Market model has no pool/volume columns, but the listing + sort-by-volume need them. <strong>Add cached yesPool/noPool/volume</strong> (updated by the event listener); derive prices from pools in a serializer. Prices are never stored.</div>
-    <div class="note">Money: expose USDC to the UI as a plain human <code>number</code>; convert at the chain boundary only (6-dec ints ↔ number). USDC is 6 decimals on every chain — assumption holds.</div>
-  </section>
-
-  <section>
-    <h2><span class="n">07</span>Data strategy &amp; self-healing (critical)</h2>
-    <p>Chain holds everything (markets, pools, shares, trades-as-events, outcomes). The DB mirrors it for fast queries + off-chain metadata (description, category, images, labels — these are NOT on chain).</p>
-    <ul>
-      <li><strong>Event listener</strong> (viem watchContractEvent): SharesBought → update pools/volume, upsert Trade (by txHash), upsert User, emit market:trade. MarketResolved → update + emit market:resolved. MarketCreated → ensure a row exists (UI-created rows already carry metadata, so don't overwrite).</li>
-      <li><strong>On every startup, reconcile from chain:</strong> read marketCount; for each market, <em>update existing rows' chain-derived fields and RE-CREATE any missing rows</em> (with on-chain question + default metadata). Then <strong>backfill trades</strong> from SharesBought logs (chunked getLogs, upsert by txHash) and recompute volume from the Trade table.</li>
-    </ul>
-    <div class="warn">⚠ This self-heal is mandatory, not optional. Free hosts spin down / wipe ephemeral state and deploys restart the process — without startup reconcile+backfill, markets and trades silently vanish from the UI. Metadata that is only off-chain (descriptions, custom labels, images) can't be recovered from chain, so never wipe the DB casually.</div>
-  </section>
-
-  <section>
-    <h2><span class="n">08</span>API routes (Next App Router, force-dynamic)</h2>
+    <h3>Functions (all require()s)</h3>
     <table>
-      <tr><th>Route</th><th>Notes</th></tr>
-      <tr><td><code>GET /api/markets</code></td><td>filters: status (open=default=not-resolved · resolved · all · active · expired), category, sort (volume/new/ending), page, limit.</td></tr>
-      <tr><td><code>POST /api/markets</code></td><td>admin — saves metadata AFTER on-chain create; <em>verifies the market exists on-chain</em> first; emits market:created.</td></tr>
-      <tr><td><code>GET /api/markets/[id]</code></td><td>market + last 50 trades.</td></tr>
-      <tr><td><code>PATCH /api/markets/[id]</code></td><td>admin — edit OFF-CHAIN metadata with <strong>integrity locks</strong> (see §13).</td></tr>
-      <tr><td><code>GET /api/portfolio/[address]</code></td><td>positions; shares read on-chain (authoritative), claimable + claimableAmount computed.</td></tr>
-      <tr><td><code>/api/admin/categories</code></td><td>GET list (with counts) · POST create · DELETE custom only (defaults protected; markets move to "Other").</td></tr>
-      <tr><td><code>/api/admin/resolve/pending · /[id]</code></td><td>GET expired+unresolved · POST server-side resolve (deployer key) with client-wallet fallback.</td></tr>
-      <tr><td><code>POST /api/upload</code></td><td>image → see §12 (returns a <strong>data URI</strong>, not a file path).</td></tr>
+      <tr><th>Function</th><th>Guards / behavior</th></tr>
+      <tr><td><code>constructor(usdc, treasury, feeBps)</code></td><td>Ownable(msg.sender); usdc≠0, treasury≠0, feeBps≤500.</td></tr>
+      <tr><td><code>createMarket(question, endTime, seedAmount)</code> onlyOwner → id</td><td>endTime&gt;now, seedAmount&gt;0; id=++marketCount; yesPool=seed/2, noPool=seed−seed/2; safeTransferFrom seed; emit MarketCreated. (Seed mints no shares.)</td></tr>
+      <tr><td><code>buyShares(id, isYes, usdcAmount, minShares)</code> nonReentrant → shares</td><td>market exists, !resolved, now&lt;endTime, amount&gt;0; fee=amount·feeBps/10000 (→ accumulatedFees, NOT pool); net=amount−fee; shares=getShares(net); require shares≥minShares &amp;&amp; shares&gt;0; add net to side pool, mint shares, totalShares+=; safeTransferFrom full amount; emit SharesBought.</td></tr>
+      <tr><td><code>resolveMarket(id, outcome)</code> onlyOwner</td><td>exists, now≥endTime, !resolved; set resolved+outcome; emit MarketResolved.</td></tr>
+      <tr><td><code>claimWinnings(id)</code> nonReentrant → payout</td><td>resolved; userShares = winning-side shares; require &gt;0; payout = userShares · totalPool / totalWinningShares; zero the claimer's winning shares (pool/totals untouched); safeTransfer; emit WinningsClaimed. Pull model, claimable forever, no admin sweep.</td></tr>
+      <tr><td><code>setFeeBps(n)</code> onlyOwner</td><td>n≤500.</td></tr>
+      <tr><td><code>setTreasury(a)</code> onlyOwner</td><td>a≠0.</td></tr>
+      <tr><td><code>withdrawFees()</code> nonReentrant</td><td>msg.sender==treasury; amount=accumulatedFees&gt;0; reset; safeTransfer.</td></tr>
     </table>
-    <p><strong>Admin auth (MVP):</strong> client sends <code>x-wallet-address</code> header; server compares to NEXT_PUBLIC_ADMIN_ADDRESS. Real protection comes from the contract's onlyOwner + POST verifying on-chain existence. Upgrade to SIWE for production.</p>
+
+    <h3>Events &amp; views</h3>
+    <pre>event MarketCreated(uint indexed id, string question, uint endTime, uint seedAmount)
+event SharesBought(uint indexed id, address indexed buyer, bool isYes, uint usdcAmount, uint shares, uint newYesPool, uint newNoPool)
+event MarketResolved(uint indexed id, bool outcome)
+event WinningsClaimed(uint indexed id, address indexed claimer, uint usdcAmount)
+views: getMarket(id)->Market ; getShares(addr,id)->(yes,no) ; getYesPrice(id) ; getNoPrice(id) ; getTotalPool(id)
+public mappings expose totalYesShares(id), totalNoShares(id), accumulatedFees, feeBps, treasury, marketCount</pre>
+
+    <h3>Deploy order (deploy.ts)</h3>
+    <p>Deploy MockUSDC (reuse existing via <code>EXISTING_USDC</code> env to keep balances across redeploys) → deploy PredictionMarket(usdc, treasury, feeBps) → mint USDC to deployer + approve → optionally create sample markets (skip with <code>SEED_MARKETS=false</code>) → write <code>deployments.json</code> + print the env block. AMMPricer needs no separate deploy (inlined).</p>
   </section>
 
-  <section>
-    <h2><span class="n">09</span>Realtime (Socket.io on a custom server)</h2>
-    <p><code>server.ts</code> runs Next + Socket.io + cron + event listener in one process. Rooms: market:{id}, market:list, admin (admins only, after signature verify with viem verifyMessage). Guests connect unauthenticated to public rooms.</p>
-    <div class="warn">⚠ <strong>Share the Socket.io instance via <code>globalThis</code></strong>, not a module singleton: server.ts (run by tsx) and the Next-bundled API routes (webpack) are different bundles, so a plain module-level singleton diverges and API-route emits silently no-op.</div>
-    <p>Payloads (in shared): market:trade (→ market:{id} + market:list), market:resolved (→ market:{id}), market:created (→ market:list), market:expired (→ both), admin:resolve:pending (→ admin). Client connects silently after wallet auth; sign "Connect to PredictX" once (cache the signature in sessionStorage). Never auto-open the connect modal.</p>
-  </section>
-
-  <section>
-    <h2><span class="n">10</span>Cron + client-side expiry</h2>
-    <p>node-cron '* * * * *': ACTIVE markets with endDate ≤ now → EXPIRED, emit market:expired + admin:resolve:pending.</p>
-    <div class="warn">⚠ The cron only fires on the minute, so server status lags expiry by up to ~60s. <strong>Derive an "effective status" on the client</strong> (a market is EXPIRED the instant endDate passes) with a hook that forces a re-render at the exact end time. Cards/detail/trading panel use the effective status so a market closes the moment the countdown hits zero.</div>
-  </section>
-
-  <section>
-    <h2><span class="n">11</span>Pages &amp; features</h2>
+  <section id="s5">
+    <h2><span class="n">05</span>Contract tests (Hardhat, ~35, all pass)</h2>
+    <p>Use <code>AMMPricerHarness.sol</code> to call the internal library externally. Use <code>loadFixture</code> + <code>time</code> helpers; cast deployed contracts via typechain.</p>
     <ul>
-      <li><strong>Listing (/):</strong> status tabs (Open default / Resolved / All — resolved hidden by default so they don't clutter), category pills, sort. Cards: image/emoji, question (2-line clamp), category pill, status badge, <em>combined YES/NO probability bar</em>, animated volume, time remaining. Live-updates via socket.</li>
-      <li><strong>Market detail (/market/[id]):</strong> two columns. Left: big YES/NO price blocks, price chart (Recharts, crosshair + active dot, 1D/1W/1M), collapsible description, activity feed (gradient avatars, last 50, live prepend). Right sticky: TradingPanel + market-info card. Admin sees an <em>Edit</em> link.</li>
-      <li><strong>TradingPanel</strong> — ACTIVE: segmented YES/NO toggle (sliding indicator via framer-motion layoutId, optional outcome images), amount + MAX, live preview (shares/price/fee[hidden if feeBps=0]/payout), price-impact warning. Button flow: connect → Approve USDC (MaxUint256, once) → Buy → Confirmed. EXPIRED: "Closed · awaiting resolution", read-only. RESOLVED: ResolutionBanner + <em>Claim only if the wallet actually holds winning shares</em> (read getShares; otherwise "you didn't win"/"no position").</li>
-      <li><strong>Portfolio (/portfolio):</strong> Trader+; summary cards (Open / Unrealized P&amp;L / Claimable); Open/Resolved tabs; claim button per winning position. On connect, toast if any unclaimed winnings.</li>
-      <li><strong>Create (/create, admin):</strong> form + live card preview. Fields: question 10–140, description 20–1000, category, endDate+endTime (≥1h future, UTC), seed 10–10000 (≤ balance), market image, yes/no labels (both or neither), <em>optional per-outcome images</em>. Flow: upload image → approve USDC → createMarket → POST metadata → redirect.</li>
-      <li><strong>Edit (/market/[id]/edit, admin):</strong> see §13.</li>
-      <li><strong>Admin Resolve (/admin/resolve):</strong> expired+unresolved oldest-first, confirm modal, badge count, realtime.</li>
-      <li><strong>Admin Categories (/admin/categories):</strong> list + counts + Default badge; add (emoji+name+slug auto); delete custom.</li>
-      <li><strong>Admin Fees (/admin/fees):</strong> fee rate, accumulated fees, <em>Withdraw fees</em> (treasury) and <em>Set fee</em> (owner, 0–5%).</li>
-      <li>Skeletons, toasts (pending→confirmed→error), empty states, error boundaries per page, 404 for unknown ids.</li>
+      <li><strong>AMMPricer:</strong> equal pools → 0.5; invariant across ratios; extreme ratios (tiny pool → that side cheap); getShares at 50/50 (=200) and imbalanced; getPriceAfterBuy raises bought side &amp; bigger buy → bigger move; assertInvariant passes/reverts on empty.</li>
+      <li><strong>PredictionMarket:</strong> createMarket owner/seed/emit + reverts (not-owner via <code>revertedWithCustomError(market,'OwnableUnauthorizedAccount')</code>, past endTime, zero seed); buyShares happy + fee (net in pool, fee accrues) + feeBps=0 + slippage pass; reverts (expired, resolved, zero, slippage, no-allowance via <code>ERC20InsufficientAllowance</code>); resolve YES/NO + reverts; claim pro-rata (read share counts from chain, don't hardcode) + loser/double-claim revert + not-resolved revert; fee mgmt (owner-only, cap 500, treasury-only withdraw, accrual); full lifecycle integration draining the contract to 0.</li>
     </ul>
   </section>
 
-  <section>
-    <h2><span class="n">12</span>Images — store as data URIs (no filesystem)</h2>
-    <div class="warn">⚠ <strong>Do not write uploads to <code>public/uploads</code>.</strong> On ephemeral hosts (Render free) the disk is wiped on restart and runtime-written public files don't serve reliably → broken images. Instead: POST /api/upload resizes with sharp (≈256×256 webp) and returns a <strong>base64 data URI</strong> stored directly in the DB imageUrl. Fall back to the original bytes if sharp ever fails. Same for per-outcome images. (For huge volume, swap to S3/R2 later — then imageUrl becomes a real URL.)</div>
-    <p>Per-outcome images (yesImageUrl/noImageUrl) are purely off-chain — no contract change. Shown in the probability bar (replacing the dot), the trading toggle, detail price blocks, and cards.</p>
+  <section id="s6">
+    <h2><span class="n">06</span>Slippage &amp; error handling</h2>
+    <ul>
+      <li><code>minShares = expectedShares * 0.99</code> (1% tolerance), passed into buyShares.</li>
+      <li>Warn if price impact <code>|after−before|/before &gt; 5%</code>.</li>
+      <li>Friendly error map (parse nested viem <code>shortMessage/details/message/cause</code>): user rejected/4001, slippage→"Price moved too much", market expired→"This market has closed", already resolved, not resolved, no winning shares, insufficient allowance→"Approve USDC", insufficient balance, ownable→"Only the admin", fallback "Transaction failed: " + shortMessage.</li>
+    </ul>
   </section>
 
-  <section>
-    <h2><span class="n">13</span>Editing markets — integrity locks</h2>
-    <p>Admin can edit off-chain metadata, but a market's terms must not change under traders:</p>
+  <section id="s7">
+    <h2><span class="n">07</span>Database schema (Prisma · PostgreSQL · cache only)</h2>
+    <pre>model User     { address String @id  role String @default("TRADER")  createdAt DateTime @default(now())  trades Trade[] }
+model Category { id String @id @default(cuid())  name String @unique  slug String @unique  icon String
+                 isDefault Boolean @default(false)  createdAt DateTime  markets Market[] }
+model Market   { id String @id                       // = String(contractId)
+                 contractId Int @unique               // on-chain id
+                 question String  description String  categoryId String  category Category @relation(...)
+                 endDate DateTime  resolved Boolean @default(false)  outcome String?    // "YES"|"NO"|null
+                 status String @default("ACTIVE")      // ACTIVE|EXPIRED|RESOLVED
+                 imageUrl String?  yesLabel String @default("YES")  noLabel String @default("NO")
+                 yesImageUrl String?  noImageUrl String?            // optional per-outcome images
+                 yesPool Float @default(0)  noPool Float @default(0)  volume Float @default(0)   // cached chain state
+                 createdAt DateTime  trades Trade[]   @@index([status]) @@index([categoryId]) @@index([endDate]) }
+model Trade    { id String @id @default(cuid())  marketId String  market Market @relation(...)
+                 trader String  user User? @relation(fields:[trader],references:[address])
+                 outcome String  amount Float  shares Float  txHash String @unique  createdAt DateTime
+                 @@index([marketId]) @@index([trader]) }</pre>
+    <div class="warn">⚠ Added beyond the original spec (needed): cached <code>yesPool/noPool/volume</code> (for listing + sort-by-volume), <code>yesImageUrl/noImageUrl</code>, and <code>txHash @unique</code> (idempotent event replay). Prices are derived from pools in a serializer, never stored. <code>binaryTargets = ["native","debian-openssl-3.0.x"]</code> on the generator (Docker).</div>
+    <div class="note">USDC = 6 decimals everywhere. Expose to the UI as a human <code>number</code>; convert at the chain boundary only.</div>
+  </section>
+
+  <section id="s8">
+    <h2><span class="n">08</span>Data strategy &amp; self-healing</h2>
+    <p><strong>On-chain (truth):</strong> all markets (active+resolved, never deleted), pools, share balances, trades (events), outcomes. <strong>Off-chain (DB cache):</strong> metadata (description, category, image, labels, outcome images), trades mirrored from events, indexed for fast queries.</p>
+    <p><strong>Event listener (lib/eventListener.ts, viem watchContractEvent):</strong></p>
+    <ul>
+      <li><code>SharesBought</code> → upsert User, update market pools + <code>volume += amount</code>, upsert Trade by txHash, emit <code>market:trade</code>.</li>
+      <li><code>MarketResolved</code> → set resolved/outcome/status=RESOLVED, emit <code>market:resolved</code>.</li>
+      <li><code>MarketCreated</code> → if a row exists (UI-created, has metadata) do nothing; else create a minimal row under "Other" and emit <code>market:created</code>.</li>
+    </ul>
+    <p><strong>Startup self-heal (run before watching):</strong></p>
+    <ul>
+      <li><code>reconcileMarketsFromChain()</code> — read marketCount; for each on-chain market: update existing rows' chain fields (pools/resolved/outcome/status), or <em>re-create missing rows</em> from chain (on-chain question + default metadata).</li>
+      <li><code>backfillTradesFromChain()</code> — scan <code>SharesBought</code> logs in chunks (<code>SYNC_LOOKBACK_BLOCKS</code>), upsert trades by txHash, recompute each market's volume from the Trade table.</li>
+    </ul>
+    <div class="warn">⚠ Mandatory. Free hosts spin down and deploys restart the process; <code>watchContractEvent</code> only sees events from start-time, so without startup reconcile+backfill, markets/trades vanish from the UI after a sleep. Never casually wipe the DB — off-chain-only metadata (descriptions, custom labels, images) can't be rebuilt from chain.</div>
+  </section>
+
+  <section id="s9">
+    <h2><span class="n">09</span>API routes &amp; response shapes</h2>
+    <pre>GET /api/markets?status&amp;category&amp;sort&amp;page&amp;limit
+  status: open(default = not RESOLVED) | resolved | all | active | expired ; sort: volume|new|ending
+  -> { markets: [{ id, contractId, question, description, category:{id,name,slug,icon},
+        endDate, status, resolved, outcome, imageUrl, yesLabel, noLabel, yesImageUrl, noImageUrl,
+        yesPool, noPool, yesPrice, noPrice, volume, createdAt }], total, page, limit }
+
+POST /api/markets        (admin) save metadata AFTER on-chain create; verifies market exists on-chain; emits market:created
+GET  /api/markets/[id]   -> { market, trades: [{ id, trader, outcome, amount, shares, txHash, createdAt }] }  // last 50 desc
+PATCH /api/markets/[id]  (admin) edit off-chain metadata with integrity locks (see §14)
+
+GET  /api/portfolio/[address]
+  -> { positions: [{ market, yesShares, noShares, currentYesPrice, currentNoPrice,
+        unrealizedPnl, claimable, claimableAmount }] }
+  // shares read on-chain (authoritative, zeroed after claim); claimable = resolved &amp;&amp; winning side &amp;&amp; shares&gt;0
+  // claimableAmount = userWinningShares / totalWinningShares * totalPool
+
+GET  /api/admin/categories ; POST (admin) {name,slug,icon} ; DELETE /[id] (admin, custom only; markets -> Other)
+GET  /api/admin/resolve/pending (admin) -> expired+unresolved, oldest first
+POST /api/admin/resolve/[id]    (admin) {outcome} server-side resolve via deployer key (501 -> client-wallet fallback)
+POST /api/trades                idempotent trade store by txHash (internal/backfill; listener writes directly)
+POST /api/upload                multipart "image" -> { imageUrl: "data:image/webp;base64,..." }   (see §15)</pre>
+    <p><strong>Admin auth (MVP):</strong> <code>x-wallet-address</code> header compared to <code>NEXT_PUBLIC_ADMIN_ADDRESS</code>. Hardened by the contract's <code>onlyOwner</code> and POST verifying the market exists on-chain. Upgrade to SIWE for production. All routes <code>export const dynamic = 'force-dynamic'</code>.</p>
+  </section>
+
+  <section id="s10">
+    <h2><span class="n">10</span>Realtime (Socket.io)</h2>
+    <p><strong>Rooms:</strong> <code>market:{id}</code> (detail), <code>market:list</code> (listing), <code>admin</code> (admins only, after signature verify). <strong>Auth:</strong> guests connect unauthenticated; Traders/Admins send <code>{ address, signature, message:"Connect to PredictX" }</code>, verified via viem <code>verifyMessage</code>; admins additionally joined to <code>admin</code>.</p>
+    <pre>market:trade            // -> market:{id} AND market:list
+  { marketId, trader, isYes, outcomeLabel, usdcAmount, shares, yesPool, noPool, yesPrice, noPrice, volume, timestamp }
+market:resolved         // -> market:{id}
+  { marketId, outcome, outcomeLabel, totalPool, resolvedAt }
+market:created          // -> market:list
+  { marketId, question, description, category, endDate, yesLabel, noLabel, imageUrl, yesImageUrl, noImageUrl,
+    yesPrice, noPrice, yesPool, noPool, volume, status:"ACTIVE", createdAt }
+market:expired          // -> market:{id} AND market:list   { marketId, expiredAt }
+admin:resolve:pending   // -> admin
+  { marketId, question, endDate, yesPool, noPool, yesPrice, noPrice, yesLabel, noLabel, volume, imageUrl }</pre>
+    <p><strong>Client hooks:</strong> <code>useMarketSocket(id)</code> joins market:{id}, handles trade/resolved/expired. <code>useMarketListSocket()</code> joins market:list → marketStore (applyTrade/prependCreated/setExpired). <code>useAdminSocket()</code> (Header) → adminStore on admin:resolve:pending. Connect manually after wallet auth; cache the signature in sessionStorage; never auto-open the connect modal.</p>
+    <div class="warn">⚠ Hold the Socket.io server on <code>globalThis</code> (e.g. <code>globalThis.__predictxIO</code>): <code>server.ts</code> (tsx) and Next-bundled API routes (webpack) are separate module graphs, so a plain singleton diverges and route emits silently no-op.</div>
+  </section>
+
+  <section id="s11">
+    <h2><span class="n">11</span>Cron + client-side effective status</h2>
+    <p><code>node-cron('* * * * *')</code> in server.ts: query ACTIVE markets with <code>endDate ≤ now</code> → set EXPIRED; emit <code>market:expired</code> (market+list) and <code>admin:resolve:pending</code> (admin). Boot order: load env → prepare Next → HTTP server → attach Socket.io → cron → event listener → listen.</p>
+    <div class="warn">⚠ Cron fires only on the minute (≤60s lag). Add <code>useEffectiveStatus(market)</code>: returns RESOLVED if resolved, else EXPIRED if <code>endDate ≤ now</code>, else ACTIVE — and schedules a <code>setTimeout</code> that forces a re-render exactly at endDate. Cards / detail / TradingPanel use it so a market closes the instant the countdown hits zero, regardless of the cron.</div>
+  </section>
+
+  <section id="s12">
+    <h2><span class="n">12</span>Pages &amp; features</h2>
+    <h3>Global layout / Header</h3>
+    <p>Sticky header: logo + nav (Markets / Portfolio) + ThemeToggle + ConnectButton (RainbowKit). Admin dropdown: Create / Resolve (badge = pending count, realtime) / Categories / Fees. Mobile hamburger.</p>
+    <h3>Listing (/)</h3>
+    <p>Sticky filter bar: <strong>status tabs (Open default / Resolved / All)</strong> + sort (Volume/New/Ending) on top; category pills below ("All" + per category). Responsive grid 3/2/1. MarketCard: thumb (image or category emoji) · category pill · status badge (Live/Awaiting/✓won) · question (2-line clamp) · combined ProbabilityBar · animated volume · time remaining. Whole card links to detail; bar animates on socket trade.</p>
+    <div class="note">Resolved markets are hidden from the default "Open" view (decluttered) but reachable via Resolved/All tabs and Portfolio — never deleted (chain is permanent).</div>
+    <h3>Market detail (/market/[id])</h3>
+    <p>Server component fetches market (404 if missing) + last 50 trades, renders a client <code>MarketDetail</code>. Two columns (stack on mobile). <strong>Left:</strong> header (image, category, status pill, question, <em>Edit link if admin</em>), meta row (volume, ends date local+UTC, time left), big YES/NO price blocks + combined bar, collapsible description, PriceChart (Recharts area, gradient fill, crosshair cursor + active dot, 1D/1W/1M; seeded with open+current price, live-appended), ActivityFeed (gradient Avatar per trader, colored YES/NO chip, amount, shares, time-ago, live prepend, max 50). <strong>Right (sticky):</strong> TradingPanel + market-info card (pools, volume, market id). Uses <code>useMarketSocket</code> for live trade/resolved/expired.</p>
+    <h3>TradingPanel states</h3>
+    <ul>
+      <li><strong>ACTIVE:</strong> segmented YES/NO toggle (sliding indicator via framer-motion <code>layoutId</code>, glow, optional outcome image), amount input + MAX (from wallet balance), live preview (shares, avg/after price, fee [hidden if feeBps=0], into-pool, payout-if-win), &gt;5% price-impact warning. Buttons: Guest→connect prompt; needs allowance→step "1. Approve → 2. Buy"; Approving…→Buying…→Confirmed ✓. Uses <code>useTrade</code> (check allowance, approve MaxUint256 once, then buyShares with minShares).</li>
+      <li><strong>EXPIRED:</strong> "Market closed · Awaiting resolution", read-only prices.</li>
+      <li><strong>RESOLVED:</strong> ResolutionBanner; read this wallet's getShares — <em>Claim only if it actually holds winning shares</em>; else "you held losing shares" / "no position". Claim → claimWinnings.</li>
+    </ul>
+    <h3>Portfolio (/portfolio)</h3>
+    <p>Trader+ (guests see a connect prompt). 3 summary cards: Open positions / Unrealized P&amp;L / Claimable. Tabs Open / Resolved. Rows: question, shares (yes/no with labels), P&amp;L, status-appropriate action (none / awaiting / Claim button / "no winnings"). On connect, one toast if any unclaimed winnings exist.</p>
+    <h3>Admin pages</h3>
+    <ul>
+      <li><strong>/admin/resolve:</strong> expired+unresolved oldest-first; row = image, question, "Expired Xh ago", volume, YES%/NO%; Resolve buttons → confirm modal ("cannot be undone") → resolve (server key, client-wallet fallback) → row removed → market:resolved broadcast. New rows arrive via admin:resolve:pending.</li>
+      <li><strong>/admin/categories:</strong> list (icon, name, slug, count, Default badge); inline add (emoji + name + slug auto + validation); delete custom (confirm; markets move to Other).</li>
+      <li><strong>/admin/fees:</strong> fee rate, accumulated fees, treasury; Withdraw fees (treasury-only) + Set fee (owner, 0–5%).</li>
+    </ul>
+  </section>
+
+  <section id="s13">
+    <h2><span class="n">13</span>Create Market form (/create, admin)</h2>
+    <p>Two columns: form left, live MarketCard preview right (updates as you type).</p>
+    <table>
+      <tr><th>Field</th><th>Rules</th></tr>
+      <tr><td>question</td><td>required, 10–140, a clear yes/no question</td></tr>
+      <tr><td>description</td><td>required, 20–1000, context + resolution criteria</td></tr>
+      <tr><td>category</td><td>required dropdown (from Category)</td></tr>
+      <tr><td>endDate + endTime</td><td>combined ≥ 1h in future, stored UTC; show local + UTC</td></tr>
+      <tr><td>seedAmount</td><td>10–10000 USDC, ≤ admin balance; shows "Initial price 50/50"</td></tr>
+      <tr><td>image, yes/no images</td><td>optional; jpg/png/webp ≤2MB; data URI (see §15)</td></tr>
+      <tr><td>yesLabel / noLabel</td><td>optional, ≤20; both set or both blank</td></tr>
+    </table>
+    <p><strong>Submit flow:</strong> validate (inline errors) → upload images → check allowance → approve USDC(seed) if needed → <code>createMarket(question, endTimestamp, seed)</code> → read marketCount → <code>POST /api/markets</code> with metadata → emits market:created → redirect to /market/[newId]. Step indicator + disabled while pending.</p>
+  </section>
+
+  <section id="s14">
+    <h2><span class="n">14</span>Edit market — integrity locks (/market/[id]/edit, admin)</h2>
+    <p>Admin edits off-chain metadata, but a market's terms must not change under traders.</p>
     <table>
       <tr><th>Field</th><th>Rule</th></tr>
-      <tr><td>question</td><td><span class="no">Never editable</span> — it's the on-chain commitment (immutable). Shown read-only.</td></tr>
-      <tr><td>description, yes/no labels</td><td>Editable <strong>only before any trade</strong>. Once totalShares &gt; 0 on-chain → locked (they define the bet/criteria).</td></tr>
-      <tr><td>category, all images</td><td><span class="yes">Always editable</span> — cosmetic, don't change the bet.</td></tr>
+      <tr><td>question</td><td><span class="no">Never editable</span> — on-chain commitment (immutable). Shown read-only.</td></tr>
+      <tr><td>description, yes/no labels</td><td>Editable <strong>only before any trade</strong>; locked once <code>totalShares &gt; 0</code> on-chain.</td></tr>
+      <tr><td>category, all images</td><td><span class="yes">Always editable</span> — cosmetic.</td></tr>
     </table>
-    <p>Enforce on the <strong>server</strong> (PATCH reads on-chain totalShares; returns 409 on a locked-field change) AND reflect in the UI (disabled inputs + a "trading has started" note). Server is authoritative.</p>
+    <p><code>PATCH /api/markets/[id]</code> reads on-chain <code>totalShares</code>; applies cosmetic always; applies description/labels only if no trades; returns <strong>409</strong> on a locked-field change. UI disables locked inputs with a note. Server is authoritative.</p>
   </section>
 
-  <section>
-    <h2><span class="n">14</span>Roles</h2>
+  <section id="s15">
+    <h2><span class="n">15</span>Images — data URIs (no filesystem)</h2>
+    <div class="warn">⚠ <strong>Never write uploads to <code>public/uploads</code>.</strong> On ephemeral hosts the disk is wiped on restart and runtime-written public files don't serve reliably → broken images. <code>POST /api/upload</code> (admin): validate type/≤2MB → sharp resize ~256×256 webp → return <code>data:image/webp;base64,…</code> stored directly in the DB. Fall back to original bytes if sharp throws. (Swap to S3/R2 only at high volume — then imageUrl becomes a real URL; data URIs bloat list responses.)</div>
+    <p>Per-outcome <code>yesImageUrl/noImageUrl</code> are off-chain (no contract change); shown in the probability bar (replacing the dot), the segmented trading toggle, the detail price blocks, and live-created cards.</p>
+  </section>
+
+  <section id="s16">
+    <h2><span class="n">16</span>Roles &amp; permissions</h2>
     <table>
-      <tr><th>Role</th><th>When</th><th>View</th><th>Trade</th><th>Portfolio</th><th>Admin</th></tr>
-      <tr><td>Guest</td><td>no wallet</td><td>✓</td><td>✗</td><td>✗</td><td>✗</td></tr>
-      <tr><td>Trader</td><td>any wallet connects</td><td>✓</td><td>✓</td><td>✓</td><td>✗</td></tr>
-      <tr><td>Admin</td><td>wallet == NEXT_PUBLIC_ADMIN_ADDRESS</td><td>✓</td><td>✓</td><td>✓</td><td>✓</td></tr>
+      <tr><th>Role</th><th>Assigned</th><th>View</th><th>Trade</th><th>Portfolio</th><th>Create</th><th>Admin panel</th></tr>
+      <tr><td>Guest</td><td>no wallet</td><td>✓</td><td>✗</td><td>✗</td><td>✗</td><td>✗</td></tr>
+      <tr><td>Trader</td><td>any wallet connects (auto upsert User)</td><td>✓</td><td>✓</td><td>✓</td><td>✗</td><td>✗</td></tr>
+      <tr><td>Admin</td><td>wallet == NEXT_PUBLIC_ADMIN_ADDRESS</td><td>✓</td><td>✓</td><td>✓</td><td>✓</td><td>✓</td></tr>
     </table>
-    <div class="warn">⚠ wagmi v2 silently reconnects from localStorage on mount (isReconnecting). useRole and RoleGate must treat reconnecting as a loading state (render nothing), NOT as guest — otherwise admin UI / redirects flash wrongly on every refresh.</div>
+    <p><code>useRole()</code> returns role from the connected wallet; <code>&lt;RoleGate role="TRADER"&gt;</code> hides unauthorized UI (hierarchy GUEST0/TRADER1/ADMIN2). API routes verify role server-side before any mutation.</p>
+    <div class="warn">⚠ wagmi v2 silently reconnects from localStorage on mount (<code>isReconnecting=true</code>). <code>useRole</code> &amp; <code>RoleGate</code> must treat that as a loading state (return nothing), NOT as guest — else admin UI / portfolio redirects flash on every refresh. Never call openConnectModal() in an effect.</div>
   </section>
 
-  <section>
-    <h2><span class="n">15</span>White-label &amp; runtime config</h2>
-    <p>One codebase, configured by env only. Branding via TENANT_* → injected as CSS variables on &lt;html&gt; at runtime; components reference tokens (text-yes, bg-brand), never raw hex. Per-tenant: CONTRACT/ADMIN/TREASURY/FEE_BPS, DATABASE_URL, RPC, chain id.</p>
-    <div class="warn">⚠ <strong>Resolve NEXT_PUBLIC_* at RUNTIME, not build time.</strong> Some hosts (Render) don't pass env to the Docker build, so build-time-inlined values come out empty. Have the root layout (server, force-dynamic) read process.env at request time and inject <code>window.__PREDICTX_ENV__</code> via an inline script BEFORE the app bundles run; lib/constants reads that on the client, with a process.env fallback on the server. Bonus: changing config = restart, no rebuild.</div>
-    <p><strong>Future protocol direction</strong> (not MVP): a Factory contract that lets clients deploy their own market contract (they pay gas, they own it) with an immutable <em>protocol fee → your address</em> on every trade; one static multi-tenant frontend reading everything from chain + IPFS — so a tenant self-serves and you just collect the fee.</p>
+  <section id="s17">
+    <h2><span class="n">17</span>Frontend state (Zustand)</h2>
+    <pre>walletStore  { usdcBalance, usdcAllowance, setBalances, refetch(set by WalletSync) }
+marketStore  { markets[], category, sort, status('open'|'resolved'|'all'), isLoading,
+               setFilters(), fetchMarkets(), applyTrade(e), prependCreated(e), setExpired(id) }
+adminStore   { pendingResolutions[], pendingCount, fetchPending(addr), addPending(e), removePending(id) }
+local-only (per component): TradingPanel(selectedOutcome, amount, status), MarketDetail(market, trades, chartPoints)</pre>
+    <p><code>WalletSync</code> mirrors balance/allowance into the store; <code>SocketManager</code> owns the single socket (guest immediately, sign once for wallet, sessionStorage-cached); <code>UnclaimedWinningsNotifier</code> toasts on connect.</p>
   </section>
 
-  <section>
-    <h2><span class="n">16</span>Environment variables</h2>
-    <pre>DATABASE_URL                         # Postgres (Neon or Render PG)
-DEPLOYER_PRIVATE_KEY  RPC_URL        # server: deploy + event listener + server-side resolve
+  <section id="s18">
+    <h2><span class="n">18</span>USDC approval flow (useTrade)</h2>
+    <pre>1 read allowance(user, CONTRACT)
+2 if &lt; amount: approve(CONTRACT, MaxUint256) and wait  (status 'approving')   // approve once ever
+3 minShares = expectedShares * 0.99 ; buyShares(id, isYes, amount, minShares) and wait  (status 'buying')
+4 status 'confirmed' ; refetch balances
+UI: "Approve USDC" -> "Approving…" -> "Buy YES/NO" -> "Buying…" -> "Confirmed ✓". Admin also approves before createMarket.</pre>
+  </section>
+
+  <section id="s19">
+    <h2><span class="n">19</span>Environment variables</h2>
+    <pre>DATABASE_URL
+DEPLOYER_PRIVATE_KEY  RPC_URL  ETHERSCAN_API_KEY(optional)
 NEXT_PUBLIC_CONTRACT_ADDRESS  NEXT_PUBLIC_USDC_ADDRESS
-NEXT_PUBLIC_CHAIN_ID                 # 84532 Base Sepolia · 80002 Polygon Amoy · 31337 local
-NEXT_PUBLIC_RPC_URL  NEXT_PUBLIC_ADMIN_ADDRESS  NEXT_PUBLIC_SOCKET_URL (empty=same origin)
+NEXT_PUBLIC_CHAIN_ID            # 84532 Base Sepolia · 80002 Polygon Amoy · 31337 local · 137 Polygon mainnet
+NEXT_PUBLIC_RPC_URL  NEXT_PUBLIC_ADMIN_ADDRESS  NEXT_PUBLIC_SOCKET_URL(empty=same origin)
 NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID
-TREASURY_ADDRESS  FEE_BPS (0–500, set at deploy via constructor)
-TENANT_NAME  TENANT_LOGO_URL  TENANT_PRIMARY  TENANT_YES_COLOR  TENANT_NO_COLOR  ...
-SEED_MARKETS=false (skip sample markets on a shared testnet)   RESET_DB (one-shot cache wipe)</pre>
-    <p>Hardhat reads root .env/.env.local; accept keys with or without 0x. The custom server must load env before importing anything that reads it (load @next/env first in server.ts).</p>
+TREASURY_ADDRESS  FEE_BPS(0–500, set at deploy via constructor)
+TENANT_NAME  TENANT_LOGO_URL  TENANT_FAVICON_URL  TENANT_PRIMARY  TENANT_YES_COLOR  TENANT_NO_COLOR  TENANT_SUPPORT_URL
+EXISTING_USDC(reuse token on redeploy)  SEED_MARKETS=false  RESET_DB(one-shot)  SYNC_LOOKBACK_BLOCKS</pre>
+    <p>All env read via <code>lib/constants.ts</code>, never raw <code>process.env</code> in components. Hardhat reads root <code>.env/.env.local</code> (accept keys with/without <code>0x</code>). The custom server imports <code>lib/loadEnv</code> (@next/env) FIRST so env exists before <code>lib/constants</code> evaluates.</p>
   </section>
 
-  <section>
-    <h2><span class="n">17</span>UI / UX</h2>
+  <section id="s20">
+    <h2><span class="n">20</span>White-label &amp; runtime config</h2>
+    <p>One codebase per tenant via env. <code>tenant.config.ts</code> reads <code>TENANT_*</code>; the root layout injects <code>--color-primary/yes/no</code> as CSS variables on <code>&lt;html&gt;</code> and passes the tenant object to a client provider. Rule: <strong>zero hardcoded hex in components</strong> — always <code>var(--color-…)</code> tokens. Differs per tenant: CONTRACT/ADMIN/TREASURY/FEE_BPS, DATABASE_URL, RPC, chain id, TENANT_*, domain. Same: all code, contracts source, schema, socket events.</p>
+    <div class="warn">⚠ <strong>Resolve NEXT_PUBLIC_* at RUNTIME, not build time.</strong> Some hosts (Render) don't pass env to the Docker build, so build-inlined publics come out empty. Root layout (server, force-dynamic) reads <code>process.env</code> per request and injects <code>window.__PREDICTX_ENV__</code> via an inline script BEFORE the bundles run; <code>lib/constants</code> reads window on the client, <code>process.env</code> on the server. Bonus: change config = restart, no rebuild.</div>
+    <p><strong>Future protocol (v2):</strong> a Factory contract — clients deploy their own market contract (they pay gas, they own it) with an immutable <em>protocol fee → your address</em> on every trade; one static multi-tenant frontend reads everything from chain + IPFS. Self-serve, hands-off, you collect the protocol fee. (Mind prediction-market regulation.)</p>
+  </section>
+
+  <section id="s21">
+    <h2><span class="n">21</span>UI / UX</h2>
     <ul>
-      <li>Dark primary (light-mode toggle optional via a class on &lt;html&gt; + FOUC-safe inline script). Inter font, lucide icons, framer-motion (card stagger, number tweening, segmented toggle).</li>
-      <li>YES green #22c55e, NO red #ef4444, brand #7b6fff — all as CSS variables (tenant-overridable).</li>
-      <li>Sleek fintech: subtle brand-glow radial bg, soft shadows, glow on primary/yes/no buttons, combined probability bar.</li>
+      <li>Dark primary; optional light mode via a class on <code>&lt;html&gt;</code> + a FOUC-safe inline script (read localStorage before paint) + ThemeToggle (Sun/Moon). Only neutral tokens change between themes; brand stays tenant-driven.</li>
+      <li>Inter (next/font), lucide icons, framer-motion (staggered card entrance, AnimatedNumber tweening for volume, segmented toggle slide), Recharts crosshair, gradient Avatars.</li>
+      <li>Sleek dark-fintech: subtle brand-glow radial bg, soft shadows (<code>shadow-card</code>), glow on primary/yes/no buttons, combined probability bar, skeletons, toasts, empty states, per-page error boundaries, 404.</li>
+      <li>YES <code>#22c55e</code> · NO <code>#ef4444</code> · brand <code>#7b6fff</code> — all CSS variables.</li>
     </ul>
-    <div class="warn">⚠ <strong>Tailwind alpha modifiers don't work on CSS-variable colors</strong> (bg-yes/30, bg-canvas/80 break the build, because the var holds hex not channels). Use <code>color-mix(in srgb, var(--color-x) N%, transparent)</code> instead (helper classes like .tint-yes, .glass).</div>
+    <div class="warn">⚠ <strong>Tailwind alpha modifiers don't work on CSS-variable colors</strong> (<code>bg-yes/30</code>, <code>bg-canvas/80</code> break the build — the var holds hex, not channels). Use <code>color-mix(in srgb, var(--color-x) N%, transparent)</code> (helpers <code>.tint-yes</code>, <code>.glass</code>, <code>.badge-yes/no</code>).</div>
   </section>
 
-  <section>
-    <h2><span class="n">18</span>Deployment (Docker → free host now, VPS later)</h2>
-    <p>Single Dockerfile (node:22-bookworm-slim): install all workspace deps, <code>npm run compile</code> (ABIs) → prisma generate → next build; entrypoint: prisma db push → (optional RESET_DB wipe) → seed categories → start server.ts. docker-compose.yml (app + Postgres) for any VPS.</p>
+  <section id="s22">
+    <h2><span class="n">22</span>Deployment (Docker → free host now, VPS later)</h2>
+    <p>Single <code>Dockerfile</code> (node:22-bookworm-slim): <code>apt-get install openssl ca-certificates</code> → npm ci → copy → declare NEXT_PUBLIC_* ARGs → <code>npm run compile</code> (ABIs) → <code>prisma generate</code> → <code>next build</code>. Entrypoint: <code>prisma db push</code> → (if <code>RESET_DB=true</code> wipe markets+trades) → seed categories → run <code>server.ts</code>. <code>docker-compose.yml</code> (app + Postgres) for any VPS.</p>
     <ul>
-      <li><strong>Recommended free stack:</strong> Render (Docker Web Service) + Render/Neon Postgres + a public testnet (Base Sepolia / Polygon Amoy). Render free spins down after ~15 min — the startup self-heal (§07) covers it.</li>
-      <li>Flow: deploy contracts to the testnet (<code>npm run deploy:&lt;net&gt;</code>, SEED_MARKETS=false) → push repo → connect on Render with Docker → set env vars → deploy.</li>
+      <li><strong>Free stack:</strong> Render (Docker Web Service) + Render/Neon Postgres + a public testnet. Render free spins down ~15 min — startup self-heal (§08) covers it.</li>
+      <li><strong>Flow:</strong> deploy contracts (<code>deploy:&lt;net&gt;</code>, SEED_MARKETS=false) → copy addresses → push repo → Render: Docker + env vars → deploy → admin creates markets via UI.</li>
     </ul>
-    <div class="warn">⚠ <strong>Prisma on the slim image:</strong> install <code>openssl ca-certificates</code> in the Dockerfile and set <code>binaryTargets = ["native","debian-openssl-3.0.x"]</code> in the schema, or db push fails with "Schema engine error".</div>
-    <div class="warn">⚠ <strong>RESET_DB is one-shot.</strong> Set it true for a single deploy after a contract redeploy, then REMOVE it — otherwise every spin-down/restart wipes admin-created markets.</div>
-    <p><strong>Switching chains</strong> is env-only (+ ~2 lines to add a brand-new chain to lib/chains.ts and hardhat.config.ts): redeploy contracts, update CHAIN_ID/RPC/addresses (use the chain's real USDC on mainnet, MockUSDC on testnet), reset DB. App code never changes.</p>
+    <div class="warn">⚠ <strong>Prisma on slim:</strong> without <code>openssl</code> in the image + <code>binaryTargets debian-openssl-3.0.x</code> → "Schema engine error" on db push.</div>
+    <div class="warn">⚠ <strong>RESET_DB is one-shot:</strong> set true for one deploy after a contract redeploy, then REMOVE it — else every spin-down wipes admin-created markets.</div>
+    <p><strong>Switching chains</strong> (e.g. Polygon) = env-only + ~2 lines to register a brand-new chain in <code>lib/chains.ts</code> + <code>hardhat.config.ts</code>: redeploy contracts, update CHAIN_ID/RPC/addresses (real USDC on mainnet, MockUSDC on testnet), reset DB. App/contract code never changes; USDC is 6-dec on all chains.</p>
   </section>
 
-  <section>
-    <h2><span class="n">19</span>Build order</h2>
+  <section id="s23">
+    <h2><span class="n">23</span>Build order</h2>
     <pre>1  monorepo + workspaces + tsconfig paths
-2  contracts (AMMPricer→correct direction, PredictionMarket, MockUSDC) + ~35 tests + deploy.ts
-3  Prisma schema (+ pool/volume + outcome-image fields) + seed
-4  shared types · lib (constants[runtime env], chains, wagmi, socket, amm replica, format, errors, abi)
-5  roles (useRole/RoleGate with isReconnecting guard)
-6  API routes + server-side reads/writes
-7  event listener (+ startup reconcile + trade backfill) · cron · socket server (globalThis)
-8  server.ts (load env first → Next → Socket.io → cron → listener)
-9  pages: listing → detail → portfolio → create → admin (resolve/categories/fees) → edit
-10 realtime hooks · web3 (useTrade approve→buy, claim, resolve, createMarket, withdrawFees, setFeeBps)
-11 UI pass: Inter + lucide + framer-motion + ProbabilityBar + light mode (CSS-var tokens, color-mix)
-12 Dockerfile + compose + DEPLOY.md ; deploy to testnet + Render</pre>
+2  contracts (AMMPricer correct-direction, PredictionMarket, MockUSDC) + ~35 tests + deploy.ts
+3  Prisma schema (+ pool/volume + outcome images) + seed + reset
+4  shared types ; lib (constants[runtime env via loadEnv], chains, wagmi, socket, amm, format, errors, abi)
+5  roles (useRole / RoleGate with isReconnecting guard)
+6  API routes + lib/contractReads + lib/serialize + lib/auth
+7  realtime (socketServer via globalThis) ; eventListener (+ reconcile + backfill) ; cron
+8  server.ts (loadEnv first -> Next -> Socket.io -> cron -> listener)
+9  pages: listing(status tabs) -> detail -> portfolio -> create -> admin(resolve/categories/fees) -> edit(locks)
+10 hooks + web3 (useTrade approve->buy, claim, resolve, createMarket, withdrawFees, setFeeBps) + effective status
+11 UI pass: Inter + lucide + framer-motion + ProbabilityBar + light mode (CSS-var tokens, color-mix) + data-URI images
+12 Dockerfile + compose + DEPLOY.md ; deploy to testnet + Render ; README</pre>
   </section>
 
-  <section>
-    <h2><span class="n">20</span>MVP scope</h2>
-    <p><strong>In:</strong> binary YES/NO markets, constant-product AMM, wallet auth, buy/claim on-chain, owner resolution, price chart, portfolio, admin create/resolve/categories/fees, market edit (integrity-locked), per-outcome images, realtime, testnet deploy.</p>
-    <p><strong>Out (v2):</strong> orderbook, KYC, decentralized oracle, multi-outcome, LP rewards, comments, mobile app, governance, the Factory/protocol-fee multi-tenant version.</p>
+  <section id="s24">
+    <h2><span class="n">24</span>Developer specs (deliverables)</h2>
+    <p><strong>Blockchain:</strong> AMMPricer.sol, PredictionMarket.sol, MockUSDC.sol, AMMPricerHarness.sol, deploy.ts (+ verify), full test suite, the exact events/views above.</p>
+    <p><strong>Backend:</strong> server.ts, lib/prisma, lib/realtime(socket via globalThis), lib/socketServer, lib/eventListener (+ reconcile + backfill), lib/cron, lib/chainServer (public + owner wallet clients), lib/contractReads, lib/serialize, lib/auth, prisma/seed.ts + reset.ts, POST /api/upload (sharp → data URI). Socket auth via viem verifyMessage.</p>
+    <p><strong>Frontend:</strong> app/ pages + api routes ; components (layout/market/admin/shared + TenantProvider/WalletSync/SocketManager/UnclaimedWinningsNotifier/ThemeToggle) ; hooks ; store ; lib (wagmi, socket, constants[runtime], chains, abi, amm, format, errors, tenant.config). Key wagmi: useReadContract(getMarket/allowance/getShares), useWriteContract(approve/buyShares/claimWinnings/resolveMarket/createMarket/withdrawFees/setFeeBps).</p>
+  </section>
+
+  <section id="s25">
+    <h2><span class="n">25</span>Gotchas checklist ⚠ (don't repeat these)</h2>
+    <ul>
+      <li><strong>AMM direction:</strong> price = ownPool/total; buying a side raises its own price. Keep Solidity + lib/amm.ts identical.</li>
+      <li><strong>Cache columns:</strong> add yesPool/noPool/volume to Market; derive prices in a serializer.</li>
+      <li><strong>Self-heal on startup:</strong> reconcile markets + backfill trades from chain (free hosts wipe/sleep).</li>
+      <li><strong>Socket via globalThis</strong> (tsx server vs Next webpack bundle).</li>
+      <li><strong>Effective status on client</strong> (cron lags expiry up to 60s).</li>
+      <li><strong>Images as data URIs</strong> in DB (no ephemeral filesystem).</li>
+      <li><strong>Edit integrity locks:</strong> question immutable; description/labels lock once trading starts (server-enforced 409).</li>
+      <li><strong>wagmi isReconnecting guard</strong> in useRole/RoleGate.</li>
+      <li><strong>Runtime NEXT_PUBLIC injection</strong> (hosts may not pass env to the Docker build).</li>
+      <li><strong>color-mix, not Tailwind /alpha</strong>, on CSS-variable colors.</li>
+      <li><strong>Prisma on slim:</strong> install openssl + set binaryTargets debian-openssl-3.0.x.</li>
+      <li><strong>RESET_DB one-shot</strong> ; SEED_MARKETS=false on shared testnets ; EXISTING_USDC to keep balances across redeploys.</li>
+      <li><strong>loadEnv first</strong> in server.ts ; accept private keys with/without 0x ; lucide-react is legitimately 1.x.</li>
+    </ul>
+  </section>
+
+  <section id="s26">
+    <h2><span class="n">26</span>MVP scope</h2>
+    <p><strong>In:</strong> binary YES/NO markets, constant-product AMM, wallet auth, buy/claim on-chain, owner resolution, price chart, portfolio, admin create/resolve/categories/fees, integrity-locked editing, per-outcome images, realtime, testnet deploy.</p>
+    <p><strong>Out (v2):</strong> orderbook, KYC, decentralized oracle (UMA/Chainlink), multi-outcome, LP rewards, comments/social, mobile app, governance token, the Factory/protocol-fee multi-tenant version.</p>
   </section>
 
   <footer>
-    PredictX master build prompt · v2 — incorporates the corrected AMM direction, runtime env injection,
-    chain self-heal, data-URI images, integrity-locked editing, and the full Docker/Render deploy path.
-    Give this whole document back to reproduce the app.
+    PredictX master build prompt · v2 (detailed) — restores full contract/API/schema/payload depth and bakes in
+    the corrected AMM direction, runtime env injection, chain self-heal, data-URI images, integrity-locked editing,
+    and the Docker/Render deploy path. Give this whole document back to reproduce the app.
   </footer>
 
 </div>
 
 <script>
   function copyDoc() {
-    const t = document.getElementById('doc').innerText.replace(/Copy full prompt ↗\s*/, '');
+    var t = document.getElementById('doc').innerText.replace(/Copy full prompt ↗\s*/, '');
     navigator.clipboard.writeText(t).then(function () {
       var b = document.querySelector('.copy');
       var old = b.textContent; b.textContent = 'Copied ✓';
