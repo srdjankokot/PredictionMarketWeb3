@@ -1,6 +1,8 @@
 'use client';
 
 import { useCallback, useState } from 'react';
+import Link from 'next/link';
+import { Pencil } from 'lucide-react';
 import type { Market, Trade } from '@predictx/shared';
 import { ActivityFeed } from '@/components/market/ActivityFeed';
 import { ProbabilityBar } from '@/components/market/ProbabilityBar';
@@ -9,6 +11,7 @@ import { TradingPanel } from '@/components/market/TradingPanel';
 import { ErrorBoundary } from '@/components/shared/ErrorBoundary';
 import { useEffectiveStatus } from '@/hooks/useEffectiveStatus';
 import { useMarketSocket } from '@/hooks/useMarketSocket';
+import { useRole } from '@/hooks/useRole';
 import { formatDateTimeWithUtc, formatUsd, timeRemaining } from '@/lib/format';
 
 export function MarketDetail({
@@ -76,6 +79,7 @@ export function MarketDetail({
   });
 
   const status = useEffectiveStatus(market);
+  const { role } = useRole();
   const description =
     showFullDesc || market.description.length <= 220
       ? market.description
@@ -100,6 +104,14 @@ export function MarketDetail({
                 {market.category.icon} {market.category.name}
               </span>
               <StatusPill market={market} status={status} />
+              {role === 'ADMIN' && (
+                <Link
+                  href={`/market/${market.id}/edit`}
+                  className="ml-auto inline-flex items-center gap-1 text-xs text-muted hover:text-ink"
+                >
+                  <Pencil className="h-3.5 w-3.5" /> Edit
+                </Link>
+              )}
             </div>
             <h1 className="text-xl font-bold leading-snug text-ink">{market.question}</h1>
           </div>
