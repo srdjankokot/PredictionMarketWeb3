@@ -1,6 +1,7 @@
 import { NextResponse, type NextRequest } from 'next/server';
 import { Prisma } from '@prisma/client';
 import { isAdminRequest } from '@/lib/auth';
+import { readOnChainMarket } from '@/lib/contractReads';
 import { prisma } from '@/lib/prisma';
 import { toMarketDTO, toTradeDTO } from '@/lib/serialize';
 
@@ -44,18 +45,39 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
   const body = await req.json().catch(() => null);
   if (!body) return NextResponse.json({ error: 'Invalid JSON' }, { status: 400 });
 
+  // Has anyone traded? Integrity-sensitive fields lock once shares exist on-chain.
+  const onChain = await readOnChainMarket(market.contractId);
+  const hasTrades = onChain ? onChain.totalShares > 0n : market.volume > 0;
+
   const data: Prisma.MarketUncheckedUpdateInput = {};
-  if (typeof body.question === 'string' && body.question.trim()) data.question = body.question.trim();
-  if (typeof body.description === 'string') data.description = body.description.trim();
+
+  // Always editable — cosmetic / organizational, doesn't change the bet.
   if ('imageUrl' in body) data.imageUrl = body.imageUrl || null;
   if ('yesImageUrl' in body) data.yesImageUrl = body.yesImageUrl || null;
   if ('noImageUrl' in body) data.noImageUrl = body.noImageUrl || null;
-  if (typeof body.yesLabel === 'string') data.yesLabel = body.yesLabel.trim() || 'YES';
-  if (typeof body.noLabel === 'string') data.noLabel = body.noLabel.trim() || 'NO';
   if (typeof body.categoryId === 'string' && body.categoryId) {
     const cat = await prisma.category.findUnique({ where: { id: body.categoryId } });
     if (!cat) return NextResponse.json({ error: 'Unknown category' }, { status: 400 });
     data.categoryId = body.categoryId;
+  }
+
+  // The question is the on-chain commitment — never edited here.
+  // Description + outcome labels define the bet/criteria, so they lock once trading starts.
+  const wantsSensitiveChange =
+    (typeof body.description === 'string' && body.description.trim() !== market.description) ||
+    (typeof body.yesLabel === 'string' && body.yesLabel.trim() !== market.yesLabel) ||
+    (typeof body.noLabel === 'string' && body.noLabel.trim() !== market.noLabel);
+
+  if (hasTrades && wantsSensitiveChange) {
+    return NextResponse.json(
+      { error: 'Trading has started — description and labels are locked.' },
+      { status: 409 },
+    );
+  }
+  if (!hasTrades) {
+    if (typeof body.description === 'string') data.description = body.description.trim();
+    if (typeof body.yesLabel === 'string') data.yesLabel = body.yesLabel.trim() || 'YES';
+    if (typeof body.noLabel === 'string') data.noLabel = body.noLabel.trim() || 'NO';
   }
 
   const updated = await prisma.market.update({

@@ -10,8 +10,10 @@ export function EditMarketForm({ market, adminAddress }: { market: Market; admin
   const router = useRouter();
   const { push } = useToast();
 
+  // Trading started -> criteria/labels are locked (integrity). Question is never editable.
+  const locked = market.volume > 0;
+
   const [categories, setCategories] = useState<Category[]>([]);
-  const [question, setQuestion] = useState(market.question);
   const [description, setDescription] = useState(market.description);
   const [categoryId, setCategoryId] = useState(market.category.id);
   const [imageUrl, setImageUrl] = useState<string | null>(market.imageUrl);
@@ -31,11 +33,7 @@ export function EditMarketForm({ market, adminAddress }: { market: Market; admin
   const selected = categories.find((c) => c.id === categoryId);
 
   async function save() {
-    if (question.trim().length < 10 || question.trim().length > 140) {
-      push('error', 'Question must be 10–140 characters');
-      return;
-    }
-    if (description.trim().length < 20 || description.trim().length > 1000) {
+    if (!locked && (description.trim().length < 20 || description.trim().length > 1000)) {
       push('error', 'Description must be 20–1000 characters');
       return;
     }
@@ -45,7 +43,6 @@ export function EditMarketForm({ market, adminAddress }: { market: Market; admin
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json', 'x-wallet-address': adminAddress },
         body: JSON.stringify({
-          question: question.trim(),
           description: description.trim(),
           categoryId,
           imageUrl,
@@ -71,15 +68,23 @@ export function EditMarketForm({ market, adminAddress }: { market: Market; admin
 
   return (
     <div className="max-w-xl space-y-4">
+      {locked && (
+        <p className="rounded-lg badge-expired px-3 py-2 text-xs">
+          🔒 Trading has started — the description and labels are locked to protect traders. You can
+          still update the category and images.
+        </p>
+      )}
+
       <div className="card space-y-3 p-4">
-        <Field label={`Question (${question.length}/140)`}>
-          <input className="input" value={question} maxLength={140} onChange={(e) => setQuestion(e.target.value)} />
+        <Field label="Question (locked — committed on-chain at creation)">
+          <div className="input cursor-not-allowed text-muted opacity-80">{market.question}</div>
         </Field>
         <Field label={`Description (${description.length}/1000)`}>
           <textarea
-            className="input min-h-24"
+            className="input min-h-24 disabled:cursor-not-allowed disabled:opacity-60"
             value={description}
             maxLength={1000}
+            disabled={locked}
             onChange={(e) => setDescription(e.target.value)}
           />
         </Field>
@@ -106,10 +111,22 @@ export function EditMarketForm({ market, adminAddress }: { market: Market; admin
         </Field>
         <div className="grid grid-cols-2 gap-3">
           <Field label="YES label">
-            <input className="input" value={yesLabel} maxLength={20} onChange={(e) => setYesLabel(e.target.value)} />
+            <input
+              className="input disabled:cursor-not-allowed disabled:opacity-60"
+              value={yesLabel}
+              maxLength={20}
+              disabled={locked}
+              onChange={(e) => setYesLabel(e.target.value)}
+            />
           </Field>
           <Field label="NO label">
-            <input className="input" value={noLabel} maxLength={20} onChange={(e) => setNoLabel(e.target.value)} />
+            <input
+              className="input disabled:cursor-not-allowed disabled:opacity-60"
+              value={noLabel}
+              maxLength={20}
+              disabled={locked}
+              onChange={(e) => setNoLabel(e.target.value)}
+            />
           </Field>
         </div>
         <div className="grid grid-cols-2 gap-3">
